@@ -1,7 +1,0 @@
-first           second           third
-  s                s               s
--------         -------          ------
-one             first               1
-two             second             2
-three           third             3
-four            fourth           4

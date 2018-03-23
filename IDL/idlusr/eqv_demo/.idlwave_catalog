@@ -1,9 +1,0 @@
-;;
-;; IDLWAVE catalog for library JHU_APL_IDLUSR
-;; Automatically Generated -- do not edit.
-;; Created by idlwave_catalog on Thu Oct 21 09:24:57 2004
-;;
-(setq idlwave-library-catalog-libname "JHU_APL_IDLUSR")
-(setq idlwave-library-catalog-routines
- '(("eqv_demo" pro nil (lib "eqv_demo.pro" nil "JHU_APL_IDLUSR") "%s" (nil))
-   ("x" pro nil (lib "x.pro" nil "JHU_APL_IDLUSR") "%s" (nil))))
