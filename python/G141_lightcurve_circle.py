@@ -38,7 +38,7 @@ import hstmarg
 
 
 def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_selection, out_folder, run_name, plotting):
-    """ ;+
+    """
     NAME:
        G141_LIGHTCURVE_CIRCLE
   
