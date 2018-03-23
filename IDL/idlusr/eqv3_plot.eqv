@@ -1,9 +1,0 @@
-*------  eqv3_plot.eqv
-*	R. Sterner, 2000 May 11
-
-init: loadct,4
-title: Sine test
-eq: x=maken(xlo,xhi,nx) & plot,x,sin(x)
-par: xlo 0 10 0
-par: xhi 0 100 10
-par: nx 50 500 100
