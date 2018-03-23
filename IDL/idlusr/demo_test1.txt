@@ -1,0 +1,33 @@
+*-----------------------------------------------------------------
+*  demo_test1.txt = add_helpmenu test file 1.
+*  R. Sterner, 2008 Oct 22
+*-----------------------------------------------------------------
+
+<menu>
+top Menu 1
+  t1 Line 1
+  t2 Line 2
+    t21 Line 2.1
+    t22 Line 2.2
+  t3 Line 3
+top1b Menu 1b
+  t1 Line 1
+  t2 Line 2
+</menu>
+
+<tooltips>
+top1b This is a test for menu 1b.
+</tooltips>
+
+<t1>
+Line 1 help
+</t1>
+<t21>
+Line 2.1 help
+</t21>
+<t22>
+Line 2.2 help
+</t22>
+<t3>
+Line 3 help
+</t3>

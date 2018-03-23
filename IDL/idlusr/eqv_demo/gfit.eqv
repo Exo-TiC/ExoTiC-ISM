@@ -1,0 +1,30 @@
+*-----  snapshot.eqv = snapshot of current status  -------
+*	Sterner, Wed Oct 23 20:40:15 2002
+ 
+title: Gaussian Curve fit demo
+ 
+eq:  y = amp*exp(-((x-mu)/sigma)^2)
+ 
+xrange: -10  10
+yrange: 0  10
+trange: -10  10
+independent: x
+n_points: 100
+ 
+xtype:        0
+ytype:        0
+ptype:        0
+ 
+psym:        4
+scatter: snapshot.eqdat
+c_axes:           0
+c_back:    16777215
+c_plot:    16713216
+c_over:           0
+c_scat:         255
+ 
+par: amp      -10.0000      10.0000      8.00000    16749968
+par: mu      -10.0000      10.0000      0.00000    16749968
+par: sigma       0.00000      10.0000      6.00000    16749968
+par: a      -10.0000      10.0000      5.00000    12632256
+par: b      -10.0000      10.0000      5.00000    12632256

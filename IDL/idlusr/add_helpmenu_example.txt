@@ -1,0 +1,206 @@
+<all>
+*-----------------------------------------------------------------
+*  Example help text drop-down menu layout file.
+*  R. Sterner, 2008 Oct 20
+*  Last update: 2010 Aug 16 13:30
+*
+*  Comments (* in first character) are ignored.
+*  Null lines are also ignored in the menu setup area
+*  but not in the displayed help text so may be used
+*  as needed.
+*
+*  This entire file is displayed in demo mode by the
+*  menu item "Show the entire demo layout file" except
+*  for a leading <all> before the first displayed line
+*  and a trailing </all> after the last.
+*-----------------------------------------------------------------
+
+*-----------------------------------------------------------------
+*  Menu setup area
+*  The setup of the drop-down menu is defined in the
+*  area delimited by the <menu> </menu> pair.
+*  In this case the tag pair <menu> </menu> is fixed and
+*  only one such menu pair is allowed, there will only be
+*  a single help button defined by this file but it
+*  can have any number of sublevel menus.
+*  Each menu item is on one line and consists of a tag
+*  and a label.  The tag is used to reference a section
+*  of help text below, and the label is dislpayed on the
+*  buttons in the menu.  The drop-down menu may be nested.
+*  Nesting is defined by the indentation which must be
+*  consistent.  The first menu item must use the least
+*  indentation, it is the top level menu button.  Any
+*  other items with that indentation will also be a menu
+*  button at the top level.
+*-----------------------------------------------------------------
+<menu>
+main Example menu
+  ov Overview
+  in Input
+    fil Layout file
+    all Show the entire demo layout file
+    txt Layout text
+  use How to use
+    wset Widget Setup
+    evnt Event Handler
+  err This item gives an error
+</menu>
+
+*-----------------------------------------------------------------
+*  Help text area
+*  Lines of text are delimited by <tag> </tag> pairs.
+*  The tag names are defined in the menu setup area as
+*  the first item of each line.
+*-----------------------------------------------------------------
+<ov>
+add_helpmenu is used to generate one or more drop-down
+help menus.  It is called in the widget layout section
+of a widget routine.  More details are given in the section
+on How to use.
+
+This routine takes two arguments. The main call is:
+    add_helpmenu, base_wid, file
+      base_wid = the widget ID of the base where the menus
+        are displayed.
+      file = the name of the menu layout file.
+
+To see an example layout file do
+    add_helpmenu,/details
+
+To see a demo do
+     add_helpmenu,/demo
+         or
+     add_helpmenu,demo=test_file
+         which will try to display the specified file.
+
+To check the format of a layout file do
+     add_helpmenu, check=layout_file
+         which will check how many menus are defined and
+         list the number of lines of text each menu item
+         will display or point out problems with layout.
+</ov>
+
+<fil>
+If the input is a file then it should have the following format.
+Null lines and comments (* in first character) are allowed
+and ignored.
+
+The file has two main sections, a menu setup area, and a help text
+area.  The order doesn't matter but the menu setup area should
+probably come first.
+
+The menu setup area consists of lines of text between <menu>
+and </menu>.  Each line of text has a one word tag and a label
+which may be multiple words.  The first occurance of the
+<menu> </menu> pair are used to locate the menu setup area, so
+if these keys appear later in the layout file (such as in the
+help text) they are ignored.  That's a reason why this section
+should come first.
+
+The help text area contains the lines of text between <tag>
+</tag> pairs where the tags were defined in the menu setup area.
+These delimiters must the only items onthe lines where they occur.
+They may be used inside the help text if they are not the only
+items on the line (or after their use as delimiters).
+</fil>
+
+<txt>
+The input may be a text array with the same format as the text file.
+</txt>
+
+<wset>
+Call add_helpmenu in the widget layout part of a routine after setting
+up a base to contain the drop-down menu(s).  The demo mode in
+add_helpmenu.pro creates an example widget with one base, the top level
+base, and adds a QUIT button and then any menus defined in the layout file.
+Information is passed to the event handler through a top level base
+information structure, which in this case has two items, the text array
+with the menu layout text, and the source of this text such as the
+file name.  The widget setup code for the demo widget is:
+
+	  ;---  Set up demo widget  ---
+	  top = widget_base(/row,title='add_helpmenu demo', $
+	    xpad=10,ypad=10,space=10)
+	  id = widget_button(top,val='Quit',uval='QUIT')
+	  add_helpmenu, top, txt		; Add demo menu(s).
+	  widget_control, top, /real		; Realize widget.
+	  s = {user_help:txt, layout_src:dfile} ; Info structure.
+	  widget_control, top, set_uval=s	; Add info.
+	  xmanager,'add_helpmenu',top		; Manage the widget.
+
+</wset>
+
+<evnt>
+The added drop-down menu items will generate an event when clicked.
+The info needed to display the help text connected to that menu item
+is passed in the menu item user value which consists of the string like
+"UHELP" and a tag.  The top level base user value contains a text
+array with all the menu help text delimited by keys formed from these
+tags in the menu item user value.  The requested text is extracted and
+displayed if possible, or an error message is given.  The event handler
+routine for the demo mode is shown here:
+
+	pro add_helpmenu_event, ev
+
+	;---------------------------------------------------------
+	;  Grab the command from the widget uval
+	;---------------------------------------------------------
+	widget_control, ev.id, get_uval=uv
+	cmd = getwrd(uv)
+
+	;---------------------------------------------------------
+	;  QUIT
+	;---------------------------------------------------------
+	if cmd eq 'QUIT' then begin
+	  widget_control, ev.top, /destroy
+	  return
+	endif
+
+	;---------------------------------------------------------
+	;  Help menu item
+	;---------------------------------------------------------
+	widget_control, ev.top, get_uval=s	; Top level info structure.
+	txt = s.user_help			; Grab the help text array.
+	src = s.layout_src			; Grab the text source.
+	tag = getwrd(uv,1)			; Grab the help tag from uval.
+	atag = '<'+tag+'>'			; Construct the help text
+	btag = '</'+tag+'>'			; delimiters.
+	txt_keysection,txt,after=atag,before=btag, $ ; Grab the help text.
+	  /quiet, err=err
+	if err ne 0 then begin			; Deal with an error.
+	  xmess,['Error in menu layout text: Could not find matching',$
+		 'delimiting tags.  Was looking for', $
+		 atag+ ' and '+btag+' in ', $
+		 src] 
+	  return
+	endif
+	xhelp,txt,/bottom			; Display the help text.
+
+	end
+
+
+The user value for the demo menu item "Example menu" / "Input" / "Layout text"
+is "UHELP txt".  In this case the string UHELP is not used since the only
+other widget is the QUIT button is it is handled already.  So any other events
+must be from a menu item.  But the tag txt is used to construct the keys needed
+to extract the help text from the complete text array in the top level base
+user value.  The target section of this text is shown here:
+. . .
+<txt>
+The input may be a text array with the same format as the text file.
+</txt>
+. . .
+
+The menu item user value format is fixed but there may be other ways
+to handle the event than shown here.  With more types of events there
+should be a test for the string UHELP (that is not needed here).
+If multiple layout files are used in multiple calls to add_helpmenu
+the the string UHELP should be changed to so the event handler can be
+aware of which text the event references.  This is done using the CMD=cmd
+keyword in the call.  The layout text is returned in the keyword TEXTOUT=txt
+so it can be added to the top level base user value info structure.  The
+cmd string could be used in the structure tag for this text to identify it.
+The needed info could be added to the top level base user value in
+a different way.  But this example shows one way that works.
+</evnt>
+</all>

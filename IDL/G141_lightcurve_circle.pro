@@ -1391,9 +1391,9 @@ device,RETAIN=2
 
 ;restore,'template_kurucz.sav' ;template_kurucz,template_kurucz_header
 ;  template_kurucz=template
-restore,'~/Documents/Limb_darkening/templates.sav' ;template_kurucz,template_kurucz_header
+restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/templates.sav' ;template_kurucz,template_kurucz_header
 
- restore,'~/Documents/Limb_darkening/kuruczlist.sav' ;list of kurucz models  17=solar vturub=2 km/s
+ restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/kuruczlist.sav' ;list of kurucz models  17=solar vturub=2 km/s
 ;==== Select Metalicity
 ;M_H=[-1.0(),-0.5(),-0.3(2),-0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
 ;  model=li(0) ;-0.1
@@ -1407,7 +1407,7 @@ restore,'~/Documents/Limb_darkening/templates.sav' ;template_kurucz,template_kur
 ;  model=li(24)  ;+1.0
 model=li(k_metal)
 
-direc='~/Documents/Limb_darkening/Kurucz/'
+direc='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/Kurucz/'
 
 ;Teff=[3500(9),3750(20),4000(31),4250(42),4500(53),4750(64),5000(75),5250(86),5500(97),5750(108),6000(119),6250(129),6500(139)]
 ;==== Select Teff and Log g
@@ -1465,27 +1465,27 @@ mu=[1.000,   .900,  .800,  .700,  .600,  .500,  .400,  .300,  .250,  .200,  .150
 
 
 ;if (grating eq 'G430L') then restore,'ihd189733p.sav' ;f1..f16,mu,ws
-if (grating eq 'G750M') then restore,'~/Documents/Limb_darkening/G750L.sensitivity' ;f1..f16,mu,ws
+if (grating eq 'G750M') then restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G750L.sensitivity' ;f1..f16,mu,ws
 
 ;=============
 ; HST - load responce function and interpolate onto kurucz model grid
 ;==============
 if (grating eq 'G430L') then begin 
-  restore,'~/Documents/Limb_darkening/G430L.sensitivity.sav';wssens,sensitivity
+  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G430L.sensitivity.sav';wssens,sensitivity
  G=31 & wdel=3 
 endif
 
 if (grating eq 'G750L') then begin
-   restore,'~/Documents/Limb_darkening/G750L.sensitivity'
+   restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G750L.sensitivity'
 endif
 
 if (grating eq 'G750M') then begin 
-  restore,'~/Documents/Limb_darkening/G750M.sensitivity.sav';wssens,sensitivity
+  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G750M.sensitivity.sav';wssens,sensitivity
  G=31 & wdel=0.554 
 endif
 
 if (grating eq 'R500B') then begin 
-  restore,'~/Documents/Limb_darkening/R500B.sensitivity.sav';wssens,sensitivity
+  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/R500B.sensitivity.sav';wssens,sensitivity
  G=31 & wdel=3.78201D0 
 endif
 ;
@@ -1496,12 +1496,12 @@ endif
 ; -----------------------------------------------------------------------
 ; WE ONLY REALLY USE THESE TWO IN THIS ROUTINE
 if (grating eq 'G141') then begin ;http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
-  restore,'~/Documents/Limb_darkening/G141.WFC3.sensitivity.sav';wssens,sensitivity
+  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G141.WFC3.sensitivity.sav';wssens,sensitivity
   wdel=100 
 endif
 
 if (grating eq 'G102') then begin ;http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
-  restore,'~/Documents/Limb_darkening/G102.WFC3.sensitivity.sav';wssens,sensitivity
+  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G102.WFC3.sensitivity.sav';wssens,sensitivity
   wdel=100 
 endif
 ; -----------------------------------------------------------------------
@@ -1814,38 +1814,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pro limb_fit_3D_choose,grating,widek,wsdata,uLD,c1,c2,c3,c4,cp1,cp2,cp3,cp4,aLD,bLD,header,M_H,Teff,logg
 ;
 ; NAME:
@@ -1898,8 +1866,8 @@ pro limb_fit_3D_choose,grating,widek,wsdata,uLD,c1,c2,c3,c4,cp1,cp2,cp3,cp4,aLD,
 ; window,4,xpos=80,ypos=0,xsize=1250,ysize=800  ;,xpos=80,ypos=500,xsize=1250,ysize=800
 ; window,5,xpos=80,ypos=600,xsize=500,ysize=500 ;,xpos=1450,ypos=800,xsize=1100,ysize=700
 
-dirsen='~/Documents/Limb_darkening/'
-direc='~/Documents/Limb_darkening/3DGrid/'
+dirsen='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/'
+direc='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/3DGrid/'
 print,'Current Directories Entered:'
 print,'  '+dirsen
 print,'  '+direc
@@ -2422,21 +2390,6 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pro occultnl,rl,c1,c2,c3,c4,b0,mulimb0,mulimbf,plotquery,_extra=e
 ; Please cite Mandel & Agol (2002) if making use of this routine.
 timing=systime(1)
@@ -2517,6 +2470,7 @@ b0=bt0
 ;print,'Time ',systime(1)-timing
 return
 end
+
 
 pro occultuniform,b0,w,muo1
 if(abs(w-0.5d0) lt 1.d-3) then w=0.5d0

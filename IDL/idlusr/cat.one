@@ -1,0 +1,1303 @@
+*****************************************************************************
+IDL library routines classified by category
+Library name: IDLUSR
+Purpose:      Generally useful routines.
+From:         Johns Hopkins Applied Physics Laboratory
+Contact:      ray.sterner@jhuapl.edu
+ 
+Main categories
+---------------
+Text Files
+Text strings
+Date and time routines
+Information
+Plotting/Graphics
+    Interactive on screen
+    Plotting and annotation
+    Scaling/Windowing
+    Hardcopy
+Imaging
+    Image or 2-d array generation
+    Display and display related processing
+    Processing not always related to immediate display
+    Color tables and color images
+    Hardcopy
+Array processing
+    Curve and surface generation
+    1-d only filters
+    1-d or 2-d filters
+    2-d only filters
+    Information
+    Modification
+Math routines
+    scalar arg
+    Array arg
+    Coordinate transformations/rotations/vector computations
+    Fitting
+    Geometry
+    Numbers
+    Mandelbrot set
+Map related
+Programming routines
+    Information
+    I/O and Memory
+    Widget related
+    Development tools
+Miscellanious
+ 
+-----------------------------------------------------------------------------
+ 
+Text Files
+==========
+add_margin:P Add space to left margin and top of a text file.
+detab_file:P Convert any tabs in a file to spaces.
+drop_comments:F Drop comment and null lines from a text array.
+file_search2:F Find files and sort them.
+filebreak:P Breaks file name(s) into components.
+filename:F File names with system independent symbolic directories.
+findfile2:F Find files and sort them.
+findfile3:F Find files and sort them.
+getfile:F Read a text file into a string array.
+getfile_tags:F Return a structure with selected tags from a control/defaults file.
+getfileln:F Get a line from a text file.
+graphfile:P List a file on the graphics device.
+helpfile:P Display a file of help text.
+nextitem:F Return next line from a file, ignore comments & null lines.
+putfile:P Write a text file from a string array.
+putfile_tags:P Update selected tags in a control/defaults file.
+rdcol:F Read columns of numbers or times from a text file.
+rdfile:P Read lines from a text file.
+readtokey:P Read an open text file until a given key word is found.
+txtdb_dash:F For a text array, find the txtdb_rd reference line of dashes.
+txtdb_in:F Index into a structure returned by txtdb_rd.
+txtdb_rd:F Read a text file data base.
+txtdb_wr:P Write a file in txtdb format (columns) from a structure.
+xtextfile:P Explore a text file of unkown format.
+xtextimg:P Create an image with text.  Widget based.
+ 
+-----------------------------------------------------------------------------
+ 
+Text strings
+============
+arg_parse:P Parse an argument list into positional and keyword args.
+array_list:P List an array in a form useful to cut and paste.
+byt2strarr:P Unpack a string array from a byte array
+bytarr_get:P Extract a byte array from a byte buffer.
+bytarr_put:P Insert a byte array into a byte buffer.
+commalist:F Return a given array as a comma delimited text list.
+cposprint:P Print a string showing character positions.
+d2dm:F Function to convert from degrees to deg, min.
+d2dms:F Function to convert from degrees to deg, min, sec.
+delchr:F Delete all occurrences of a character from a text string.
+detab:F Replace tab characters by spaces.
+dms2d:F Convert from Degrees, Minutes, and seconds to degrees.
+dms_form:F Convert degrees to a deg, min, sec vector font string.
+f2fi16:F Convert feet to feet, inches, and fractions to 1/16 inch.
+firstchar:F Position of first non-whitespace char in string.
+firstchr:F Set first character of a string, add if needed.
+fndwrd:P Find number, locations, lengths of words in a text string.
+getstr:F Get delimited strings from a text string or array.
+getwrd:F Return the n'th word from a text string.
+hash_example:P Example using a hash table.
+hash_get:F Get a value from a hash table given a key.
+hash_init:P Initialize a hash table.
+hash_list:P List all keys in a hash table.
+hash_put:P Update a value in a hash table. If not there add as new item.
+hash_stats:P Look at the statistics of a hash table.
+indentation_level:P Determine indentation levels of input text.
+isnumber:F Determine if a text string is a valid number.
+lastchr:F Set last character of a string, add if needed.
+list_insert:F Insert a 1-d array into another 1-d array.
+makelabels:F Make an array of tick mark labels.
+makes:F Make a string array of integers from lo to hi by step.
+more:P Display a text array using the MORE method.
+multicol:F Reformat a string array into multi-columns.
+namenum:P Break a name into a pattern and numbers in the name.
+numfrac:F Convert a number to a decimal string with n places.
+numname:F Generate names or text strings with embedded numbers.
+nwrds:F Return the number of words in the given text string.
+plural:F Plural function: returns 's' if arg > 1, else ''.
+rep_marked_lines:P Edit a text array by replacing lines that have markers.
+rep_txtmarks:P Edit a text array by replacing marker strings.
+repchr:F Replace all occurrences of one character with another in a text string.
+repstr:F Replace a substring in a text string or array.
+repword:F Replace a word in a text string.
+showtabs:P List text array on screen, with tabs as a printable char.
+spc:F Return a string with the specified number of spaces (or other char).
+state_name:F Return name of state given 2 letter abbreviation.
+str_cliptrail0:F Clip trailing zeros equally for given array of numbers.
+str_drop_punc:F Return a string with punctuation removed.
+str_parse:P Parse tag=str_val pairs in an input string.
+str_reorder:F Reorder the columns of a text array.
+strarr2byt:P Pack a string array into a byte array
+strdelarr:P Convert a delimited byte array to string array.
+strep:F Edit a string by position. Precede, Follow, Replace, Delete.
+stress:F String edit by sub-string. Precede, Follow, Delete, Replace.
+strfind:P Find and list substrings in a string array.
+stringform:F Format a string array (1024 not a limit).
+strlentab:F Gives length of a string with tab characters expanded.
+strrev:F Reverse a string or string array.
+strsub:F Extract a substring by start and end positions.
+strtrm2:F Trim given character (and spaces) from ends of given string.
+strzero:F Convert a string to a zero terminated byte array.
+taggedwords:P Extract and returned words tagged with a specified symbol.
+tag_funct:F Process structure elements through specified functions.
+text_block:P Print or return a block of inline text (lines starts with ;).
+text_grab:P Copy and paste text into an IDL string array.
+tprint:P Turn print statements into a text array.
+txt_keysection:P Extract a section of a text array between given keys.
+txt_wrap:P Wrap a long line of text, returning a text array.
+txtgetkey:F Get a keyword value from a string array.
+txtmercon:F Merge continued lines in a text array.
+txtpad:F Pad a text array with spaces so all elements are same length.
+txtputkey:P Write a structure out in keyword/value pair form.
+uniq_tagval:P Reduce given tag and value lists to unique tags only.
+unique:F Return the unique elements of an array.
+upcase1:F Capitalize first letter in string.
+whichwrd:F Find which word is a given string is in.
+wordarray:P Convert text string or string array to 1-d array of words.
+wordorder:F Re-arrange words in a text string.
+wordpos:F Find position of a word in a string.
+xtxtin:P Widget based text input.
+ 
+-----------------------------------------------------------------------------
+ 
+Date and time routines
+======================
+caltxt:F Return a text array with calendar.
+cyph:P Construct a cycle/phase array from time series data.
+date2doy:P Date to Day of Year conversion.
+date2dn:F Find day of year number from date.
+date2jd:F Convert a date string to Julian Day number.
+date2ymd:P Date text string to the numbers year, month, day.
+dt_tm_brk:P Break a date and time string into separate date and time.
+dt_tm_chk:F Check date & time string that both parts exist & are valid.
+dt_tm_dif:F Find time interval in seconds between two date/time strings.
+dt_tm_fromjs:F Convert "Julian Seconds" to a date/time string.
+dt_tm_full:F Add missing parts of date to get a full date/time string.
+dt_tm_inc:P Increment a date/time by a given number of seconds.
+dt_tm_mak:F Set up a time and date string from reference JD and offset.
+dt_tm_pick:P Pick a date and time using a widget.
+dt_tm_pick_int:P Pick a date and time using a widget.
+dt_tm_range:P Extract date/time range from string with two date/times.
+dt_tm_tojs:F Convert a date/time string to "Julian Seconds".
+gmt_offsec:F Return offset in seconds from local time to GMT (UT).
+jd2js:F Convert from Julian Day Number to Julian Seconds.
+jd2mdays:P Convert a range of Julian Days to month start and end JDs.
+jd2str:P Find year, month, day strings from Julian Day number.
+jd2ymd:P Find year, month, day from julian day number.
+jd2date:F Convert a Julian Day number to a date string.
+jdselect:F Select Julian Day array subset by month or weekday.
+js_incmonth:F Increment JS by one month.
+js_from_matlab:F Convert from Matlab time to Julian Seconds.
+js_to_matlab:F Convert from Julian Seconds to Matlab time.
+js2gra:F Greenwich RA (radians). Greenwich Mean Sidereal Time (GMST).
+js2jd:F Convert from Julian Seconds to Julian Day Number.
+js2v:P Read a time (in "Julian seconds") vs value file.
+js2weekday:F Compute weekday given Julian Second.
+js2ymds:P Convert from "Julian Second" to year, month, day, second.
+jscheck:P Check accuracy of "Julian Seconds" over a given time span.
+jsplot:P Make a time series plot with time in Julian Seconds.
+lincal:P Plot a multimonth linear calendar on one page.
+lmst:F Give local mean sidereal time.
+list_doy:P List day of year for current and nearby dates.
+month2name:F Convert a month number to a month name.
+monthdays:F Given a year and month returns number of days in that month.
+monthnames:F Returns a string array of month names.
+monthnum:F Return month number given name.
+ms2js:F Convert MicroSoft internal time to Julian Seconds.
+nthweekday:F Julian Day of N'th weekday of month (like 2nd tues).'
+sechms:P Seconds after midnight to h, m, s, numbers and strings.
+secstr:F Convert a time string to seconds.
+select_intervals:F Select all intervals within a given range.
+sph_range_map:F Compute an array of ranges from a point on a sphere.
+strsec:F Convert seconds after midnight to a time string.
+sunclock:P Show world map with day, twilight, and night.
+time2jdoff:P Find Julian day and offset from seconds. JS, Timeaxis
+time_label:F Make a time label array
+timeaxis:P Plot a time axis.
+tnaxes:P Find nice time axis tics.
+utnow:F Return current Universal Time in Julian Seconds.
+weekday:F Compute weekday given year, month, day.
+xcyph:P Widget based cycle/phase images.
+xdate:P Widget based date selection tool.
+ydn2date:F Convert year and day of the year to a date string.
+ydn2md:P Convert from year and day number of year to month and day of month.
+ydns2js:F Convert year, day of the year, and seconds to Julian Seconds.
+ymd2date:F Convert from year, month, day numbers to date string.
+ymd2dn:F Convert from year, month, day to day number of year.
+ymd2jd:F From Year, Month, and Day compute Julian Day number.
+ymds2js:F Convert to year, month, day, second to "Julian Second".
+yy2yyyy:F Convert a 2 digit year to a 4 digit year.
+ 
+-----------------------------------------------------------------------------
+ 
+Information
+===========
+age_check:P Check if files in two directories match.
+bit_explode:P Split bits in a byte array into bytes.
+ell_decplaces:P Show size of decimal places at a given point.
+event_log:P Enter an event into the latest event log file.
+fix_reslib:P Modify routines in specified RES IDL library.
+helpfile:P Display a file of help text.
+hexdump:P Display a file in hex.
+hlp:P Variant of HELP.  Gives array min, max.
+hlp1:P Variant of HELP.  Gives array min, max.
+hlp2:P Variant of HELP.  Gives array min, max.
+hlpst:P List structure elements.  Gives array min/max.
+limbox:P Interactively get new map limits.
+maplatlong:P Find complete lat/long range covered by map.
+ndim_indices:P Indexing info for an n-dimensional table.
+pointid:P Use the mouse cursor to display an ID for a plotted point.
+posbox:P Test for a box drawn around the screen position, or plot one.
+rngbox:P Interactively get new plot xrange and yrange.
+showtabs:P List text array on screen, with tabs as a printable char.
+tag_match:P Find matching tags in two structures.
+wgs_84:F Return a structure with some WGS 84 Ellipsoid values.
+winlist:P List windows in use.
+win_info:F Return a structure with window size and viewport.
+win_open:F Test if a given window is open.
+xbb:P Widget bill board utility for text display.
+xdatafile:P Explore a text file of unkown format.
+xhelp:P Widget to display given help text.
+xhelpf:P Widget to display help text from a file or array.
+xliner:P Display one line descriptions of routines given keywords.
+ 
+-----------------------------------------------------------------------------
+ 
+Plotting/Graphics
+==================
+ 
+Interactive on screen 
+---------------------
+box_size:P Used by MOVBOX to change box size using the cursor.
+box1:P Single mouse button interactive box on image display.
+box2b:P Two button interactive box, can return a position box.
+boxarea:P Select an area with a box.
+chinit:P Initializes chart setup.  Good for viewgraphs.
+color_code:F Color code a range of value.
+color_code_ct:F Color code data based on a color table.
+color_wheel:P Pick a color using a color wheel.
+complexview:P View a subarea of a complex image as a vector field.
+crossi:P Interactive cross-hair cursor on screen or plot.
+crossi2:P Interactive cross-hair cursor on screen or plot.
+digitize:P Digitize a plot in an image using the mouse cursor.
+drawpoly:P Draw a polygon using mouse.
+eqv:P Interactive equation viewer and curve fitter.
+eqvc:P Interactive equation viewer and curve fitter.
+eqvd:P Interactive equation viewer and curve fitter.
+eqv2:P Interactively plot a function on current plot.
+eqv3:P Execute IDL code using interactively varied parameters.
+hori:P Interactive horizontal line on screen or plot.
+image_area_get:P Get image working area.
+image_area_set:P Set up image working area.
+imgline:P Interactive line on the screen.
+imgregion:F Interactively extract a selected image region.
+leg:P Make a plot legend.
+lini:P Interactive line.
+magcrs:P Show a magnified window around given point and wait for a cursor change.
+mapgc:P Plot a great route circle on a map.
+movbox:P Interactive box on image diaply.
+movcross:P Interactive cross-hair on a plot.
+movemark:P Move a marker in a window.
+normcrs:P Data cursor. Returns X and Y Normalized coordinate.
+paint:P Paint on an image.
+pan:P Pan around a screen image.  Set pixels to a specified value.
+pickcolor:P Allow user to pick a color from current color table.
+pk:P Pick a set of points on a plot.
+plot_limbox:P Plot map limits array as a box on the map.
+pltcrv:P Edit curve points with mouse.  Overlay spline.
+protractor:P Measure angles on the screen.
+rcplot:P Make Row or Column plots for current window.
+regionsbar:P Plot a color bar for a regions type image.
+rev:P Reverse plot and background colors.
+rngbox:P Interactively get new plot xrange and yrange.
+show_box:P Used by MOVBOX to display current box size and position.
+slowplot:P Plot data slowly in fading colors.
+soplot:P Make a shaded over plot.
+splot:P Make a shaded plot.
+sprint:P Print text on screen, allows easy update.
+texti:P Interactive Text.
+thplot:P Plot a curve with varying thickness along it.
+tvbox:P Draw or erase a box on the image display.
+tvcirc:P Draw a circle on the display.
+tvrdbox:P Read part of screen image into a byte array.
+tvrdbox2b:P Read part of screen image using an interactive box.
+tvwrbox:P Display byte array on screen using box for position & size.
+vary:P Execute IDL code varying parameters using sliders.
+vase:P Draw rotationally symetric shapes.
+veri:P Interactive vertical line on screen or plot.
+winwatch:P Zoom part of the current window in a display window.
+xadjcirc:P Interactively adjust one or more circles on an image.
+xcursor:P Cursor coordinate display in a pop-up widget window.
+xcurve:P Draw a curve in the display window.
+xline:P Interactive line on image display.
+xorplot:P Manage XOR plots.  Erases last when plotting new.
+xtextimg:P Create an image with text.  Widget based.
+xypro_radon:P A crossi xypro procedure to plot lines from radon points.
+zpan:P Zoom and pan around an image using the mouse.
+zpan2:P Zoom and pan around an image using the mouse, mark center.
+ 
+Plotting and annotation
+-----------------------
+aademo:P Demo plot using the aa routines.
+aapoint:P Antialiased point routine.
+aaplot:P Antialiased plot routine.
+aaplotp:P Antialiased plotp routine.
+aatext:P Antialiased text routine.
+align:P Vector text justification (positioning).
+arcs:P Plot specified arcs or circles on the current plot device.
+arrow2:P Draw arrows on screen.
+autocolor:P Print text on an image using automatic colors.
+axis2:P General axis routine for screen.
+aztick:F Tick mark formatting function for azimuth.
+cbar:P Make a color bar.
+cbar2:P Make a color bar on screen. Very close to cbar, see internal help.
+cgm:P Toggles graphics redirection to a *.cgm file on or off.
+clrname:F Return a 24 bit color given a color name.
+color_code:F Color code a range of value.
+complot:P Plot complex numbers as points in the complex plane.
+draw:P Graphics draw from last point to given point.
+ellipse:P Plot specified ellipse on the current plot device.
+fill_cont:F Returns a byte array with filled contours.
+findplace:P Find a place from the Pop_places database
+genarrow:P Generate an arrow polygon.
+genellipse:P Generate points on an ellipse.
+genshape:P Generate x,y coordinates to draw named shaped.
+graphfile:P List a file on the graphics device.
+grid:P Draw x/y grid in plot window.
+hline:P Plot a horizontal line after erasing last plotted line.
+hor:P Plot a horizontal line on a graph at specified y value.
+jsplot:P Make a time series plot with time in Julian Seconds.
+lastplot:P Backup !p.multi to last plot position.
+linepts:P Gives pixel coordinates of points along a line segment.
+make_ruler:P Plot linear scales on the laser printer.
+make_scale:P Plot circular scales on the laser printer.
+matplot:P Display an image with color bar roughly as in Matlab.
+move:P Graphics move to a point.
+movlabels:P Interactively position labels and list xyouts statement.
+movtxt:P Interactively position text and list xyouts statement.
+nextplot:P Update !p.multi to next plot position.
+nwin:P Convert from normalized window coordinates.
+parcurve:P Return a curve parallel to given curve.
+plot_posbox:P Plot position box in window.
+plot_rngbox:P Draw a range box on a plot.
+plotp:P Pencode plot routine.  Allows disconnected lines.
+plotpos:F Compute plot position for a plot of specified shape.
+plotseq:P Plot a movielike sequence of graphs.
+plotsh:P Plot curves with a drop shadow.
+point:P Plot a filled point at given position.
+points:F Convert from size in points to IDL charsize or pixels.
+polyfillp:P Polyfill with pen code for multiple polygons.
+posbox:P Test for a box drawn around the screen position, or plot one.
+radii:P Plot specified radii on the current plot device.
+raout:P Write text along an arc in data coordinates.
+rbar:P Plot a color bars with defined ranges.
+relfill:P Relative plot with rotation, scaling, translation.
+relplot:P Relative plot with rotation, scaling, translation.
+rev:P Reverse plot and background colors.
+rtics:P Plot labeled or unlabeled tic marks around a circular arc.
+sector:P Plot and fill a sector of a circle.
+sph_demo:P Demonstrate some of the spherical plot (sph*) routines.
+sphgc:P Find intersections of two great circles on sphere.
+sphinit:P Initialize sphere drawing package.
+sphlat:P Draw parallels of latitude on a sphere.
+sphlng:P Draw meridians of longitude on a sphere.
+sphplot:P Plot a curve in spherical polar coordinates.
+sphrad:P Draw sphere radius.
+sph_range_map:F Compute an array of ranges from a point on a sphere.
+sphtext:P Write text on a sphere.
+splat:P Generate points on a splat curve.
+slowplot:P Plot data slowly in fading colors.
+station_model:P Meteorology station plot (wind barbs, ...).
+stext_xyp:F Return stroke text plot arrays.
+sunclock:P Show world map with day, twilight, and night.
+textplot:P Plot text with 2-d alignment.  Also return bounding box.
+textpos:P Find size and angle of text string given points at each end.
+thicken:P Thicken graphics in an existing image.  Good for viewgraphs.
+ticklen:P Compute ticklength for specified size in pixels.
+timeaxis:P Plot a time axis.
+tvcrs2:P Like tvcr but allows data, device, & normal coordinates.
+vclip:P Clip a vector to a clipping window.
+vecfld:P Plot a 2-d vector field.
+ver:P Plot a vertical line on a graph at specified x value.
+vline:P Plot a vertical line after erasing last plotted line.
+wind_rose:P Plot a single wind rose on current map.
+xprint:P Print text on graphics device.  After initializing use just like print.
+xtextimg:P Create an image with text.  Widget based.
+xtics:P Draw labeled tics for an X type axis.
+xyoutb:P Bold text version of xyouts.
+zplot:P Plot symbols in various colors.
+ 
+Scaling/Windowing
+-----------------
+axval:F Find nice axis values.
+cm2norm:P Convert from cm to normalized coordinates.
+erasewin:P Erase plot window to a given color.
+exrange:F Return a range array with range expanded by given fraction.
+getpos:F Return current plot position.
+getwindow:P Get data window coordinates.
+getview:P Return current viewport.
+imgwindow:F Compute plot window needed to display given image.
+new_range:F Compute a new range array from old.
+nwin:P Convert from normalized window coordinates.
+obj_draw:P Display graphical object in a resizable window.
+plot_posbox:P Plot position box in window.
+plotpos:F Compute plot position for a plot of specified shape.
+plotwin:P Gives plot window (area enclosed by axes) in pixels.
+pos_cm:F Convert keyword POSITION for PLOT from cm to norm. coords.
+set_isoxy:P Set data window with equal x & y scales. Covers at least given range.
+set_window:P Set data window.
+subnormal:P Convert from subnormal coordinates to normalized coord.
+sw_showpt:P Scroll a scrolling window to show given point.
+todev:P Convert from data or normalized to device coordinates.
+tvpos:P Gives screen position used by tv, tvscl.
+vclip:P Clip a vector to a clipping window.
+win_info:F Return a structure with window size and viewport.
+win_open:F Test if a given window is open.
+win_size_shape:P Find window size & shape needed to display a specified image.
+zwindow:P Z buffer window like normal x window.
+ 
+Hardcopy
+--------
+cgm:P Toggles graphics redirection to a *.cgm file on or off.
+epsinit:P Redirect plots and images to Encapsulated Postscript File.
+epsterm:P Terminate Encapsulated Postscript plotting.
+latexoff:P Close the encapsulated Postscript file opened by LATEXON.
+latexon:P Generate encapsulated postscript file to include in LaTeX documents.
+prwindow:P Print current window or gif image on color printer.
+psinit:P Redirect plots and images to postscript printer.
+pspaper:P Plot a postscript layout sheet. Gives normalized coordinate system.
+psterm:P Terminate postscript plotting and send plots to printer.
+ 
+-----------------------------------------------------------------------------
+ 
+Imaging
+=======
+ 
+Image or 2-d array generation
+-----------------------------
+img_make:F Make an image of the specified type and color.
+makez:F Make simulated 2-d data.  Useful for software development.
+makez24:F Make a test 24-bit color image.
+phase:F Return an array filled in to indicate specified moon phase.
+radial_img:F Make an image array with a radial brightness distribution.
+ 
+Display and display related processing
+--------------------------------------
+clr_scale:P Clear image scaling values embedded by put_scale.
+color_array:F Make an array of colors.
+color_wheel:P Pick a color using a color wheel.
+colorize:P Colorize an image.
+colorwarn:P Warn if available IDL colors too few.
+complexview:P View a subarea of a complex image as a vector field.
+dot:F Used by SUN_SHADE for dot prod. of surf. normal & sun vect.
+histplot:P Interactive histograms in a box.
+ifwindow:P Create specified window if it does not exist, else use it.
+image_numbers:P Display image numbers in a widget.
+image_stats:P Display image stats in a widget.
+img_tv:P Add an image with transparency to existing displayed image.
+img_fileviewer:P View an array of images.
+imgarr_viewer:P View an array of images.
+imgarray:P Create an array of small images given a list.
+imgcontour:P Plot an image with contours.
+imgneg:P Display negative of current image.
+imgopen:P Prepare a large image to be read.
+imgread:F Read part of a large image.
+imgscale:P Interactive image scaling.
+imgunder:P Display image in same area as last plot.
+izoom:P Zoom an image and display with labeled axes.
+izoom_sub:P Zoom part of an image that has scale embedded by put_scale.
+jpeg_mag:P Change size of a JPEG image.
+loglut:F Return a log lookup table useful for scaling images.
+make_jsmovie:P Generate web pages to display a Javascript movie from images.
+make_window:P Make a window, regular or scrolling.
+makeclr:F Make an array of of 24-bit colors.
+map_proj_name:F Convert map_set projection number to projection name.
+map_put_scale:P Embed map coordinates info in image.
+map_set_scale:P Set map scaling from info embedded in a map image.
+map_set_scale2:P Set map scaling from info embedded in a map image.
+numplot:P Interactive array of image numbers in a box.
+obj_draw:P Display graphical object in a resizable window.
+pack:P Find best packing of images (rectangles) on a page.
+polyfilltr:P Polyfill on current image with a transparent color.
+put_scale:P Embed in current image values needed to restore scaling.
+scale_rgb:P Interactively scale R,G,B image components.
+scalebar:P Make an image bar indicating image min/max and scaling.
+screengif:P Display a GIF image in a screen window.
+screenjpeg:P Display a jpeg image in a screen window.
+screenpng:P Display a PNG image in a screen window.
+screentiff:P Display a tiff image in a screen window.
+set_scale:P Set scaling from currently displayed (or given) image.
+setwin:P Set which window should be currently active window.
+shade_img:P Shade a given image based on a shading array.
+shade_surf2:P Allow image overlay with surface shading.
+sun_shade:F Make a colored shaded relief view of a surface array.
+swdelete:P Delete current window, scrolling or not.
+swincenter:P Center given point in a current scrolling window.
+swindow:P Create a scrolling window.  Works much like window.
+swinfo:F Return info for current or specified scrolling window.
+swlist:P Display info for all scrolling windows, set new active one.
+swshake:P Shake an swindow.
+subimg:P From current image select and redisplay a subimage.
+sw_showpt:P Scroll a scrolling window to show given point.
+topo:F Make a monochrome shaded relief view of a surface.
+topo2:F Make a shading array for a given data array.
+tvhue:P Display given 2-d array as specified hue in current image.
+tvrd2:F Version of tvrd that allows out of bounds.
+tvsharp:P Redisplay a sharpened version of the current screen image.
+vimgseq:P Display a sequence of byte images.
+vumov:P View a res file movie.
+win_info:F Return a structure with window size and viewport.
+win_open:F Test if a given window is open.
+winnew:P Create a new plot window on screen or Z buffer.
+xhistpick:P Widget routine to select image scaling based on a histogram.
+xtextimg:P Create an image with text.  Widget based.
+xview:P View and/or convert images (GIF, TIFF, ...).
+zwindow:P Z buffer window like normal x window.
+ 
+Processing not always related to immediate display
+--------------------------------------------------
+binbound:F For binary image return array with boundary points set to 1.
+concoord:P Convert between two linear coordinate systems.
+ctrim:F Do a circular trim on an array.
+dist_scale:P Display a distance scale on an image.
+dist_scale2:P Display a distance scale on an image.
+ellfit:P Fit an ellipse to a 2-d probability distribution.
+ellfitbin:P Fit an ellipse to a 2-d binary blob image.
+gif2png:P GIF to PNG converter
+hist:F Compute histogram and corresponding x values. Allows weights.
+hist2d:F Compute a 2-d histogram for an array of points.
+ibilin:P Inverse bilinear interpolation.
+image_align:P Align two images.
+image_area_get:P Get image working area.
+image_area_set:P Set up image working area.
+img_8to24:F Convert an 8-bit image to 24-bit using a color lookup table.
+img_add:F Add two 24-bit color images together.
+img_adjhsv:F Adjust Hue, Saturation, and Value for a 3-D image array.
+img_ce:P Color image contrast enhancement.
+img_cfilter:F Apply a color filter to an image (both 24 bit color).
+img_clrcpy:P Copy specified colors from one image to another.
+img_clrw:F Set specified pixels to a given color in a 24-bit image.
+img_cpoly:P Plot a transparent color polygon on an image.
+img_cpypix:F Copy pixels from one 24-bit image to another.
+img_disp:P Display a given image.
+img_ice:P Color image interactive contrast enhancement.
+img_illuminate:F Apply color illumination to an image (24 bit color).
+img_insimg:F Insert a subimage into an 24-bit color image.
+img_interpolate:F Do interpolate on a 2-D or 3-D image array.
+img_ls:F Scale 24-bit image value (of HSV) between percentiles 1 and 99 (or specified percentiles).
+img_map_image:F Do map_image for a 24 bit color image.
+img_map_patch:F Do map_patch for a 24 bit color image or a 2-d array.
+img_margin:F Add a margin to an image.
+img_merge:F Merge color components into a 24-bit color image.
+img_plot:F Plot on a 24-bit image without using X windows.
+img_plotp:F Do a plotp on a 24-bit image without using X windows.
+img_point:F Plot a filled point at given position on 24-bit image.
+img_radial:F Radially distort a 2-D or 3-D image array.
+img_radon:P Compute the Radon Transform of a color or B&W image.
+img_redim:F Change the interleave dimension of a 3-D image.
+img_repclr:F Replace a color in a 24-bit image.
+img_resize:F Resize a 2-D or 3-D image array.
+img_rot:F Rotate a 2-D or 3-D image array by any angle.
+img_rotate:F Rotate a 2-D or 3-D image array.
+img_scale:F Scale given image for display.
+img_shape:P Returns the shape of a 2-D or 3-D image array.
+img_sharpen:F Sharpen a 2-D or 3-D image array.
+img_shift:F Shifts a 2-D or 3-D image array in x and y.
+img_shiftf:F Shifts a 2-D or 3-D image by a fractional number of pixels.
+img_smooth:F Box smooth a 2-D or 3-D image array.
+img_smooth2:F Multi-pass box smooth a 2-D or 3-D image array.
+img_smoothc:F Convolution smooth a 2-D or 3-D image array.
+img_split:P Returns the color components of a color image.
+img_spread:F Spread image values over total range of image data type.
+img_stretch:F Stretch a 2-D or 3-D image array.
+img_subarea:F Returns a subarea from an array or color image.
+img_subimg:F Returns a subimage from a color image.
+img_text:F Plot text on a 24-bit image without using X windows.
+img_thicken:P Thicken graphics in an existing image.  Good for viewgraphs.
+img_wclr:F Find where a color is in a 24-bit image.
+imgfrm:P Puts a specified border around an image.
+imgmask:P Create a mask from an image.
+imgpolrec:F Map an angle/radius image to an X/Y image.
+imgrecpol:F Map an X/Y image to an angle/radius image.
+jpg_mag:P Change JPG image size.
+pixsplit:P Bilinearly split given pixels between surrounding pixels.
+png_mag:P Change PNG image size.
+radon2:F Compute the Radon Transform using the FFT method.
+roi_indices:F Convert roi_pick region string to indices array.
+roi_pick:P Pick one or more regions of interest, return as text array.
+size_img:P Return image size and true value.
+seedfill:P For an array fill a connected region bounded by given values.
+seedfillr:P For an array fill a connected region of constant pixel value.
+sharpen:F Returna sharpened version of the given image.
+subimg_loc:P Locate a subimage within an image.
+tbin:F Total binned values.
+tbin2d:F Total 2-D binned values.
+ 
+Color tables and color images
+-----------------------------
+act_apply:F Apply an absolute color table to an array of values.
+act_cbar:P Make a color bar for an absolute color table.
+act_edit:P Build and/or Edit an absolute color table.
+act_info:F Return values from current absolute color table.
+act_show:P Display color bars for the given list of color tables.
+c_adjhsv:F Adjust Hue, Saturation, and Value for a given 24-bit color.
+c2hsv:P Convert a 24-bit color value to Hue, Saturation, Value.
+c2rgb:P Convert a 24-bit color value to Red, Green, Blue values.
+ced1:P Simple widget to edit a single color table entry.
+clr2lum:F Compute luminance from a 24-bit color value.
+clrname:F Return a 24 bit color given a color name.
+clt:P Load a color table. Menu selection.
+color_array:F Make an array of colors.
+color_pick:P Color picker widget.
+color_pick2:P Color picker widget using RGB and HSV sliders.
+color_wheel:P Pick a color using a color wheel.
+color:P Set a color in the color table by specifying color name.
+colors8bit:P Show array of 256 colors in a window.
+color_quanj:F Combines Red, Green, Blue components into a color image.
+colorwarn:P Warn if available IDL colors too few.
+congrid8c:F Do 24 bit congrid interpolation on 8 bit color image.
+ctint:P Interpolate between two color table entries.
+ctool:P Modify a color table using widgets.
+gif2jpeg:P Convert a GIF image to a JPEG image.
+gifadd:P Add R,G,B color components for list of GIF images.
+gif2png:P GIF to PNG converter
+gifscreen:P Save current screen image and color table to a GIF file.
+imgneg:P Display negative of current image.
+imgsqz:P Squeeze number of image colors used for current image.
+jpeg2tiff8:P Convert a JPEG image to an 8 bit TIFF image.
+jpegscreen:P Save current screen image and color table to a JPEG file.
+load_colors:P Load a color table with a standard range of colors.
+loglut:F Return a log lookup table useful for scaling images.
+makeclr:F Make an array of of 24-bit colors.
+makevlt:P Generate and load a random color table (CT).
+multiband:F Convert a multiband image to a 24-bit color image.
+pickcolor:P Allow user to pick a color from current color table.
+png2jpeg:P Convert a PNG image to a JPEG image.
+pngscreen:P Save current screen image to a PNG file.
+rgb:P Explore RGB color system.
+rgb2c:F Convert R,G,B (or H,S,V) values to 24-bit color.
+rotvlt:P Rotate current vlt or part of it.
+setcolor:P Set a single color table entry.
+shade_clt:P Sets up color table used for sun_shade shaded relief displays.
+tarclr:F Find closest match to target color in current color table.
+testcolor:P Display colors selected by number.
+tiff2gif:P Convert a TIFF image to a GIF image.
+tiff2jpeg:P Convert a TIFF image to a JPEG image.
+tiffscreen:P Save current screen image and color table to a TIFF file.
+topc:F Return top color number for current device.
+topcolors:P Reserve and define some colors at top of color table.
+wavelength_to_hue:P Convert an array of wavelengths to hues.
+xced1:P Simple widget to edit a single color table entry.
+xhsbc:P Adjust image hue, saturation, brightness, & contrast. Widget.
+xmerge:P Widget based routine to merge multiple color images in one.
+ 
+Hardcopy
+--------
+imagesize:P Compute actual postscript image size given available space.
+img_fitprint:P Add margin to fit an image to a print size.
+pack:P Find best packing of images (rectangles) on a page.
+psimg:P Display an image on postscript printer.
+ 
+-----------------------------------------------------------------------------
+ 
+Array processing
+================
+ 
+Curve and surface generation
+----------------------------
+apodize:F Weighting array for apodizing an image.  Cosine taper.
+checker:P Return a checker board pattern array of 0 and 1.
+makei:F Make a long array with given start and end values and step size.
+makems:F Make array of values from start to end with a max step size.
+maken:F Make an array of N values, linear between two given limits.
+makenlog:F Make array of N values, logarithmic between two given limits.
+makenxy:P Make 2-d x and y coordinate arrays of specified dimensions.
+makenxyz:P Make 3-d x,y and z coordinate arrays of specified dimensions.
+makex:F Make an array with specified start, end and step values.
+makexlog:F Make an array of logarithmic friendly values.
+makexy:P Make 2-d X & Y coord. arrays, useful for functions of x,y.
+makey:F Make simulated data.  Useful for software development.
+makez:F Make simulated 2-d data.  Useful for software development.
+makez24:F Make a test 24-bit color image.
+makev:F Make simulated 3-d data.  Useful for software development.
+parcurve:P Return a curve parallel to given curve.
+winlin:F Make a weighting array with linear tapering for windowing.
+ 
+1-d only filters
+----------------
+cosfilt:F Cosine tapered weighting array to use for FFT filtering.
+costap:F Cosine taper weighting from 1 at center to 0 at ends.
+data_segmod:P Segment data that has values modulo a constant (like angles).
+envelope:P Return the min/max envelope of a time series.
+fft_filter:F Do FFT filtering of time series data.
+filljumps:P Find indices needed to fill in value jumps in an array.
+fixang:F Fix angle discontinuety at 0-360.
+fixangh:F Fix angle wraparound using a hysteresis method.
+fixgaps:F Linearly interpolate across data gaps in an array.
+interp1:F Linear interpolation.
+interpx:F Interpolate data with possible gaps and missing (bad) values.
+interpx_demo:P Demonstrate the use of interpx.
+invinterp:F Inverse interpolation.
+linfill:P Fill gaps in array data using linear interpolation.
+list_insert:F Insert a 1-d array into another 1-d array.
+path_reduce_points:P Reduce number of points in a path.
+select_intervals:F Select all intervals within a given range.
+unique:F Return the unique elements of an array.
+ 
+1-d or 2-d filters
+------------------
+kurf:F Computes kurtosis inside a moving window.
+median_miss:F Median filter allowing missing values.
+rebin_miss:F rebin allowing missing values.
+skewf:F Computes skew inside a moving window.
+smooth2:F Do multiple smoothing. Gives near Gaussian smoothing.
+varf:F Computes variance inside a moving window.
+ 
+2-d only filters
+------------------
+radon2:F Compute the Radon Transform using the FFT method.
+ 
+Information
+-----------
+best_fft:F Attempts to find size of fastest FFT from given choices.
+data_segment:P Compute indices of data segments in an array.
+dimsz:F Return size of requested array dimension.
+diskcenter:P Find center and radius of a disk in an image.
+explore:P Image stats in a 16 x 16 box movable with the mouse.
+extremes:F Find all the local extremes of a 1-d array.
+extremes_2d:F Find local extremes in a 2-d array.
+zextremes:P Find extremes in a 3-D array in the Z direction only.
+getgroup:F N'th group of identical elements from a given array.
+getrun:F N'th run of consecutive integers from a given array.
+inrange:P Find multiples of given step just inside given range.
+isarray:F Tests if the argument is an array.
+lastindex:P Returns last index for each dimension of the given array.
+locmax:P Find local maxima in an image.
+ngroups:F Gives # of groups of identical elements in given array.
+nruns:F Gives # of runs of consecutive integers in given array.'
+pmatch:P Find a given pattern in a 1-d array.
+runlength:F Give run lengths for array values.
+unique:F Return the unique elements of an array.
+ 
+Modification
+------------
+ave2d:F Average rows or columns of a 2-d array.
+blend:F Sets up weighting array for blending arrays together.
+congrid2:F Alternate (and limited) congrid using interpolate.
+embed:F Embed an array in a larger array.
+filljumps:P Find indices needed to fill in value jumps in an array.
+fixang:F Fix angle discontinuety at 0-360.
+fixgaps:F Linearly interpolate across data gaps in an array.
+imgpolrec:F Map an angle/radius image to an X/Y image.
+imgrecpol:F Map an X/Y image to an angle/radius image.
+interp2:F Interpolate a 2-d array to another size.
+interpx:F Interpolate data with possible gaps and missing (bad) values.
+interpx_demo:P Demonstrate the use of interpx.
+lgradient:F Create a floating array with a linear gradient.
+ls:F Scale image between percentiles 1 and 99 (or specified percentiles).
+ls2:F Scale image between percentiles 1 and 99 (or specified percentiles).
+mean2:F Do mean over speicifed dimension.
+one2three:P Convert from 1-d indices to 3-d indices.
+one2two:P Convert from 1-d indices to 2-d indices.
+regions:F Using specified breakpoints map image values into 0,1,2,...
+scalearray:F Linearly scale array values to specified range.
+segment:F Set boundaries of constant value to 0.
+setminus:F Eliminate elements from a set that are also in another set.
+shiftf:F Shift an array by a fractional number of indices.
+stddev2:F Standard deviation of an array, optionally over a dimension.
+stripshift:F Shift strips of an image in x or y.
+sum2d:F Sum rows or columns of a 2-d array.
+three2one:P Convert from 3-d indices to 1-d indices.
+translate:P Translate an image to regisiter with a reference image.
+two2one:P Convert from 2-d indices to 1-d indices.
+vnorm:F Normalize an array of values to 0. to 1.
+ 
+-----------------------------------------------------------------------------
+ 
+Math routines
+=============
+ 
+scalar arg
+----------
+all_factors:F Return sorted array of all factors of a given number.
+ang_diff:F Return difference between two angles in degress.
+ang_mid:F Return the angle midway between two angles.
+basecon:F Convert an integer number from one base to another.
+best_fft:F Attempts to find size of fastest FFT from given choices.
+ceil:F Return the ceiling of the argument.
+digits_get:F Get digits in a number.
+digits_put:F Combine separate digits into a number.
+factor:P Find prime factors of a given number.
+floor:F Return the floor of the argument.
+bit_get:F Pick out specified bits from a value.
+gcd_mod:F Find the greatest common divisor of two integers by modulo.
+gceil:F Generalized ceil function, step not limited to 1.
+gfloor:F Generalized floor function, step not limited to 1.
+int_low:F Drop an integer data type to the lowest precision.
+kepler:P Solve Kepler's equation given mean anomaly and eccentricity.
+lcm_mod:F Find the least common multiple of two integers with gcd_mod.
+nearest:F Return multiple of a given step nearest a target value.
+nicenumber:F Find a nice number close to the given number.
+num_dec:F Number of decimal places in given number.
+numfactors:F Gives the number of factors of a number.
+ph:F Return the phase of a complex number.
+pimod:F Force angles in radians to the range -Pi to +Pi.
+pmod:F Find the positive modulo value of a number.
+bit_put:F Insert specified bits in a target.
+round2:F Round that works for big double precision numbers.
+roundn:F Round values to n decimal places.
+setminus:F Eliminate elements from a set that are also in another set.
+sign:F Return the mathematical sign of the argument.
+bit_show:P Shows bits of an integer data type.
+swap_nibbles:F Swap nibbles in a byte.
+zero_int:F Return a zero of the requested data type.
+ 
+Array arg
+---------
+ang_mean:F Return the mean (and sdev) of a set of angles.
+cspec:F Compute ensemble averaged frequency spectrum of complex data.
+cumulate:F Array with the cumulative sum of an array.  Integrate.
+exdiff:F Return difference between array extremes.
+in_common:F Find elements of two arrays that are common (or not).
+int_low:F Drop an integer data type to the lowest precision.
+intersect:F Return the elements common to two given arrays.
+kurt:F Returns the kurtosis of an array (4th moment/2nd moment^2).
+kurf: F Computes kurtosis inside a moving window.
+mean:F Returns the mean of an array.
+mean2:F Do mean over speicifed dimension.
+midv:F Return value midway between array extremes.
+midv_log_fr:F Return a log friendly midpoint between given values.
+numfrac:F Convert a number to a decimal string with n places.
+ph:F Return the phase of a complex number.
+pimod:F Force angles in radians to the range -Pi to +Pi.
+pmod:F Find the positive modulo value of a number.
+round2:F Round that works for big double precision numbers.
+roundn:F Round values to n decimal places.
+rspec:F Compute an ensemble averaged frequency spectrum of real data.
+scale_db:F Scale given data to db (meant for images).
+sdev:F Returns standard deviation of an array.
+stddev2:F Standard deviation of an array, optionally over a dimension.
+simp:F Does Simpson numerical integration on an array of y values.
+skew:F Returns the skew of an array (3rd moment/2nd moment^3/2).
+skewf:F Computes skew inside a moving window.
+smooth2:F Do multiple smoothing. Gives near Gaussian smoothing.
+spl_angint:F Spline angular interpolation of a periodic function.
+swap_nibbles:F Swap nibbles in a byte.
+symasym:P Resolve an array into symmetric & anti-symmetric components.
+trapi:F Trapizoidal integration for irregularly spaced values.
+unpack12:F Unpack 12-bit data into 16-bit data.
+variance:F Computes the variance of an array of numbers.
+varf:F Computes variance inside a moving window.
+xspec:F Compute an ensemble averaged cross spectrum of real data.
+zero_int:F Return a zero of the requested data type.
+ 
+Coordinate transformations/rotations/vector computations
+--------------------------------------------------------
+altazi2radec:P Convert from alt,azi,time to ra,dec.
+earthrad:F Return earth radius in specified units.
+ell_decplaces:P Show size of decimal places at a given point.
+ell_latcon:P Convert between latitude types.
+ell_ll2rb:P For two points on an ellipsoid return range and bearing.
+ell_ll2tm:P Lon,lat to transverse mercator on an ellipsoid.
+ell_llh2xyz:P Ellipsoidal Long, Lat, Height, to x, y, z.
+ell_rb2ll:P From range and bearing on an ellipsoid compute a point.
+ell_rb2ll_txt:P Convert a file with range/bear pairs into lat/long.
+ell_xyz2llh:P x, y, z to ellipsoidal Long, Lat, Height.
+flat2sph:P Map a flat map onto a sphere.
+js2gra:F Greenwich RA (radians). Greenwich Mean Sidereal Time (GMST).
+lint:P Find the intersection of two lines in the XY plane.
+ll2rb:P From latitude, longitude compute range, bearing.
+ph:F Return the phase of a complex number.
+plint:P Intersection point of a plane and a line.
+plane_int:P Compute the intersection line of two planes.
+polrec:P Convert 2-d polar coordinates to rectangular coordinates.
+polrec3d:P Convert vector(s) from spherical polar to rectangular form.
+radec2altazi:P Convert from ra,dec,time to alt,azi.
+radec2latlon:P RA, Dec, time to Latitude, Longitude (substar point).
+rb2ll:P From range, bearing compute latitude, longitude .
+recpol:P Convert 2-d rectangular coordinates to polar coordinates.
+recpol3d:P Convert vector(s) from rectangular to spherical polar form.
+rot_3d:P Rotate 3-d coordinate system.
+rotate_xy:P Rotate a set of X,Y points about a given point.
+skewint:P Give the near-intersection point for two skew lines.
+sphic:P Compute intersection points of two circles on a unit sphere.
+unit:F Returns unit vector along given vector.
+wgs_84:F Return a structure with some WGS 84 Ellipsoid values.
+ 
+ 
+Fitting
+-------
+ellfit:P Fit an ellipse to a 2-d probability distribution.
+ellfitbin:P Fit an ellipse to a 2-d binary blob image.
+eqv:P Interactive equation viewer and curve fitter.
+eqv2:P Interactively plot a function on current plot.
+fit:P Curve fit program. Polynomial, exponential, power law.
+fit12:P For internal use by FIT only.
+fit6:P For internal use by FIT only.
+gauss:F Return a fitted gaussian curve for a given histogram.
+gen_fit:F Fitted Y array for given X array from given fit parameters.
+line_fit:P Fit a line to weighted x,y points.
+poly_fit2:F Returns fitted Y values for each given X value.
+opfit1d:F Calculate orthonormal polynomial fit for 1-d data.
+opfit2d:F Calculate orthonormal polynomial fit for 2-d data.
+orthopoly:F Calculates a set of orthonormal polynomials.
+path_reduce_points:P Reduce number of points in a path.
+spl_angint:F Spline angular interpolation of a periodic function.
+stk_linreg:P Fit line by linear regression to columns in a stack of images.
+subimg_loc:P Locate a subimage within an image.
+ 
+Geometry
+--------
+ellfit:P Fit an ellipse to a 2-d probability distribution.
+ellfitbin:P Fit an ellipse to a 2-d binary blob image.
+polystat:P Compute polygon statistics (# vertices, area, perimeter).
+sphdist:F Angular distance between points on a sphere.
+vect_angle:F Angular distance between vectors.
+ 
+Numbers
+-------
+all_factors:F Return sorted array of all factors of a given number.
+convert_list:F Convert a text description of numbers to a numeric array.
+factor:P Find prime factors of a given number.
+intersect:F Return the elements common to two given arrays.
+numfactors:F Gives the number of factors of a number.
+pimod:F Force angles in radians to the range -Pi to +Pi.
+pmod:F Find the positive modulo value of a number.
+prime:F Return an array with the specified number of prime numbers.
+print_fact:P Print prime factors found by the factor routine.
+round2:F Round that works for big double precision numbers.
+ 
+Mandelbrot set
+--------------
+mandelbrot:P Compute Mandelbrot images
+mandel_gif:P Convert saved images from mandelbrot to gif images
+mcompute:P Compute mandelbrot set images.
+mzoom:P Compute new region needed to zoom a mandelbrot image.
+ 
+-----------------------------------------------------------------------------
+ 
+Map related
+=============
+altazi_pointer:P Plot an altazimuth pointer on display.
+check_shapefile:P Look at details of a shapefile. Show some access commands.
+county_fips:F Return list of county FIPS codes given state.
+datum_nad27_to_wgs84:P Datum shift from NAD27 to WGS84, CONUS only.
+distance_scale:P Plot a distance scale in graphics screen.
+earthrad:F Return earth radius in specified units.
+ell_2pt_circle:P Find a circle of specified radius through 2 points on an ellipsoid.
+ell_3pt_circle:P Fit a circle to 3 points on an ellipsoid.
+ell_crv_add:P Combine two curves orienting second if needed.
+ell_crv_split:P Split a curve with an azimuth (geodesic or loxodromic).
+ell_cyl_eq_area:P Compute area of given lng/lat polygon on an earth ellipsoid.
+ell_dist_match:P Find point with equal distance to 2 reference points.
+ell_geo_2ptsep:F Find distance between two points along a geodesic.
+ell_geo_int:P Intersection point of two geodesic segments.
+ell_geo_interp_pts:P Add points interpolated on a geodesic between array points.
+ell_geo_mid:F Find midpoint between two points along a geodesic.
+ell_geo_mindist_pt:P Find the point on the given geodesic closest to a given point.
+ell_geo_pt_sep:P Return geodesic separations of adjacent points in an array.
+ell_geo_pts:P Return an array of points along a geodesic.
+ell_geo_side:F Find which side of a geodesic a given point located on.
+ell_geoazi_int:P Find intersection point of a geodesic and an azimuth line.
+ell_geocirc_int:P Find intersection point of a geodesic and circle.
+ell_ll2rb:P For two points on an ellipsoid return range and bearing.
+ell_ll2tm:P Lon,lat to transverse mercator on an ellipsoid.
+ell_llh2xyz:P Ellipsoidal Long, Lat, Height, to x, y, z.
+ell_lox_side:F Find which side of a loxodrome a given point located on.
+ell_loxodrome:P Deal with loxodromes on ellipsoidal earth.
+ell_merc:P Mercator projection on an ellipsoid, forward and inverse.
+ell_plot_pt:P Plot a point or segment on current map.
+ell_plot_ptarr:P Plot an array of points structures.
+ell_plot_seg:P Plot a color coded data segment on current map.
+ell_point_mov:F Find a point given range and azimuth from another point.
+ell_point_sep:F Distance in meters between two points given as structures.
+ell_polygon:P Fill sides of a polygon on an ellipsoid with small steps.
+ell_rb2ll:P From range and bearing on an ellipsoid compute a point.
+ell_seg_pt_closest:P Find point on segment closest to a given point.
+ell_track_dist:F Return distance in meters along given track.
+ell_track_reduce_points:P Reduce the number of points along a track.
+ell_xyz2llh:P x, y, z to ellipsoidal Long, Lat, Height.
+ellipsoid:P Set or get earth ellipsoid structure.
+ellipsoid_int:P Find the intersection of a line with an ellipsoid.
+fast_map:P Make a quick IDL map.
+fips2st:F From 2 digit FIPS code return 2 letter state abbreviation.
+flat2sph:P Map a flat map onto a sphere.
+from_meters:F Convert distances from meters to specified units.
+get_ellipsoid:P Return an ellipsoid structure.
+img_map_image:F Do map_image for a 24 bit color image.
+img_tokmz:P Convert an image array to a *.kmz file.
+limbox:P Interactively get new map limits.
+ll2rb:P From latitude, longitude compute range, bearing.
+llpen2kml:P Convert a txtdb file (or structure) with lon, lat, pen code to a kml file.
+llsigned:F Give signed lat or long given deg min sec (dms) text.
+lonlat2shape:P Save lon, lat arrays in a shape file.
+map_arrhd:P Plot an arrow head on a map.
+map_embedded_info:P List or modify embedded map info from map_set2.
+map_get_bytes:P Get extra info from resmap embedded scaling array.
+map_latlng_rect:P Plot a rectangular area of lat/long on a map.
+map_outside:P Color image points outside a map area.
+map_pixdeg:P Return the map scale in pixels/degree at the map center.
+map_proj_name:F Convert map_set projection number to projection name.
+map_proj_text:P Return map projection descriptive text
+map_put_bytes:P Add extra info to resmap embedded scaling array.
+map_put_scale:P Embed map coordinates info in image.
+map_set2:P Use instead of map_set to allow embedded scaling.
+map_set_scale:P Set map scaling from info embedded in a map image.
+map_set_scale2:P Set map scaling from info embedded in a map image.
+map_space:P Set any points off a generated map to white.
+map_state_restore:P Restore last map_set state.
+map_state_save:P Save last map_set state.
+mapcirc:P Plot a circle on a map and list its parameters.
+mapcirci:P Interactive circle on a map.  Select and list points.
+mapgc:P Plot a great route circle on a map.
+mapgci:P Interactive great circle on a map.
+maplatlong:P Find complete lat/long range covered by map.
+maplatlong_grid:P Plot a lat/long grid on last map.
+maprect:P Plot a rectangle on a map and list its parameters.
+maprings:P Plot rings (circles) on a map.
+mapwindow:P Find screen window used by last map.
+path_reduce_points:P Reduce number of points in a path.
+plot_limbox:P Plot map limits array as a box on the map.
+plotshape:P Plot given shape file on current map.
+png2kmz:P Convert a PNG image with embedded scaling to a KMZ file.
+qmap:P Draw a quick map.
+rb2ll:P From range, bearing compute latitude, longitude .
+satlatlng2altazi:P From Lat, Long find Altitude, Azimuth for a satellite.
+sattrackaz:F Return the azimuth of a satellite track given inc and lat.
+shapefile_pts:P Return data points from a shape file.
+sph_cyl_eq_area:P Compute area of given lng/lat polygon on an earth sphere.
+sph_range_map:F Compute an array of ranges from a point on a sphere.
+st2fips:F From 2 letter state abbreviation return 2 digit FIPS code.
+state_name:F Return name of state given 2 letter abbreviation.
+sunclock:P Show world map with day, twilight, and night.
+to_meters:F Convert distances in selected units to meters.
+utm2latlon:P Convert UTM coordinates to lat,lon.
+wgs_84:F Return a structure with some WGS 84 Ellipsoid values.
+ 
+-------------------------------------------------------------------------
+ 
+ 
+Programming routines
+====================
+ 
+Information
+-----------
+aarr:F Simulate an associative array (key / value pairs).
+array_list:P List an array in a form useful to cut and paste.
+build_arr_struct:F Build a structure from arrays of tags and values.
+check5:F Check if running IDL version 5 or greater.
+commalist:F Return a given array as a comma delimited text list.
+convert_ind:F Convert a text description of runs of indices to numbers.
+convert_list:F Convert a text description of numbers to a numeric array.
+created:F Return file creation host, user, and time stamp or tag.
+data_block:P Read the block of data following data_block call.
+data_set_key:P Get data set info given a key.
+datatype:F Datatype of variable as a string (3 char or spelled out).
+decompose:P Device independent decompose set or get.
+draw_wid_corr:P Get draw widget scroll size correction.
+endian:F Function indicating which endian the current machine uses.
+etc:F Return estimated time to completion in seconds.
+event_log:P Enter an event into the latest event log file.
+file_test:F Test if file readable &, optionally, has specified contents.
+filelists:P Return specified lists of files in directory.
+findcmd:P Find lines in command line recall buffer with given keywords.
+get_count:F Get next count value, from 1 up.
+get_idlpid:F Get Process ID of IDL current IDL session (Unix only).
+get_visual_name:P Device independent get_visual_name.
+getenv2:F Version of getenv portable across operating systems.
+getsysnams:P Get a list from a file specified by an environmental var.
+grab_commands:P Grab command line recall commands and save in a text file.
+help_save2:P Look at files made by save2 and list what they contain.
+inbox:F Test if given point inside given box.
+isarray:F Tests if the argument is an array.
+lastindex:P Returns last index for each dimension of the given array.
+listruns:P Make a list of runs of consecutive integers.
+naxes:P Find nice axis tics.
+ncdf_list:P List variables in a Net CDF file.
+ngroups:F Gives # of groups of identical elements in given array.
+numpersec:F Given values increasing with time return rate per second.
+outbox:F Test if given point outside given box.
+path:P Examine and modify the IDL path.
+pcon:P IDL path control utility. May turn libraries on or off.
+scramble:F Scrambles an array or returns an array scrambled indices.
+bit_show:P Shows bits of an integer data type.
+showpath:P Show the path of the calling routine.
+stack__define:O Stack object.
+struct_autoconvert:F Convert a structure wih all string items to numeric.
+tag_comp:P Compare tag values from two structures.
+tag_test:F Test if given tag is in given structure.
+text_block:P Print or return a block of inline text (lines starts with ;).
+timer:P Measure elapsed time between calls.
+timer object:O Timer object for elapsed time (t=obj_new('timer') & t->help).
+to_datatype:F Convert arg to specified data type.
+typ2num:F Convert datatype description to corresponding numeric zero.
+wait_bar:P Wait for given number of seconds, show a sliding indicator.
+whoami:P Returns to the calling routine its directory and name.
+whocalledme:P Returns to calling routine its parent's directory and name.
+win_info:F Return a structure with window size and viewport.
+win_open:F Test if a given window is open.
+win_size_shape:P Find window size & shape needed to display a specified image.
+window_drift:P Return window drift in x and y.
+wrap_plot:P Simple wrapper routine to demonstrate _extra.
+ 
+I/O and Memory
+--------------
+abs_path:F Convert a relative path to an absolute path.
+archive_ndir:P Archive N levels of a directory.
+arg_parse:P Parse an argument list into positional and keyword args.
+bell:P Ring terminal bell.
+bit_byte_reverse:F Return value made by reversing the bits of given byte value.
+bit_extract:F Extract a specified bit string from a byte array.
+bit_reverse:F Reverse all the bits in the given item.
+bit_shift:F Shift bits in a byte array by any amount.
+bit_unpack:F Unpack bit string arrays from a given byte array.
+created:F Return file creation host, user, and time stamp or tag.
+crs_edit:P Edit a bitmap to use for a cursor image.
+dirmem:F Update a directory list for easy access.
+endian:F Function indicating which endian the current machine uses.
+enter:F Prompted entries allowing defaults. Help, IDL/DCL commands.
+filename:F File names with system independent symbolic directories.
+fslider_setrange:P Set new min/max for cw_fslider.
+futil:P A system independent file utility (copy, move, delete, chmod...).
+getkey:F Return a keyboard key.  Interpret escape sequences.
+hash_from_struct:F Convert a nested structure to a nested hash.
+hash_to_struct:F Convert a nested hash to a nested structure.
+hget:F Get a handle value.
+hset:P Set a handle value.
+ingest_bindata:F Ingest binary data in a byte array into a structure.
+list_nested:P List a nested structure or hash.
+m_fun:F Function to get a value by tag name from a global area.
+m_get:P Get a value by tag name from a global area.
+m_list:P List values in global areas saved by m_put.
+m_put:P Save a value by a tag name in a global area.
+more:P Display a text array using the MORE method.
+ncdf_get:P Get a set of variables from a NetCDF file.
+ncdf_list:P List variables in a Net CDF file.
+ncdf_put:P Write given data to a NetCDF file.
+nextnum:F Return next number using the arrow keys.
+pckey:P Read PC keyboard. Interpret special keys.
+printat:P Print given items at specified screen column and line.
+readm:P Unformatted read from a byte array.
+res_add_struct:P Add items from given unnested structure to an open res file.
+res_execute:P Process an executable res file.
+res_from_struct:P Write a RES file from an unnested structure.
+res_taglist:P Get requested values from list list of res files.
+res_to_struct:P Read a RES file into a structure.
+reshdr_from_file:P Replace a RES file header from a text file.
+reshdr_to_file:P Write a RES file header to a text file.
+resclose:P Close results file.
+rescopy:P Copy a res file to another res file, may drop items.
+rescom:P Display values from the results common and also file header.
+resedit:P Replace values in a res file.
+resget:P Get a variable from a results files.
+resget_one:F Function to get one item from a res file.
+resget_slice:P Get 2D slices from a results files and return as a 3D array.
+resopen:P Open a results file for reading or writing.
+resput:P Put values into a results file.
+restore_named:P Restore variables under given names (saved with save_named).
+save_named:P Save variables so they can be restored with any name.
+restore2:P Retrieve from a file IDL variables saved by save2.
+save2:P Save IDL vars in a file. Allows them to be renamed during restore2.
+screen:P Print a terminal screen layout sheet on PS printer.
+substruct:F Return a substructure from a structure by indices.
+swap:P Swap two values.
+tag_add:P Add or update a tag in a structure.
+tag_arr:P Concatenate scalars from one structure into arrays in another.
+tag_clash:F Find and fix a potential structure tag clash.
+tag_drop:F Drop a specified tag in a given structure.
+tag_funct:F Process structure elements through specified functions.
+tag_modify:P Modify a structure using given functions.
+tag_move:P Move tags from one structure to another.
+tag_rename:F Rename tags in a structure.
+tag_sort:F Sort structure tags based on a specified tag.
+tag_value:F Return the value for a given structure tag.
+text_block:P Print or return a block of inline text (lines starts with ;).
+tiffscreen:P Save current screen image and color table to a TIFF file.
+txtfile:P Enter a (new) file name.
+txtgetfile:P Select a file name.
+txtin:P txtmenu value entry.
+txtmenu_help:P Gives detailed help for the TXTMENU routine.
+txtmenu:P Text screen menu routine.
+txtmess:P Display a message on the screen and wait for any key.
+txtmeter:P Display a 0 to 100% meter on a text screen.
+txtpick:P Select file(s) from a screen menu displaying a file list.
+txtyesno:F Ask a yes/on question and read the answer.
+typextract:F Extract a specified datatype from binary data in byte array.
+var2byt:P Convert numeric variables to the equivalent array of bytes.
+wav_play:P Play a wave file.
+win_copy:P Copies graphics from a hidden window to the target window.
+win_redirect:P Redirects all graphics to a hidden window.
+wmenu2:F Like wmenu but allows non-mouse menus. Uses widgets if available.
+xresget2:P Get items from a resfile using a menu.
+ 
+Widget related
+--------------
+add_helpmenu:P Add one or more drop-down menus for help text to given base.
+cw_bitlights:F Indicate bits on or off.
+cw_droplist2:F A pop up list from which to select an item.
+cw_dslider:F Slider using draw widget. Generates drag events.
+cw_magimage:F Image with magnified view compound widget.
+cw_mcled:F Multicolored LED widget.
+cw_stripchart:F Strip chart compound widget.
+widget_getoffset:P Get x/y position of a subwidget.
+wdraw_buttons:P Make button images for draw widget buttons.
+xautohelp:P Display auto help when mouse moves over a widget.
+xautohelp_example:P This routine shows how to use xautohelp.
+xbb:P Widget bill board utility for text display.
+xfiles:P Select files, individual or ranges.
+xget_imgdsc:P Get image description: type and size
+xget_filelist:P Get a list of files using a widget.
+xgetfile:F Widget based file selection routine.
+xgetvals:P General widget to get values.
+xgetvals_demo:P Demonstration of the xgetvals routine.
+xhelpmenu:P Give a drop-down help menu from text in a file.
+xhotlist:P Widget based hotlist of items.
+xlist:F Pop-up list selection widget.
+xmess:P Display a message using a widget.
+xmeter:P Display a 0 to 100% meter on a text screen.
+xoption:F Widget option selection panel.
+xsubdir:P Widget based subdirectory selection tool.
+xyesno:F Widget Yes/No selection panel.
+ 
+Development tools
+-----------------
+animals:F Return a string array of animals.
+makey:F Make simulated data.  Useful for software development.
+makez:F Make simulated 2-d data.  Useful for software development.
+makez24:F Make a test 24-bit color image.
+makev:F Make simulated 3-d data.  Useful for software development.
+ 
+-------------------------------------------------------------------------
+ 
+Miscellanious
+=============
+dayglobe:P Show the area of daylight/night on a globe.
+dt_tm_fromcr:F Convert from Carrington Rotation Number to Date/Time.
+dt_tm_tocr:F Convert from Date/Time to Carrington Rotation Number.
+exif_reader:P Read values from an Exif file (digital camera file).
+exif_reader50:P Read values from an Exif file (digital camera file).
+fix_reslib:P Modify routines in specified RES IDL library.
+gen_alphone:P Generate an alph.one file for an IDL library.
+horizon_dist:F Compute distance to horizon given observer height.
+iglobe:P Plot a globe.
+newsweb:P Newsletter generator
+npow:P Plot a diagram showing a number to a power.
+pastel_sun_colors:P Load pastel sun color table
+precess_res:P Precess celestial coordinates to a new date.
+refract:F Correct true altitudes to refracted altitudes.
+sun_zd:F Return solar zenith distances for given position.
+sun:P Computes geocentric physical ephemeris of the sun.
+sun_colors:P Load sun color table
+sunaltazi:P Compute sun position from date/time and long/lat.
+sundisk:P Compute solar disk coordinates as seen from anywhere.
+sunjs:P Computes geocentric physical ephemeris of the sun.
+sunjs2:P Computes geocentric physical ephemeris of the sun.
+sunpos:P Compute sun position from date/time and long/lat.
+world_sunzd:F Compute Sun zenith distance for an array of world points.
+tetris:P Play tetris game.
+web_back:P Generate a random web background.
+webcaltab:P Generate HTML table code for a calendar.
+webshadow:P Add a shadow to a web page image.
+webtile:P Generate a Netscape web page background tile.

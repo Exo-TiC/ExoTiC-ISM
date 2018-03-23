@@ -1,0 +1,100 @@
+
+  What is xliner?
+  ---------------
+
+  xliner is a help widget for IDL that can be used to
+  search for routines using search keywords.  Any known
+  routines with the given search words in a one line
+  description are listed.  The full front end template
+  may be listed for a selected routine.
+
+
+  Where does xliner search?
+  -------------------------
+
+  xliner, on startup, looks in each directory on the IDL path
+  for a file named alph.one.  alph.one files contain the one
+  line descriptions of routines in an IDL library. Directories
+  on the IDL path that contain an alph.one file are listed in
+  in the xliner widget with a toggle button to include/exclude
+  them in the keyword search.
+
+
+  How can library directories with no alph.one file be included?
+  --------------------------------------------------------------
+
+  Some IDL directories may not allow any files to be added if
+  they are read only.  This may be the case for the libraries
+  that come with IDL.  In such cases the one line description
+  files may be placed elsewhere.  A pointer file in the user's
+  home directory may be set up to indicate the location of these
+  one line description files.  The pointer file is named xliner.txt
+  or .xliner.txt to hide it from directory listings.
+
+  The pointer file, xliner.txt or .xliner.txt, is a text file in the
+  user's home directory.   The format of this file is:
+    One line for each IDL library to be included in xliner.
+    Each line has 3 items:
+      1. Full path and name of alph.one file (can have any name).
+      2. Full path to the IDL library.
+      3. Short name for library.
+  Comments (* in column 1) and null lines are ignored.
+
+  The pointer file may also contain line indicating that some of the
+  libraries should start turned off so they will not be searched.  This
+  is done with a line like:
+     OFF = lib1 lib2 ...
+  The example below shows one library being turned off.
+
+  Here is an example xliner.txt file (or .xliner.txt):
+
+*-----------------------------------------------------------------------
+*  .xliner.txt = Point to alph.one files for xliner
+*  R. Sterner, 2004 Jan 08
+*-----------------------------------------------------------------------
+
+/homes/sterner/xliner/rsi_alph.one /usr/local/rsi/idl_5.6/lib rsi
+/homes/sterner/xliner/astro_alph.one /common/idl_libs/goddard_astrolib/pro astro
+OFF = rsi
+
+  If multiple alph.one files are placed in one directory, as in the
+  above example, they must have different names.
+
+
+  What is the format of the one line description files (alph.one)?
+  ----------------------------------------------------------------
+
+  alph.one files contain one line for each routine
+  in a library (or whichever routines are to be documented).
+  The line has the routine name at the start, a colon, then a brief
+  description on the same line.  For example:
+    ...
+    sphdist:F Angular distance between points on a sphere.
+    sphgc:P Find intersections of two great circles on sphere.
+    sphic:P Compute intersection points of two circles on a unit sphere.
+    ...
+  A P or F following the colon is optional and means Procedure or Function.
+
+  Text files may also be referenced in the alph.one file as follows:
+     text_file_name:T description if needed
+  The T just after the : is needed in this case.  Often the text file name
+  can be the one line description itself, for example:
+      list_of_color_names_in_idl8:T
+  No extra description may be needed but can be used if desired.  The text file
+  is assumed to be in the library directory, so in this example the text in the
+  file named list_of_color_names_in_idl8.txt would be displayed when the above
+  line is clicked (if there is such a file).
+
+
+  Generating a one line description file
+  --------------------------------------
+
+  Move to the directory that will contain the one line description file
+  and get into IDL.  Run gen_alphone, dir=dir, save=save where dir
+  is the directory to catalog (easily obtained from the path command)
+  and save is the name of the output file, like rsi_alph.one.
+  Then in the xliner.txt file in the user's home directory add a line
+  for the new library that includes the full path and name of the generated
+  one line description file, the full path to the library itself, and
+  a short name for the library.  Then xliner should include that library
+  the next time it is called up.

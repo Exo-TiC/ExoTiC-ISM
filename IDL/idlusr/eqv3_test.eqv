@@ -1,0 +1,5 @@
+*------  eqv3_test.eqv
+
+init: loadct,4
+eq: tvscl,dist(a)
+par: a 50 200 100

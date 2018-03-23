@@ -1,0 +1,42 @@
+
+  Adding web pages to document library routines
+  ---------------------------------------------
+
+  Routines in an IDL library searched by xliner (library must
+  contain a file alph.one) may have a web page to give more detailed
+  documentation.  All web pages must be in a subdirectory named web in
+  the library directory.  For simple pages create an html file named
+  <routine>.html where <routine> is the name of the routine.  For more
+  involved pages a subdirectory named <routine> may be made in the web
+  subdirectory and it must contain a file named <routine>.html but may
+  also contain other related files such as image used in routine>.html.
+
+  A button will be added to the xliner help for a library routine if
+  possible.  Clicking on that button will display the web page for that
+  routine if there is one, or else an error page.
+
+  Specifiying the web browser to use
+  ----------------------------------
+
+  The web browser to use for displaying the pages for the routines
+  must be given in a file named xliner_config.txt which is located
+  in the library directory (need a copy in each library).
+  The file must contain an entry giving the web command:
+         web_command = cmd
+  where cmd is the command to spawn from IDL and must contain the
+  marker string $$page$$ which gets automatically replaced by the 
+  path to the web page to display.  This command will be system dependent.
+  An example for Mac OS X using the Chrome web browser is:
+        web_command = open $$page$$ -a  /Applications/Google\ Chrome.app
+
+  Operation in xliner
+  -------------------
+
+  When a routine listed in xliner is clicked the built in help for that
+  routine is displayed in a widget.  If the file xliner_config.txt exists
+  in the library directory then a button labeled "Web page" will appear in
+  this widget. If the file web/<routine>.html or web/<routine>/<routine>.html
+  is found then when the button is clicked that page will be displayed in
+  the specified web browser.  If those files are not found then an error
+  page will be displayed.
+

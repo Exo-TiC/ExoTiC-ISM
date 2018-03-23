@@ -1,0 +1,14 @@
+*------------------------------------------------------------------------
+*  xliner_config.txt = xliner configuration file.
+*  R. Sterner, 2010 Jul 21
+*------------------------------------------------------------------------
+*
+*       web_command = Command to spawn to display a web page in a
+*               broswer.  The marker string $$name$$ is replaced by
+*               the path to the web page to display.
+*------------------------------------------------------------------------
+
+        *---  Mac OS X with Chrome:
+        *  -n does not work right, gives an error.
+*        web_command = open $$page$$ -n -a  /Applications/Google\ Chrome.app
+        web_command = open -a  /Applications/Google\ Chrome.app $$page$$

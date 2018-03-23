@@ -1,0 +1,30 @@
+*------------------------------------------------------
+*
+*	eqv3_ex.eqv
+*	R. Sterner, 2000 May 16
+*
+*	Use: In IDL do
+*	z = makez(200,200)
+*	eqv3,'eqv3_ex.eqv',p1=z
+*
+*------------------------------------------------------
+
+init: loadct,4
+init: device,decomp=0
+
+title: Image test
+
+eq: win_redirect &$
+    erase & tvscl,rot(p1,a,miss=0)>lo<hi,ix,iy &$
+    win_copy
+
+par: lo 0 1 0 units=pixel value
+par: hi 0 1 1 units=pixel value
+par: ix 0 500 100 units=pixels
+par: iy 0 500 100 units=pixels
+par: a 0 360 0 units=degrees
+
+exit: erase,50 & wait,.1
+exit: erase,100 & wait,.1
+exit: erase,150 & wait,.1
+exit: erase,200 & wait,.1

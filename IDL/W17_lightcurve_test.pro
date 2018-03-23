@@ -14,8 +14,8 @@ HST_period = 0.06691666
 
 ; READ in the txt file for the lightcurve data
 ; the double precision seems important here as the x array is very specific
-data = ddread('~/Documents/HST/W17/Transit/G141/14918/analysis_files/visit1/test_files/W17_white_lightcurve_test_data.txt', offset=7, /countall, /double)
-wavelength = ddread('~/Documents/HST/W17/Transit/G141/14918/analysis_files/visit1/test_files/W17_wavelength_test_data.txt', offset=3, /countall, /double)
+data = ddread('/Users/ilaginja/Documents/Git/HST_Marginalization/data/W17_white_lightcurve_test_data.txt', offset=7, /countall, /double)
+wavelength = ddread('/Users/ilaginja/Documents/Git/HST_Marginalization/data/W17_wavelength_test_data.txt', offset=3, /countall, /double)
 
 x = REFORM(data(0,*))
 y = REFORM(data(1,*))
@@ -58,7 +58,7 @@ endif
 
 data_params = [rl,epoch,inclin,MsMpR,ecc,omega,Per,FeH,Teff,logg]
 grid_selection = 'fit_time'
-out_folder = '~/Documents/HST/W17/Transit/G141/14918/analysis_files/visit1/test_files/'
+out_folder = '/Users/ilaginja/Documents/Git/HST_Marginalization'
 run_name = 'wl_time_wm3d'
 plotting='on'
 

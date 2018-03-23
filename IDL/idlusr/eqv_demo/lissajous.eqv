@@ -1,0 +1,18 @@
+*--------  snapshot.eqv = snapshot of current status  -------
+*	Sterner, Thu Oct 28 13:13:20 1993
+ 
+title: Lissajous patterns
+eq:  x=ax*sin(fx*t)+5 & y=ay*cos(fy*t)+5
+xrange: -10  10
+yrange: -10  10
+trange: -10  10
+independent: t
+discussion: lissajous.dsc
+n_points: 500
+xtype:        0
+ytype:        0
+ptype:        1
+par: ax       1.00000      10.0000      3.12625
+par: ay       1.00000      10.0000      3.68875
+par: fx       0.00000      10.0000      0.00000
+par: fy       0.00000      10.0000      0.00000

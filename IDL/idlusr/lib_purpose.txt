@@ -1,0 +1,7 @@
+
+  The purpose of the IDL library IDLUSR is to hold routines
+  thought to be of general interest to the author and other
+  IDL users.  Many of these routines are useful at the interactive
+  command mode of IDL.  Many are also useful in building other
+  routines.  Very specialized routines, or those of only local
+  interest are excluded from this library.

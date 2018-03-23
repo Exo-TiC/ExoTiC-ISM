@@ -1,0 +1,25 @@
+*------------------------------------------------------
+*
+*	eqv3_iglobe.eqv
+*	R. Sterner, 2003 Sep 03
+*
+*	Use: In IDL do
+*	eqv3,'eqv3_iglobe.eqv'
+*
+*------------------------------------------------------
+
+init: window,xs=500,ys=500
+
+title: Interactive globe
+
+eq: win_redirect &$
+    iglobe, lat,lng, ang, grid=grid,count=count &$
+    win_copy
+
+*eq: win_redirect & iglobe, lat,lng, ang, grid=grid & win_copy
+
+par: lat -90 90 0
+par: lng 0 360 0
+par: ang -180 180 0
+par: grid 0 2 0 int
+par: count 0 2 0 int

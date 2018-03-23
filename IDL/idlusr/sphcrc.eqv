@@ -1,0 +1,10 @@
+*--- sphcrc.eqv = Equation file for Spherical Circle
+*---  Created on tesla by Sterner on Wed Apr 22 11:21:51 1998
+ 
+eq:  rb2ll,x0,y0,r,/deg,t,x,y
+title:  Spherical Circle
+trange:  0 360
+n_points:  180
+par:  x0 -180 180 -90
+par:  y0 -90 90 40
+par:  r 0 180 5

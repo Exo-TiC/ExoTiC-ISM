@@ -1,0 +1,28 @@
+*------  plotseq.hlp = plotseq help text file  ------
+*------  R. Sterner, 22 Sep, 1992
+
+  PLOTSEQ is used to examine moderately large quantities of data
+  in the form of related graphs.  The purpose of this routine is
+  data display only, not analysis.
+
+  Some of the main features of PLOTSEQ:
+
+  * Display graphs as a movie.  May start, stop, change direction.
+  * Single step through individual graphs, forward or backward.
+  * Jump to a specified graph.
+  * Zoom up part of the graph. Zoom area may be typed or selected using
+    an interactive box.
+  * Graphs may be plotted using any combination of linear or log axes.
+  * May set plot symbol.
+  * May set up a custom grid overlay.
+  * May set up custom Y axis labeling for a non-standard axis.
+  * A second data set may be overlaid for comparison.
+
+  The next screen menu may be used for more details.
+
+.menu_start
+More help | title
+Quit help | quit
+Menu item details | link plotseq_2.hlp
+Calling parameters | link plotseq_3.hlp
+.menu_end

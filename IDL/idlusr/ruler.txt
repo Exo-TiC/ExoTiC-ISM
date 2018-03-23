@@ -1,0 +1,70 @@
+*------  RULER.TXT = TEST MAKE_RULER.PRO
+*       RES  19 SEP 88
+
+*--------------  10 CM RULER (left)  ---------------------
+        type =  Plotting 10 cm ruler.
+        LENGTH = 10
+        XY = 1, 1.5
+        LABELS = 0, 10, 1, -0.8, .7
+        TICS, 0, 10, 1, -0.5, 4
+        TICS, 0, 10, .5, -0.3
+        TICS, 0, 10, .1, -0.1
+        TEXT = 5, -1.5, c, 1, 10 cm ruler
+
+*--------------  10 CM RULER (right)  ---------------------
+        type =  Plotting 10 cm ruler.
+        LENGTH = 10
+        XY = 12, 1.5
+        LABELS = 0, 10, 1, -0.8, .7
+        TICS, 0, 10, 1, -0.5, 4
+        TICS, 0, 10, .5, -0.3
+        TICS, 0, 10, .1, -0.1
+        TEXT = 5, -1.5, c, 1, 10 cm ruler
+
+*--------------  20 CM RULER  ---------------------
+        type =  Plotting 20 cm ruler.
+        LENGTH = 20
+        XY = 1, 4.5
+        LABELS = 0, 20, 1, -0.8, .7
+        TICS, 0, 20, 1, -0.5, 4
+        TICS, 0, 20, .5, -0.3
+        TICS, 0, 20, .1, -0.1
+        TEXT = 10, -1.5, c, 1, 20 cm ruler
+
+*-------------- 6 inch RULER  ---------------------
+        type =  Plotting 6 inch ruler.
+        CF = 2.54 CM PER INCH
+        LENGTH = 6
+        XY = 5, 7
+        LABELS = 0, 6, 1, -0.9, .7
+        TICS, 0, 6, 1, -0.6, 4
+        TICS, 0, 6, .5, -0.4
+        TICS, 0, 6, .25, -0.3
+        TICS, 0, 6, .125, -0.2
+        TICS, 0, 6, .0625, -0.1
+        TEXT = 7.62, -1.5, c, 1, 6 inch ruler (1/16 inch)
+
+*-------------- 8 inch RULER  ---------------------
+        type =  Plotting 8 inch ruler (1/16 inch).
+        CF = 2.54 CM PER INCH
+        LENGTH = 8
+        XY = 1,9.5 
+        LABELS = 0, 8, 1, -0.9, .7
+        TICS, 0, 8, 1, -0.6, 4
+        TICS, 0, 8, .5, -0.4
+        TICS, 0, 8, .25, -0.3
+        TICS, 0, 8, .125, -0.2
+        TICS, 0, 8, .0625, -0.1
+        TEXT = 10.16, -1.5, c, 1, 8 inch ruler (1/16 inch)
+
+*-------------- 8 inch RULER  ---------------------
+        type =  Plotting 8 inch ruler (1/10 inch).
+        CF = 2.54 CM PER INCH
+        LENGTH = 8
+        XY = 1,12 
+        LABELS = 0, 8, 1, -0.9, .7
+        TICS, 0, 8, 1, -0.6, 4
+        TICS, 0, 8, .5, -0.4
+        TICS, 0, 8, .1, -0.2
+        TEXT = 10.16, -1.5, c, 1, 8 inch ruler (1/10 inch)
+

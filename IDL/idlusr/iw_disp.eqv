@@ -1,0 +1,11 @@
+*-------  iw_disp.eqv = Equation file for IW dispersion curve  -------
+*	R. Sterner, 1998 Feb 26
+
+eq: y = iwdisp2(k=x, phv=phv, dep=19.6, bv=bv, cur=cur)
+title: Internal Wave Dispersion Curve
+xrange: 0, 0.5
+n_points: 100
+par: phv 0.90 1.50 1.01
+par: bv  0.03 0.05 0.03979
+par: cur -0.10 0.10 0.0
+par: n   1  10  1  int

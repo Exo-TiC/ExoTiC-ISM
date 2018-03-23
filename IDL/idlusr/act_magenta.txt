@@ -1,0 +1,17 @@
+ Absolute color table: /Users/sternre1/idl/libs/idlusr/act_magenta.txt
+ 
+ step_flag =        0
+ step =       10.0000
+ step_offset =       0.00000
+ rgb = 1
+ barmin =       0.00000
+ barmax =       100.000
+ 
+ Color table: Variable, Hue, Stauration, Value.
+ 
+      Z               H            S            V
+      F               F            F            F
+-------------      -------     --------     --------
+      0.00000      0.00000      0.00000      0.00000
+      50.0000      300.469      1.00000     0.501961
+      100.000      0.00000      0.00000      1.00000
