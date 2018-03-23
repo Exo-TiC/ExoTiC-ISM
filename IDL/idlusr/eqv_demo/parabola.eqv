@@ -1,0 +1,27 @@
+*-----  snapshot.eqv = snapshot of current status  -------
+*	Sterner, Wed Oct 23 20:35:15 2002
+ 
+title: Parabola
+ 
+eq:  y = a*x^2 + b*x + c
+ 
+xrange: -10  10
+yrange: -10  10
+trange: -10  10
+independent: x
+n_points: 100
+ 
+xtype:        0
+ytype:        0
+ptype:        0
+ 
+c_axes:           0
+c_back:    13696994
+c_plot:       55049
+c_over:           0
+c_scat:           0
+ 
+par: a      -10.0000      10.0000     0.365449    12632256
+par: b      -10.0000      10.0000    -0.697675    12632256
+par: c      -10.0000      10.0000     -1.96013    12632256
+par: d      -10.0000      10.0000      5.00000    12632256

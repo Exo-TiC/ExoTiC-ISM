@@ -1,0 +1,76 @@
+*--------  plotseq_3.hlp = plotseq calling parameters.  --------
+*--------  R. Sterner, 23 Sep, 1992
+
+  PLOTSEQ calling parameters.
+
+  plotseq, x, y, [ind]
+
+    INPUT PARAMETERS:
+
+    x = array of x coordinates.  May be 1-d or 2-d.  When x is 1-d all plots
+        share same base x array which may be modified by XSCALE.
+    y = array of y coordinates.  May be 1-d or 2-d.  If 2-d then second
+        index is plot number.
+
+    OUPUT PARAMETERS:
+
+    ind = optional indices of last plotted points. The indices of a subset
+          of points may be returned if used with the ZOOM option.
+
+
+  Keyword parameters will be described in related groups.
+
+  Titles and labels
+  -----------------
+  TITLE = t_txt  Plot title in a string or string array.
+      If t_txt has one element all the plots will have the same title.
+      t_txt may have an element for each plot.
+  XTITLE = x_txt  X axis title.  Same for all plots (not a string array).
+  YTITLE = y_txt  Y axis title.  Same for all plots (not a string array).
+  YTICKNAMES = ytn  String array of custom Y axis tick labels.
+      Must be used with YTICKVALUES keyword or nothing will happen.
+  YTICKVALUES = ytv Numeric array giving Y coordinates of the custom
+      Y axis ticks corresponding to the labels given in YTICKNAMES.
+      The last two keyword parameters may be used to set up non-standard
+      Y axes.  Tick spacing need not be uniform.
+
+  Second Data Set
+  ---------------
+  XOVER = x2  Second data set x coordinates.  1-d or 2-d.
+  YOVER = y2  Second data set y coordinates.  1-d or 2-d.
+      Could use to plot a reference curve, maybe a fitted line.
+
+  Axis Control
+  ------------
+  XRANGE = xrn  A 2 element array giving the X axis range.
+  YRANGE = xrn  A 2 element array giving the Y axis range.
+  XTYPE = typ   Set X axis to linear (0) or log (1).
+  YTYPE = typ   Set Y axis to linear (0) or log (1).
+  XSCALE = xsc  A 3 x N array which may be applied to a given 1-d x array
+      to vary x axis (1) Offset, (2) Scale, (3) number of points plotted.
+      The purpose of XSCALE is to reduce the X array from a N x M 2-d array
+      to N element 1-d array and a 3 X M element scaling array.  Ex:
+      x = findgen(1000) gives 1000 points in x,
+      xscale = off_0  scale_0  n_0
+               off_1  scale_1  n_1
+                    . . .
+               off_m  scale_m  n_m
+      where the plotted x for graph j is: off_j + scale_j*x(0:n_j-1)
+
+  Plot control
+  ------------
+  COLOR = clr  Plot color.
+  SYMSIZE = siz  Plot symbol size (def=1) for main data set.
+
+  Grid
+  ----
+  GH = h   A numeric array giving the Y coordinates of horizontal grid lines.
+  GV = v   A numeric array giving the X coordinates of vertical grid lines.
+      If either GH or GV or both are given the specified lines are
+      available as a grid.  The grid may be turned on or off while running
+      the program.
+  GCOLOR = gc  Grid color.
+  GLINESTYLE = gl  Grid line style (def=solid).
+
+ 
+

@@ -34,6 +34,7 @@ from mpfit import mpfit
 import numpy as np
 from limb_darkening import limb_fit_3D_choose
 
+
 def main():
     """
     This is a translation of the W17_lightcurve_test.pro
@@ -49,8 +50,8 @@ def main():
     HST_period = 0.06691666
 
     # READ in the txt file for the lightcurve data
-    x, y, err, sh = np.loadtxt('W17_white_lightcurve_test_data.txt', skiprows=7, unpack=True)
-    wavelength = np.loadtxt('W17_wavelength_test_data.txt', skiprows=3)
+    x, y, err, sh = np.loadtxt('../data/W17_white_lightcurve_test_data.txt', skiprows=7, unpack=True)
+    wavelength = np.loadtxt('../data/W17_wavelength_test_data.txt', skiprows=3)
 
     # SET-UP the parameters for the subroutine
     # ---------------------
@@ -79,9 +80,9 @@ def main():
         Teff = 6550
         logg = 4.2
 
-    data_params = [rl,epoch,inclin,MsMpR,ecc,omega,Per,FeH,Teff,logg]
+    data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
     grid_selection = 'fit_time'
-    out_folder = '~/Projects/lcextract/test_files/' # Need to redefine this 
+    out_folder = '../outputs/Projects/lcextract/test_files/' # Need to redefine this
     run_name = 'wl_time_wm3d'
     plotting='on'
 
@@ -189,11 +190,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
     """
     print('Welcome to the Wakeford WFC3 analysis pipeline. All data will now be marginalised according to quality and usefulness.')
-    print('If results are not as expected - a new observation stratgy is reccomended, or you can bloody well wait for JWST to make your lives better. PRESS control+C now if this was an unintended action.')
+    print('If results are not as expected - a new observation stratgy is reccomended, or you can bloody well wait for '
+          'JWST to make your lives better. PRESS control+C now if this was an unintended action.')
+
     # SET THE CONSTANTS 
-    #constant = [GAIN,READNOISE,G,JD,DAY_TO_SEC,Rjup,Rsun,MJup,Msun,HST_SECOND,HST_PERIOD]
-    constant = [2.5,20.2,np.float64(6.67259e-11),2400000.5,86400,np.float64(7.15e7),np.float64(6.96e8),np.float64(1.9e27),
-    np.float64(1.99e30),5781.6,0.06691666]
+    #constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]
+    constant = [2.5,20.2, np.float64(6.67259e-11), 2400000.5, 86400, np.float64(7.15e7), np.float64(6.96e8), np.float64(1.9e27),
+    np.float64(1.99e30), 5781.6, 0.06691666]
     JD = np.float64(2400000.5)              
     Gr = np.float64(6.67259e-11)
     HSTper = np.float64(96.36) / (np.float64(24)*np.float64(60))
@@ -232,7 +235,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     xshift3 = 0.0 # X-shift in wavelength^3
     xshift4 = 0.0 # X-shift in wavelength^4
 
-    print('As you have clearly decided to proceed, we will now determine the stellar limb-darkening parameters given the input stellar metallicity and effective temperature which was selected dependent on the stellar log(g).')
+    print('As you have clearly decided to proceed, we will now determine the stellar limb-darkening parameters given the'
+          ' input stellar metallicity and effective temperature which was selected dependent on the stellar log(g).')
 
     #......................................
     #     LIMB DARKENING     ;

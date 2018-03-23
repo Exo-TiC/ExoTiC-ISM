@@ -1,0 +1,72 @@
+*------  plotseq_2.hlp = plotseq menu commands  ------
+*------  R. Sterner, 23 Sep, 1992
+
+  PLOTSEQ is controlled through a screen menu.  Menu items will be
+  described in related groups.
+
+  PLOTSEQ Menu commands
+
+  QUIT --- exit PLOTSEQ program.
+  HELP --- display this help file.
+  Debug Stop --- Stop inside PLOTSEQ for debugging.  .con continues.
+
+  Go --- Display graphs in movie mode, one after the other.
+  Plot Direction --- Toggle between forward and reverse sequencing.
+  Single Step --- Single step through graphs in the current direction.
+  Replot --- replot last graph using any new parameters (such as
+    a new X or Y range, or a new plot symbol.
+    Also very useful for cleaning up the display after multiple overplots.
+  Plot Index --- Jumps to a specified graph number.
+  Wait Time --- Set delay time in seconds between plots in the movie
+    mode (GO option).  Def = 0.
+
+  X Range --- Set plotted data range in X.
+  Y Range --- Set plotted data range in Y.
+    Enter 2 numbers separated by a space or a comma.
+    Both X and Y ranges are also automatically set by ZOOM and UNZOOM.
+ 
+  ZOOM --- Zoom a region of the graph.  Zoom uses an interactive box which
+    is manipulated using the mouse.  Use the mouse to position the lower
+    left corner of the box.  Click the left mouse button to switch to
+    size mode, move the mouse to adjust the box size.  Click the left
+    button again to switch back to move mode.  Finally click the right
+    button to accept the area covered by the box.  For Tektronix terminals
+    the box is replaced by a pair of cross-hair cursors which are used to
+    select two opposite corners of the desired box by clicking the left button.
+  UNZOOM --- reset plot region to cover the entire data set.  For linear axes
+    autoscaling is set.  For log axes the range is set from the data max to
+    a non-zero min (the smaller of 1 or max/1000).  Previous X and Y ranges
+    are not remembered so UNZOOM may not exactly undo the last ZOOM.
+
+  PSYM --- Set the plot symbol for the main data set (secondary data set
+    always uses a solid line).
+    0: solid lines 
+    1: Plus signs (+)         If a positive values is entered unconnected
+    2: Asterisks  (*)         symbols are plotted along the curve.  If a
+    3: Points     (.)         negative value is entered the symbols are
+    4: Diamonds               connected.
+    5: Triangles 
+    6: Squares 
+    7: Crosss     (X)
+    8: User defined symbol.  Set up before calling PLOTSEQ:
+         usersym,xx,yy  where xx,yy is a polygon of about +/- 1 about 0.
+
+  Second data set --- Turn on or off the overplotting of a second data
+    set.  A second set of graphs may be passed to PLOTSEQ through the
+    keywords XOVER=x2, YOVER=y2.  See calling parameters for more details.
+
+  Grid --- Turn a custom grid on or off.  Grid lines are passed to PLOTSEQ
+    through the keywords GH for horizontal lines, and GV for vertical lines.
+    See calling parameters for more details.
+
+  Plot type --- toggle between normal plots or overplots.  In overplot mode,
+    which only applies to Single Step plots, the screen is not erased between
+    plots.  Replot may be used to erase all but the last plot.
+
+  X Axis --- toggle between linear and log X axis.
+  Y Axis --- toggle between linear and log Y axis.
+    When switching to log axes, if the range minimum is 0 it is reset to 1
+    to avoid log of 0 errors.  The axis range minimum may be manually set to
+    any non-zero value before or after switching to a log axis.
+ 
+

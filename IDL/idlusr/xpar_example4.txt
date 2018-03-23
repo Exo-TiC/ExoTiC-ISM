@@ -1,0 +1,62 @@
+;--------------------------------------------------------------------
+;  xpar_example4.txt = Example xpar input text.
+;  R. Sterner, 2006 Dec 07
+;  Text for xpar to parse.
+;  Note: to use parameter p must select Satellite projection.
+;  R. Sterner, 2007 May 23 --- xpar2 checked.
+;--------------------------------------------------------------------
+
+	init: print,"Hello"
+	init: window,/free
+	init: erase,128
+
+	title: Interactive Globe
+
+	win_redirect: 1
+	code_scroll: 
+	code_width: 120
+;	code_width: 70
+;	range_entry: 0
+;	minmaxdef: 0
+
+	code: iglobe,lat,lon,ang,countries=count,$
+	  hor=hor, nocolor=nocol, grid=grid,$
+	  water=cw,land=cl,back=cb,coast=cc,cgrid=cg,$
+	  name=pr, scale=sc, sat_p=[p,0,0]
+
+	par_frame: 0, /row
+	par_frame: 1, /row
+
+	par: lon, -180, 180, 0, col=12574719
+	par: lat, -90, 90, 0, col=12574719
+	par: sc, 0, 4E8, 0, col=12574719
+	par: p, 1.1, 10, 2, col=12574719
+	par: ang, -180, 180, 0, col=12574719
+
+	par: latc, -90, 90, 0, col=16771519, fr=1
+	par: lonc, -180, 180, 0, col=16771519, fr=1
+	par: radc, 0, 90, 10, col=16771519, fr=1
+
+	sliders: 5
+	slider_len: 300
+	y_scroll: 0	; 200 may be a good value.
+
+	flag_frame: 0, row=1
+	flags: count=1, hor=1, nocol=0, grid=1
+
+	color_frame: 0, row=1
+	colors: frame=0, cw=16777138, cl=11720959, cb=16777215
+	colors: frame=0, cc=19456, cg=6579300
+
+	list_frame: 0, /row
+	lists: pr=/Stereographic/Orthographic/LambertConic/LambertAzimuthal/,$
+	  pr=Gnomic/AzimuthalEquidistant/Satellite/Cylindrical/Mercator/, $
+	  pr=Mollweide/Sinusoidal/Aitoff/HammerAitoff/AlbersEqualAreaConic/, $
+	  pr=TransverseMercator/MillerCylindrical/Robinson/, $
+	  pr=LambertConicEllipsoid/GoodesHomolosine
+
+	user: pro=xpar_example_snap, lab=Window snapshot, /info
+	user: pro=list_doy, lab=List day number in year
+
+	exit: wdelete
+	exit: print,"Good-bye"

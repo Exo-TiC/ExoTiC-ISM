@@ -1,0 +1,141 @@
+
+  xautohelp.hlp = Notes on using the xautohelp routine.
+
+  What xautohelp does
+  -------------------
+  The xautohelp routine can be used to display help text any time
+  the mouse is moved over a widget component.  This can give extra
+  info that helps in the operation of the widget, perhaps especially
+  useful for buttons with bit map graphics that may not be immediately
+  obvious in their application.  Single or multiline text may be
+  displayed in either a text widget or label widget (single or
+  multiple label widgets).
+
+  Autohelp text display area placement
+  ------------------------------------
+  Perhaps the nicest looking application is to display the help text in
+  a label widget or widgets running along the bottom of the application.
+  This label area is blank unless the cursor is over a widget component that
+  has autohelp text.  Multiple consecutive label widgets may be used to
+  display multiline help text, lines are left-justified.  A text widget could
+  be used in this position instead of a label widget.  The help text area need
+  not be at the bottom, it can be wherever you wish.  It can also be used for
+  other messages, the current time for example, or something more useful.
+  You will have to be careful that the other messages do not overwrite the
+  autohelp text before desired.  A timer routine can trigger events for a
+  clock update, check that the autotext is displaying a blank or time before
+  overwriting.
+
+  The autotext display area may also be detached from the main widget.
+  This is useful for small widgets where there would not be enough space
+  to display useful text along the bottom.  The detached display area,
+  either a label or text widget, can be positioned just below the main
+  widget using the info returned by widget_info for the main base and the
+  xoffset and yoffset keywords to the display area base widget.
+
+  Using xautohelp in a widget routine
+  -----------------------------------
+  For a complete example that uses xautohelp (but doesn't do anything
+  useful) see the routine xautohelp_example.pro.
+
+  Their are two phases in using xautohelp, INITIALIZATION and TEXT DISPLAY.
+
+  INITIALIZATION --- if a widget such as a button, slider, text entry area,
+  and so on, is to have autohelp text displayed it must have tracking_events
+  enabled.  The xautohelp is given the help text for that widget using the
+  widget ID as an index.  This means it makes sense (but is not required) to
+  save the autohelp text for each widget right after it is defined.  Here
+  is a code fragment showing this:
+	. . .
+        b = widget_button(cc,val='Button 3',/track, uval='C')
+        xautohelp,b,'Click here to QUIT.'
+        b = widget_button(cc,val='Button 4',/track, uval='D')
+        xautohelp,b,'Button # 4'
+        s = widget_slider(top,/track,uval='S')
+        xautohelp,s,'Slider.  Drag to desired value.'
+	. . .
+
+  Note tracking_events are turned on.  Multiline help text is entered as
+  a single text string using delimiters as line separators.  The default
+  delimiter is a slash (/) but any character may be used by specifying it
+  using the DELIMITER=del keyword.  Remember single label widgets cannot
+  display more than a single line and will terminate with an error since
+  they want scalar values.  Multiple label widgets may be set up, just pass
+  their addresses as an array to display multiple help text lines.
+  Widgets to ignore simply do not have tracking events turned on (most labels
+  for example).
+
+  The autohelp text display is either a label or text widget.  Its widget
+  ID must be saved for access inside the event handler routine so it may
+  be passed into xautohelp.  This is done that same way other status info
+  is passed to the event handler.  A common way is to pass this info through
+  the USER_VALUE of the top level base since that is easy to access.  Often
+  a structure with everything needed is used to keep the widget state
+  information, the display area ID or IDs could be just another entry
+  in such a structure.  If multiple labels are used pass their addresses
+  in an array.  The display area may be part of the main widget or
+  a detached window (with some initial position but movable by the
+  user).  If it is detached make sure you set its group_leader to the ID of
+  the main top level base so it will disappear when the main widget goes
+  away.  Here is a code fragment examples for a detached dispay area:
+
+	. . .
+        ;------  Autotext window  -----------
+        loc = widget_info(top,/geom)    ; Get top base size and position.
+        tmp = widget_base(/col, group_leader=top, title=' ', $
+          xoffset=loc.xoffset,yoffset=loc.yoffset+loc.ysize+8)
+        lab = widget_label(tmp, val=spc(100,char='.'))  ; Force size.
+        widget_control,tmp,/real                        ; Activate.
+        widget_control,lab,set_val=' '                  ; Clear text.
+	. . .
+
+  The above detached display is positioned to be just beneath the main
+  widget.  The +8 in the above yoffset value is a fudge value to allow
+  for the size of the window frame around the widget, that's not given
+  by widget_info and may vary on different systems.
+
+  TEXT DISPLAY --- This part is easy, all you really need to worry about is
+  getting the widget ID of the display widget from within the event handler.
+  One simple way is to store it in the user value of the top level base, or
+  more useful, inside a status structure stored there.  Perhaps the first
+  operation of the event handler is to retireve this display area widget ID.
+  Next send the event structure to xautohelp along with the display area
+  widget ID.  On return check if the event structure is still a structure, if
+  not then it has been processed as an autohelp text event so just return.
+  Otherwise drop through to the regular event processing.  A code fragment:
+
+	. . .
+        ;-----  Look for authelp text events  ----
+        widget_control, ev.top, get_uval=lab    ; Get text display area ID.
+        xautohelp, ev, display=lab              ; Send event into xautohelp.
+        if (size(ev))(2) ne 8 then return       ; Check if still a structure.
+	. . .
+
+  An example to display current time in autohelp display area when not used
+  for autohelp text is given here.  After the widget is all set up but before
+  calling xmanager, call for a timer event:
+	widget_control, top, timer=1.           ; Set a timer (for 1 sec).
+
+   The timer event will trigger a timer event which will call the event
+   handler.  In the event handler these events are processed as follows:
+
+        ;-----  Look for timer events  -----------
+        if tag_names(ev,/structure_name) eq 'WIDGET_TIMER' then begin
+          widget_control, lab, get_val=tmp
+          if (tmp eq ' ') or (strmid(tmp,0,3) eq strmid(systime(),0,3)) then $
+            widget_control, lab, set_val=systime()
+          widget_control, ev.top, timer=1.              ; Next timer event.
+          return
+        endif
+
+  This code comes after the xautohelp call.  It looks at the incoming event
+  to see if it is a timer event, if not it is ignored by this part of the
+  code.  If it is then the current text in the display area is grabbed and
+  if it is a single space (first time only) or it looks like a time (first
+  3 letters match the time output) then the current time is displayed there.
+  Then a new timer event is requested to keep the cycle going.  The event
+  handler is then exited since the event has been processed.  This code
+  will then display the current time in the display area if no autohelp text
+  is displayed there.
+
+----------------------------------------------------------------------------

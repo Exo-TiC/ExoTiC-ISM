@@ -1,0 +1,68 @@
+   0   0   0 black
+   0 255   0 green
+   0   0 255 blue
+ 255 255 255 white
+ 255   0   0 red
+   0 255 255 cyan
+ 255   0 255 magenta
+ 255 255   0 yellow
+ 165  92  20 brown
+ 200 131  66 tan
+ 100 231 160 sea green
+  15 147 114 pine green
+ 255 162  73 yellow orange
+ 255 178 200 carnation pink
+ 255 103   0 red orange
+ 150 255   0 yellow green
+   0 226 233 blue green
+ 206   0 150 red violet
+ 150   0 150 violet
+  80   0 160 blue violet
+ 255 124   0 orange
+ 255 170 202 lavender
+  80 229 247 aquamarine
+ 177   0 136 mulberry
+ 131 156 200 blue gray
+ 255 200  95 goldenrod
+ 127  68  50 sepia
+ 215 120   0 burnt orange
+   0 103 229 navy blue
+ 140   0 124 plum
+ 180 180 210 cadet blue
+ 150 120  80 raw umber
+ 195 127  73 raw sienna
+   0 150 112 forest green
+ 150 206 226 sky blue
+ 150  80  85 indian red
+ 255 165 145 melon
+ 232 150 220 thistle
+ 255 195 148 apricot
+ 218  93 237 orchid
+ 200  87  50 bittersweet
+ 232 150 164 salmon
+ 185  53   0 mahogany
+ 163   0  35 brick red
+ 150 150 180 periwinkle
+  91 158 231 cornflower
+ 200 255   0 spring green
+ 255 255 114 lemon yellow
+   0 174 188 turquoise blue
+   0 175 200 green blue
+  80   0 196 violet blue
+   0  82 144 midnight blue
+ 150 167  34 olive green
+ 240 255   0 green yellow
+ 255  95   0 orange red
+ 192   0  87 maroon
+ 191  98  44 burnt sienna
+ 255   0 143 violet red
+ 255 189 150 peach
+ 255 200   0 orange yellow
+ 224 162  54 maize
+ 128 128 128 gray
+   1   1   1 black2
+ 204 191  66 stereo yellow
+  87  87  87 stereo gray
+ 209  71  71 stereo red
+   0 193   0 stereo green
+ 255 170 170 pink

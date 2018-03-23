@@ -1,0 +1,22 @@
+;--------------------------------------------------------------------
+;  xpar_example3.txt = Example xpar input text.
+;  R. Sterner, 2006 Nov 21
+;  Text for xpar to parse.
+;--------------------------------------------------------------------
+
+	init: print,"Hello"
+
+	code_width: 120
+
+	code: print,i
+
+;	par_frame: 0, /row
+
+	par: i, 0, 100, 0, col=13421823
+
+	slider_len: 300
+	y_scroll: 0	; 200 may be a good value.
+
+	user: pro=list_doy, lab=List day number in year
+
+	exit: print,"Good-bye"

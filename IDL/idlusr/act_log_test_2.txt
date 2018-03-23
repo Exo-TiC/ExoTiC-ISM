@@ -1,0 +1,21 @@
+ Absolute color table: act_log_test_2.txt
+ 
+ step_flag =        0
+ step =       5.00000
+ step_offset =       0.00000
+ log = 1
+ rgb = 1
+ barmin =     0.0100000
+ barmax =       1000.00
+ 
+ Color table: Z=Independent Variable, H=Hue, S=Stauration, V=Value.
+ 
+      Z               H            S            V
+      F               F            F            F
+-------------      -------     --------     --------
+    0.0100000      0.00000      0.00000      0.00000
+     0.100000      288.718     0.983193     0.466667
+      1.00000      240.000      1.00000      1.00000
+      10.0000      180.000     0.988235      1.00000
+      100.000      121.404      1.00000     0.670588
+      1000.00      0.00000      0.00000      1.00000

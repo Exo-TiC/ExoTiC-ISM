@@ -1,0 +1,27 @@
+*-----  snapshot.eqv = snapshot of current status  -------
+*	Sterner, Wed Oct 23 20:43:33 2002
+ 
+title: Polar Curve
+ 
+eq:  y = c*cos(a*x) + d*sin(b*x)
+ 
+xrange: 0  0
+yrange: 0  0
+trange: 0  100
+independent: x
+n_points: 1500
+ 
+xtype:        0
+ytype:        0
+ptype:        1
+ 
+c_axes:           0
+c_back:    14221272
+c_plot:      917759
+c_over:           0
+c_scat:           0
+ 
+par: a       0.00000      20.0000      3.00000    12632256
+par: b       0.00000      20.0000      2.10000    12632256
+par: c       0.00000      10.0000      5.00000    12632256
+par: d       0.00000      10.0000      5.00000    12632256
