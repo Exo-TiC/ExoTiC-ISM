@@ -41,104 +41,64 @@ import hstmarg
 def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_selection, out_folder, run_name,
                            plotting):
     """
-    NAME:
-       G141_LIGHTCURVE_CIRCLE
-  
+    Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
+
+    Perform Levenberg-Marquardt least-squares minimization across a grid of stochastic systematic models to produce
+    marginalised transit parameters given a WFC3 G141 lightcurve for a specified wavelength range.
+
     AUTHOR:
-     Hannah R. Wakeford,
-     stellarplanet@gmail.com
+    Hannah R. Wakeford,
+    stellarplanet@gmail.com
 
     CITATIONS:
-     This procedure follows the method outlined in Wakeford, et
-     al. (2016, ApJ, 819, 1), using marginalisation across a stochastic
-     grid of models.
-     The program makes use of the analytic transit model in Mandel &
-     Agol (2002, ApJ Letters, 580, L171-175)
-     and Lavenberg-Markwardt least squares minimisation using the IDL
-     routine MPFIT (Markwardt, 2009, Book:Astronomical Data Analysis
-     Software and Systems XVIII, 411, 251, Astronomical Society of
-     the Pacific Conference Series) 
-     Here a 4-parameter limb darkening law is used as outlined in
-     Claret, 2010 and Sing et al. 2010. 
+    This procedure follows the method outlined in Wakeford, et al. (2016, ApJ, 819, 1), using marginalisation across a
+    stochastic grid of models. The program makes use of the analytic transit model in Mandel & Agol (2002, ApJ Letters,
+    580, L171-175) and Lavenberg-Markwardt least squares minimisation using the IDL routine MPFIT (Markwardt, 2009,
+    Book:Astronomical Data Analysis Software and Systems XVIII, 411, 251, Astronomical Society of the Pacific
+    Conference Series)
+    Here a 4-parameter limb darkening law is used as outlined in Claret, 2010 and Sing et al. 2010.
 
-    PURPOSE:
-     Perform Levenberg-Marquardt least-squares minimization across a
-     grid of stochastic systematic models to produce marginalised
-     transit parameters given a WFC3 G141 lightcurve for a specified
-     wavelength range. 
-     
     MAJOR PROGRAMS INCLUDED IN THIS ROUTINE:
-     KURUCZ LIMB-DARKENING procedure (kurucz_limb_fit_any.pro or limb_fit_3D_choose.pro)
-                           This requires the
-                           G141.WFC3.sensitivity.sav file,
-                           template.sav, kuruczlist.sav, and the
-                           kurucz folder with all models
-     MANDEL & AGOL (2002) transit model (occultnl.pro)
-     GRID OF SYSTEMATIC MODELS for WFC3 to test against the data
-                       (wfc3_systematic_model_grid_selection.pro)
-     IMPACT PARAMETER caluclated if given an eccentricity (tap_transite2.pro)
+    - KURUCZ LIMB-DARKENING procedure (kurucz_limb_fit_any.pro or limb_fit_3D_choose.pro)
+        This requires the G141.WFC3.sensitivity.sav file, template.sav, kuruczlist.sav, and the kurucz folder with all models
+    - MANDEL & AGOL (2002) transit model (occultnl.pro)
+    - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (wfc3_systematic_model_grid_selection.pro)
+    - IMPACT PARAMETER caluclated if given an eccentricity (tap_transite2.pro)
 
-    CALLING SEQUENCE:
-                   G141_lightcurve_circle, x, y, err, sh, data_params, LD3D, wavelength, grid_selection, out_folder, run_name, plotting
-
-    INPUTS:
-     X - array of times
-
-     Y - array of normalised flux values equal to the length of the x array.
-
-     ERR - array of error values corresponding to the flux values in
-           y
-
-     SH - array corresponding to the shift in wavelength position on
-          the detector throughout the visit. (same length as x, y,
-          and err)
-
-
-     DATA_PARAMS - priors for each parameter used in the fit passed in
-                an array in the form
-                data_params = [rl,epoch,inclin,MsMpR,ecc,omega,Per,FeH,Teff,logg]
-
-                rl - transit depth  (Rp/R*)
-                epoch - center of transit time (in MJD)
-                inclin - inclination of the planetary orbit
-                MsMpR - density of the system where MsMpR =
-                        (Ms+Mp)/(R*^3D0) this can also be calculated
-                        from the a/R* following
-                        constant1 = (G*Per*Per/(4*!pi*!pi))^(1D0/3D0) 
-                        MsMpR = (a_Rs/constant1)^3D0
-                ecc - eccentricity of the system
-                omega - omega of the system (degrees)
-                Per - Period of the planet in days
-                FeH - Stellar metallicity index
-                      M_H=[-5.0(14),-4.5(13),-4.0(12),-3.5(11),-3.0(10),
-                       -2.5(9),-2.0(8),-1.5(7),-1.0(5),-0.5(3),-0.3(2),
-                       -0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),
-                       0.5(23),1.0(24)]
-                Teff - Stellar Temperature index
-                    FOR stellar log(g) = 4.0
-                       Teff=[3500(8),3750(19),4000(30),4250(41),4500(52),
-                       4750(63),5000(74),5250(85),5500(96),5750(107),6000(118),
-                       6250(129),6500(139)]
-                    FOR stellar log(g) = 4.5
-                       Teff=[3500(9),3750(20),4000(31),4250(42),4500(53),
-                       4750(64),5000(75),5250(86),5500(97),5750(108),6000(119),
-                       6250(129),6500(139)]
-                    FOR stellar log(g) = 5.0
-                       Teff=[3500(10),3750(21),4000(32),4250(43),4500(54),
-                       4750(65),5000(76),5250(87),5500(98),5750(109),6000(120),
-                       6250(130),6500(140)]
-    
-     WAVELENGTH: array of wavelengths covered to compute y
-
-     GRID_SELECTION: 'fix_time', 'fit_time', 'fit_inclin',
-                                'fit_msmpr', 'fit_ecc'
-
-     OUT_FOLDER: string of folder path to save the data too. 
-                 e.g. '/Volumes/DATA1/user/HST/Planet/sav_file/'
-
-     RUN_NAME - string of the individual run name
-                 e.g. 'whitelight', or 'bin1', or '115-120micron'
-
+    :param x: time array
+    :param y: array of normalised flux values equal to the length of the x array
+    :param err: array of error values corresponding to the flux values in y
+    :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err)
+    :param data_params: priors for each parameter used in the fit passed in an array in the form
+        data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
+        rl: transit depth (Rp/R*)
+        epoch: center of transit time (in MJD)
+        inclin: inclination of the planetary orbit
+        MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
+               constant1 = (G*Per*Per/(4*!pi*!pi))^(1D0/3D0) -> MsMpR = (a_Rs/constant1)^3D0
+        ecc: eccentricity of the system
+        omega: omega of the system (degrees)
+        Per: Period of the planet in days
+        FeH: Stellar metallicity index
+             M_H=[-5.0(14),-4.5(13),-4.0(12),-3.5(11),-3.0(10),-2.5(9),-2.0(8),-1.5(7),-1.0(5),-0.5(3),-0.3(2),
+                  -0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
+        Teff: Stellar Temperature index
+              FOR stellar log(g) = 4.0
+                Teff = [3500(8),3750(19),4000(30),4250(41),4500(52), 4750(63),5000(74),5250(85),5500(96),5750(107),
+                6000(118),6250(129),6500(139)]
+              FOR stellar log(g) = 4.5
+                Teff=[3500(9),3750(20),4000(31),4250(42),4500(53),4750(64),5000(75),5250(86),5500(97),5750(108),
+                6000(119),6250(129),6500(139)]
+              FOR stellar log(g) = 5.0
+                Teff=[3500(10),3750(21),4000(32),4250(43),4500(54),4750(65),5000(76),5250(87),5500(98),5750(109),
+                6000(120),6250(130),6500(140)]
+    :param LD3D:
+    :param wavelength: array of wavelengths covered to compute y
+    :param grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
+    :param out_folder: string of folder path to save the data to, e.g. '/Volumes/DATA1/user/HST/Planet/sav_file/'
+    :param run_name: string of the individual run name, e.g. 'whitelight', or 'bin1', or '115-120micron'
+    :param plotting:
+    :return:
     """
 
     print(
