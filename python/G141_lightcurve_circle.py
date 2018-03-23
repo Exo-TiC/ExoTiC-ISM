@@ -30,63 +30,12 @@ fitting the models.  Again, the two are not exactly consistent but in this case 
 
 Inital translation of Python to IDL was done by Matthew Hill mhill92@gmail.
 """
+
 from mpfit import mpfit
 import numpy as np
 from limb_darkening import limb_fit_3D_choose
+import hstmarg
 
-
-def main():
-    """
-    This is a translation of the W17_lightcurve_test.pro
-    """
-    # SET THE CONSTANTS 
-    dtosec = 86400
-    big_G = np.float64(6.67259e-11)
-    Rjup = np.float64(7.15e7)
-    Rsun = np.float64(6.96e8)
-    Mjup = np.float64(1.9e27)
-    Msun = np.float64(1.99e30)
-    HST_second = 5781.6
-    HST_period = 0.06691666
-
-    # READ in the txt file for the lightcurve data
-    x, y, err, sh = np.loadtxt('../data/W17_white_lightcurve_test_data.txt', skiprows=7, unpack=True)
-    wavelength = np.loadtxt('../data/W17_wavelength_test_data.txt', skiprows=3)
-
-    # SET-UP the parameters for the subroutine
-    # ---------------------
-    # ;PLANET PARAMETERS
-    rl = np.float64(0.12169232) # Rp/R* estimate
-    epoch = np.float64(57957.970153390) # in MJD 
-    inclin = np.float64(87.34635) #this is converted into radians in the subroutine
-    ecc = 0.0 # set to zero and not used when circular
-    omega = 0.0 # set to zero and not used when circular
-    Per = np.float64(3.73548535) # in days, converted to seconds in subroutine
-
-    persec = Per * dtosec
-    aor = np.float64(7.0780354) # a/r* converted to system density for the subroutine
-    constant1 = (big_G*persec*persec/np.float32(4*3.1415927*3.1415927))**(1/3.)
-    MsMpR = (aor/(constant1))**3
-
-    LD3D = 'yes'
-    if LD3D == 'yes':
-        # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon. 
-        FeH = 2 #Fe/H = -0.25
-        Teff = 139 # logg = 4.2, Teff = 6550 K - logg is incorporated into the temperature selection for now.
-        logg = 4.2
-
-    elif LD3D == 'no':
-        FeH = -0.25
-        Teff = 6550
-        logg = 4.2
-
-    data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
-    grid_selection = 'fit_time'
-    out_folder = '../outputs/Projects/lcextract/test_files/' # Need to redefine this
-    run_name = 'wl_time_wm3d'
-    plotting='on'
-
-    G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_selection, out_folder, run_name, plotting)
 
 def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_selection, out_folder, run_name, plotting):
     """ ;+
@@ -225,15 +174,15 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     img_date = x
 
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATICS & LD
-    m = 0.0      # Linear Slope
-    HSTP1 = 0.0   # Correct HST orbital phase
-    HSTP2 = 0.0   # Correct HST orbital phase^2
-    HSTP3 = 0.0   # Correct HST orbital phase^3
-    HSTP4 = 0.0   # Correct HST orbital phase^4
-    xshift1 = 0.0 # X-shift in wavelength
-    xshift2 = 0.0 # X-shift in wavelength^2
-    xshift3 = 0.0 # X-shift in wavelength^3
-    xshift4 = 0.0 # X-shift in wavelength^4
+    m = 0.0         # Linear Slope
+    HSTP1 = 0.0     # Correct HST orbital phase
+    HSTP2 = 0.0     # Correct HST orbital phase^2
+    HSTP3 = 0.0     # Correct HST orbital phase^3
+    HSTP4 = 0.0     # Correct HST orbital phase^4
+    xshift1 = 0.0   # X-shift in wavelength
+    xshift2 = 0.0   # X-shift in wavelength^2
+    xshift3 = 0.0   # X-shift in wavelength^3
+    xshift4 = 0.0   # X-shift in wavelength^4
 
     print('As you have clearly decided to proceed, we will now determine the stellar limb-darkening parameters given the'
           ' input stellar metallicity and effective temperature which was selected dependent on the stellar log(g).')
@@ -268,10 +217,10 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     print('Thank you for your patience. Next up is the lightcurve fitting with MPFIT using L-M minimization.')
     #....................................
     #PLACE ALL THE PRIORS IN AN ARRAY
-    p0 = [rl,flux0,epoch,inclin,MsMpR,ecc,omega,Per,T0,c1,c2,c3,c4,m,HSTP1,HSTP2,HSTP3,HSTP4,xshift1,xshift2,xshift3,xshift4]
+    p0 = [rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4]
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE ;
-    grid = wfc3_systematic_model_grid_selection(grid_selection)
+    grid = hstmarg.wfc3_systematic_model_grid_selection(grid_selection)
     nsys, nparams = grid.shape
 
     #  SET UP THE ARRAYS  ;
@@ -358,7 +307,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
             parinfo.append(info)
     
         fa = {'x':x, 'y':y, 'err':err, 'sh':sh}
-        mpfit_result = mpfit(transit_circle, functkw=fa, parinfo=parinfo)
+        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
         nfree = sum([not p['fixed'] for p in parinfo])
 
         # The python mpfit does not populate the covariance matrix correctly so mpfit_result.perror is not correct
@@ -432,7 +381,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters
-        phase = (x - epoch)/ (Per / 86400) 
+        phase = (x - epoch) / (Per / 86400)
         phase2 = np.floor(phase)
         phase = phase - phase2
         a = np.where(phase > 0.5)[0]
@@ -450,7 +399,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
         b0 = (Gr * Per * Per / (4 * np.pi * np.pi))**(1/3.) * (MsMpR**(1/3.)) * np.sqrt((np.sin(phase*2*np.pi))**2 + (np.cos(inclin)*np.cos(phase*2*np.pi))**2)
-        mulimb01, mulimbf1 = occultnl(rl, c1, c2,c3, c4, b0)
+        mulimb01, mulimbf1 = hstmarg.occultnl(rl, c1, c2,c3, c4, b0)
         b01 = np.copy(b0)
         systematic_model = (phase*m + 1.0) * (HSTphase*hst1 + HSTphase**2. * hst2 + HSTphase**3.*hst3 + HSTphase**4.*hst4 + 1.0) * (sh*sh1 + sh**2.*sh2 + sh**3.*sh3 + sh**4.*sh4 + 1.0)
 
@@ -512,11 +461,11 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         #     oploterror, phase, corrected_data, err, psym=4, color=321321
         #     oplot, phase, systematic_model, color=5005005, psym=2
 
-#########################################################################################################################
-#########################################################################################################################
-#        NOT SURE OF THE VALIDITY OF THE CODE AFTER THIS POINT.  IT'S JUST A QUICK TRANSLATION OF IDL. NOT TESTED.      #
-#########################################################################################################################
-#########################################################################################################################
+    #########################################################################################################################
+    #########################################################################################################################
+    #        NOT SURE OF THE VALIDITY OF THE CODE AFTER THIS POINT.  IT'S JUST A QUICK TRANSLATION OF IDL. NOT TESTED.      #
+    #########################################################################################################################
+    #########################################################################################################################
 
     #..........................................
     #..........................................
@@ -567,7 +516,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
             parinfo.append(info)
     
         fa = {'x':x, 'y':y, 'err':err, 'sh':sh}
-        mpfit_result = mpfit(transit_circle, functkw=fa, parinfo=parinfo)
+        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
         nfree = sum([not p['fixed'] for p in parinfo])
         # The python mpfit does not populate the covariance matrix correctly so m.perror is not correct
         pcerror = mpfit_result.perror # this is how it should be done if it was right
@@ -585,8 +534,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         Npoint = len(x)
         sigma_points = np.median(err)
 
-        evidence_BIC = -Npoint*np.log(sigma_points) -0.5*Npoint*np.log(2*np.pi) -0.5*BIC
-        evidence_AIC = -Npoint*np.log(sigma_points) -0.5*Npoint*np.log(2*np.pi) -0.5*AIC
+        evidence_BIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2*np.pi) - 0.5 * BIC
+        evidence_AIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2*np.pi) - 0.5 * AIC
 
         # Redefine all of the parameters given the MPFIT output
 
@@ -661,7 +610,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
         b0 = (Gr * Per * Per / (4 * np.pi * np.pi))**(1/3.) * (MsMpR**(1/3.)) * np.sqrt((np.sin(phase*2*np.pi))**2 + (np.cos(inclin)*np.cos(phase*2*np.pi))**2)
-        mulimb01, mulimbf1 = occultnl(rl, c1, c2,c3, c4, b0)
+        mulimb01, mulimbf1 = hstmarg.occultnl(rl, c1, c2, c3, c4, b0)
         b01 = np.copy(b0)
 
         #...........................................
@@ -669,7 +618,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         #Calculate the impact parameter based on the eccentricity function
         x2 = np.arange(4000)*0.0001-0.2
         b0 = (Gr * Per * Per / (4 * np.pi * np.pi))**(1/3.) * (MsMpR**(1/3.)) * np.sqrt((np.sin(x2*2*np.pi))**2 + (np.cos(inclin)*np.cos(x2*2*np.pi))**2)
-        mulimb02, mulimbf2 = occultnl(rl, c1, c2,c3, c4, b0)
+        mulimb02, mulimbf2 = hstmarg.occultnl(rl, c1, c2,c3, c4, b0)
 
         systematic_model = (phase*m + 1.0) * (HSTphase*hst1 + HSTphase**2. * hst2 + HSTphase**3.*hst3 + HSTphase**4.*hst4 + 1.0) * (sh*sh1 + sh**2.*sh2 + sh**3.*sh3 + sh**4.*sh4 + 1.0)
 
@@ -815,7 +764,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     # hline, 0.0+(rl_sdnr(best_sys)*2.57), linestyle=1, color=cgcolor('red')
     # !p.multi=[0,1,1]   
 
-    # print, MEDIAN(count_flux_err(best_sys,*)*1d6)
+    # print(MEDIAN(count_flux_err(best_sys,*)*1d6))
     # ;ENDIF
 
     # Center of transit time
@@ -825,7 +774,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     mean_epoch = np.sum(w_q*epoch_array)
     bestfit_theta_epoch = epoch_array
     variance_theta_epochq = epoch_err_array
-    variance_theta_epoch = np.sqrt(np.sum(w_q * ((bestfit_theta_epoch - mean_epoch)**2 + (variance_theta_epochq)**2)))
+    variance_theta_epoch = np.sqrt(np.sum(w_q * ((bestfit_theta_epoch - mean_epoch)**2 + variance_theta_epochq**2)))
     print('Epoch = {} +/- {}'.format(mean_epoch, variance_theta_epoch))
 
     marg_epoch = mean_epoch
@@ -853,7 +802,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     bestfit_theta_incd = inclin_arrayd
     variance_theta_incdq = inclin_err_arrayd
     variance_theta_incd = np.sum(w_q * ((bestfit_theta_incd - mean_incd)**2 + variance_theta_incdq))
-    print,'inc (deg) = {} +/- {}'.format(mean_incd, variance_theta_incd)
+    print('inc (deg) = {} +/- {}'.format(mean_incd, variance_theta_incd))
 
     marg_inclin_deg = mean_incd
     marg_inclin_deg_err = variance_theta_incd
@@ -869,7 +818,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     variance_theta_msmpr = np.sum(w_q * ((bestfit_theta_msmpr - mean_msmpr)**2.0 + variance_theta_msmprq))
     print('MsMpR = {} +/- {}'.format(mean_msmpr, variance_theta_msmpr))
     mean_aor = constant1*((mean_msmpr)**0.333)
-    variance_theta_aor = constant1*((variance_theta_msmpr)**0.3333)/mean_aor
+    variance_theta_aor = constant1*(variance_theta_msmpr**0.3333)/mean_aor
     print('a/R* = {} +/- {}'.format(mean_aor, variance_theta_aor))
 
     marg_msmpr = mean_msmpr
@@ -883,531 +832,55 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     # SAVE, filename=out_folder+'analysis_circle_G141_marginalised_'+run_name+'.sav', w_q, best_sys, marg_rl, marg_rl_err, marg_epoch, marg_epoch_err, marg_inclin_rad, marg_inclin_rad_err, marg_inclin_deg, marg_inclin_deg_err, marg_msmpr, marg_msmpr_err, marg_aors, marg_aors_err, rl_sdnr, pos 
 
 
-def residuals():
-    model = transit_circle(p, x, sh)
-    print('Rp/R* = {}'.format(p[0]))
-    resids = (y - model) / p[1]
-
-    print('Scatter = {}'.format(np.std(resids)))
-    print('-----------------------------------')
-    print(' ')
-
-    return [0, (y-model)/err]
-
-
-def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
-    constant = [2.5, 20.2, 6.67259e-11, 2400000.5, 86400, 7.15e7, 6.96e8, 1.9e27, 1.99e30, 5781.6, 0.06691666]
-    JD = 2400000.5
-    Gr = 6.67259e-11
-    HSTper = 96.36 / (24 * 60)
-
-    rl = p[0]
-    epoch = p[2]
-    inclin = p[3]
-    ecc = p[5]
-    omega = p[6]
-    Per = p[7]   
-    T0 = p[8]
-    c1 = p[9]
-    c2 = p[10]
-    c3 = p[11]
-    c4 = p[12]
-    pi = np.float32(np.pi)
-
-    MsMpR = p[4]
-
-    constant1 = (constant[2]*Per*Per/(4*pi*pi))**(1/3.)
-    aval = constant1 * MsMpR**(1/3.)
-
-    print(epoch)
-    phase = (x - epoch) / (Per / 86400) # convert to days
-    phase2 = np.floor(phase)
-    phase = phase - phase2
-    a = np.where(phase > 0.5)[0]
-    if a.size > 0:
-        phase[a] = phase[a] - 1.0
-
-    print('phase[0] = {}'.format(phase[0]))
-    HSTphase = (x - T0) / HSTper # convert to days
-    phase2 = np.floor(HSTphase)
-    HSTphase = HSTphase - phase2
-    k = np.where(HSTphase > 0.5)[0]
-    if k.size > 0:
-        HSTphase[k] = HSTphase[k] - 1.0
-
-    b0 = (Gr * Per * Per / (4 * pi * pi))**(1/3.) * (MsMpR**(1/3.)) * np.sqrt((np.sin(phase*2*pi))**2 + (np.cos(inclin)*np.cos(phase*2*pi))**2)
-    print(b0)
-    mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
-    systematic_model = (p[13] * phase + 1.0) * (p[14] * HSTphase + p[15] * HSTphase**2 + p[16] * HSTphase**3 + p[17] * HSTphase**4 + 1.0) * (p[18] * sh + p[19] * sh**2 + p[20] * sh**3 + p[21] * sh**4 + 1.0)
-
-    # model fit to data = transit model * baseline flux * systematic model
-    model = mulimb0 * p[1] * systematic_model
-    # this would be the break point to get the model values
-    # return model
-    print('Rp/R* = {}'.format(p[0]))
-    resids = (y - model) / p[1]
-
-    print('Scatter = {}'.format(np.std(resids)))
-    print('-----------------------------------')
-    print(' ')
-
-    return [0, (y-model)/err]
-
-def occultnl(rl, c1, c2, c3, c4, b0):
-    mulimb0 = occultuniform(b0, rl)
-    bt0 = b0
-    fac = np.max(abs(mulimb0 - 1))
-    if (fac == 0):
-        fac = 1e-6  # DKS edit
-
-    omega = 4 * ((1 - c1 - c2 - c3 - c4) / 4 + c1 / 5 + c2 / 6 + c3 / 7 + c4 / 8)
-    nb = len(b0)
-    indx = np.where(mulimb0 != 1.0)[0]
-    if len(indx) == 0:
-        indx = -1 
-    mulimb = mulimb0[indx]
-    mulimbf = np.zeros((5, nb))
-    mulimbf[0, :] = mulimbf[0, :] + 1.
-    mulimbf[1, :] = mulimbf[1, :] + 0.8
-    mulimbf[2, :] = mulimbf[2, :] + 2 / 3
-    mulimbf[3, :] = mulimbf[3, :] + 4 / 7
-    mulimbf[4, :] = mulimbf[4, :] + 0.5
-    nr = np.int64(2)
-    dmumax=1.0
-
-    while ((dmumax > fac * 1.e-3) and (nr <= 131072)):
-        print(nr)
-        mulimbp = mulimb
-        nr = nr * 2
-        dt = 0.5 * np.pi / nr
-        t = dt * np.arange(nr + 1)
-        th = t + 0.5 * dt
-        r = np.sin(t)
-        sig = np.sqrt(np.cos(th[nr-1]))
-        mulimbhalf =sig**3 * mulimb0[indx] / (1 - r[nr-1])
-        mulimb1 = sig**4 * mulimb0[indx] / (1 - r[nr-1])
-        mulimb3half =sig**5 * mulimb0[indx] / (1 - r[nr-1])
-        mulimb2 = sig**6 * mulimb0[indx] / (1 - r[nr-1])
-        for i in range(1, nr):
-            mu = occultuniform(b0[indx] / r[i], rl / r[i])
-            sig1 = np.sqrt(np.cos(th[i-1]))
-            sig2 = np.sqrt(np.cos(th[i]))
-            mulimbhalf = mulimbhalf + r[i]**2 * mu * (sig1**3 / (r[i] - r[i-1]) - sig2**3 / (r[i+1] - r[i]))
-            mulimb1 = mulimb1 + r[i]**2 * mu * (sig1**4 / (r[i] - r[i-1]) - sig2**4 / (r[i+1]-r[i]))
-            mulimb3half = mulimb3half + r[i]**2 * mu * (sig1**5 / (r[i] - r[i-1]) - sig2**5 / (r[i+1]-r[i]))
-            mulimb2 = mulimb2 + r[i]**2 * mu * (sig1**6 / (r[i] - r[i-1]) - sig2**6 / (r[i+1] - r[i]))
-
-        mulimb = ((1 - c1 - c2 - c3 - c4) * mulimb0[indx] + c1 * mulimbhalf * dt + c2 * mulimb1 * dt + c3 * mulimb3half * dt + c4 * mulimb2 * dt) / omega
-        ix1 = np.where(mulimb+mulimbp != 0.)[0]
-        if len(ix1) == 0:
-            ix1 = -1 
-
-        print(ix1)
-        # python cannot index on single values so you need to use atlest_1d for the below to work when mulimb is a single value
-        dmumax = np.max(abs(np.atleast_1d(mulimb)[ix1] - np.atleast_1d(mulimbp)[ix1]) / (np.atleast_1d(mulimb)[ix1] + np.atleast_1d(mulimbp)[ix1]))
-
-    mulimbf[0, indx] = np.atleast_1d(mulimb0)[indx]
-    mulimbf[1, indx] = mulimbhalf * dt
-    mulimbf[2, indx] = mulimb1 * dt
-    mulimbf[3, indx] = mulimb3half * dt
-    mulimbf[4, indx] = mulimb2 * dt
-    np.atleast_1d(mulimb0)[indx] = mulimb
-    b0 = bt0
-    return mulimb0, mulimbf
-
-def occultuniform(b0, w):
-    """
-    This routine computes the lightcurve for occultation
-    of a uniform source without microlensing  (Mandel & Agol 2002).
-    
-    Parameters
-    ----------
-    b0: np.array
-        impact parameter in units of rs
-    w: np.array
-        occulting star size in units of rs
-    
-    Returns
-    -------
-    muo1: float
-        fraction of flux at each b0 for a uniform source
-    """
-    if (abs(w-0.5) < 1.0e-3):
-        w=0.5
-
-    nb = len(np.atleast_1d(b0))
-    muo1 = np.zeros(nb)
-
-    for i in range(nb):
-        #substitute z=b0(i) to shorten expressions
-        z = np.atleast_1d(b0)[i]
-        if (z >= 1 + w):
-            muo1[i] = 1.0
-            continue
-
-        if (w >= 1 and z <= w - 1):
-            muo1[i] = 0.0
-            continue
-
-        if (z >= abs(1 - w) and z <= 1 + w):
-            kap1=np.arccos(np.min(np.append((1 - w**2 + z**2) / 2 / z, 1.)))
-            kap0=np.arccos(np.min(np.append((w**2 + z**2 - 1) / 2 / w / z, 1.)))
-            lambdae = w**2 * kap0 + kap1
-            lambdae = (lambdae - 0.5 * np.sqrt(np.max(np.append(4. * z**2 - (1 + z**2 - w**2)**2, 0.)))) / np.pi
-            muo1[i] = 1 - lambdae
-
-        if (z <= 1 - w):
-            muo1[i] = 1 - w**2
-            continue
-
-    return muo1
-
-def wfc3_systematic_model_grid_selection(selection):
-    """
-    Model grid up to the 4th order for HST & delta_lambda, with linear T
-
-    Parameters
-    ----------
-    selection: str 
-        which model grid to use must be `'fix_time'`, `'fit_time'` , `'fit_inclin'`, 
-        `'fit_msmpr'`, or `'fit_ecc'`
-
-    Return
-    ------
-    wfc3_grid: np.array
-        grid containing which systematics to model
-
-    """
-
-    # fix time
-    if (selection == 'fix_time'):
-        grid_WFC3_fix_time = np.array([[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1],
-                                       [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]])
-        wfc3_grid = grid_WFC3_fix_time
-
-    # fit for time
-    if (selection == 'fit_time'):
-        grid_WFC3_fit_time = np.array([[0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,0], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0],
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,0], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1], 
-                                       [0,0,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]])
-
-        wfc3_grid = grid_WFC3_fit_time
-
-    # fit for inclination
-    if (selection == 'fit_inclin'):
-        grid_WFC3_fit_inclin = np.array([[0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,0], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0],
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,0], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1], 
-                                         [0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]])
-
-        wfc3_grid = grid_WFC3_fit_inclin
-
-    # fit for MsMpR
-    if (selection == 'fit_msmpr'):
-        grid_WFC3_fit_msmpr = np.array([[0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,0], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0],
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,0], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1], 
-                                        [0,0,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]])
-
-        wfc3_grid = grid_WFC3_fit_msmpr
-
-    if (selection == 'fit_all'):
-        grid_WFC3_fit_all = np.array([[0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,0], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0],
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,0], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1], 
-                                      [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]])
-        wfc3_grid = grid_WFC3_fit_all
-
-    # fit for eccentricity
-    if (selection == 'fit_ecc'):
-        grid_WFC3_fit_ecc = np.array([[0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0],
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,1,1,1,0,0,0,0], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,1,1,0,0,0,0], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,1,0,0,0,0], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,1,1,1,1,0,0,0,0],
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,1,1,1,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,1,1,1,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,1,1,1,0,0,0,0], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,1,1,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,1,1,0,0,0,0], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,1,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,1,0,0,0,0], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,1,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,1,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,1,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1], 
-                                      [0,0,1,1,1,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]])
-
-        wfc3_grid = grid_WFC3_fit_ecc
-
-    return wfc3_grid
-
-
 if __name__ == '__main__':
-    main()
+    """
+    This is a translation of the W17_lightcurve_test.pro
+    """
+    # SET THE CONSTANTS
+    dtosec = 86400
+    big_G = np.float64(6.67259e-11)
+    Rjup = np.float64(7.15e7)
+    Rsun = np.float64(6.96e8)
+    Mjup = np.float64(1.9e27)
+    Msun = np.float64(1.99e30)
+    HST_second = 5781.6
+    HST_period = 0.06691666
+
+    # READ in the txt file for the lightcurve data
+    x, y, err, sh = np.loadtxt('../data/W17_white_lightcurve_test_data.txt', skiprows=7, unpack=True)
+    wavelength = np.loadtxt('../data/W17_wavelength_test_data.txt', skiprows=3)
+
+    # SET-UP the parameters for the subroutine
+    # ---------------------
+    # ;PLANET PARAMETERS
+    rl = np.float64(0.12169232) # Rp/R* estimate
+    epoch = np.float64(57957.970153390) # in MJD
+    inclin = np.float64(87.34635) #this is converted into radians in the subroutine
+    ecc = 0.0 # set to zero and not used when circular
+    omega = 0.0 # set to zero and not used when circular
+    Per = np.float64(3.73548535) # in days, converted to seconds in subroutine
+
+    persec = Per * dtosec
+    aor = np.float64(7.0780354) # a/r* converted to system density for the subroutine
+    constant1 = (big_G*persec*persec/np.float32(4*3.1415927*3.1415927))**(1/3.)
+    MsMpR = (aor/(constant1))**3
+
+    LD3D = 'yes'
+    if LD3D == 'yes':
+        # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon.
+        FeH = 2 #Fe/H = -0.25
+        Teff = 139 # logg = 4.2, Teff = 6550 K - logg is incorporated into the temperature selection for now.
+        logg = 4.2
+
+    elif LD3D == 'no':
+        FeH = -0.25
+        Teff = 6550
+        logg = 4.2
+
+    data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
+    grid_selection = 'fit_time'
+    out_folder = '../outputs/Projects/lcextract/test_files/' # Need to redefine this
+    run_name = 'wl_time_wm3d'
+    plotting='on'
+
+    G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_selection, out_folder, run_name, plotting)
