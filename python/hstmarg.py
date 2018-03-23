@@ -38,7 +38,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     aval = constant1 * MsMpR**(1/3.)
 
     print(epoch)
-    phase = (x - epoch) / (Per / 86400) # convert to days
+    phase = (x - epoch) / (Per / 86400)   # convert to days
     phase2 = np.floor(phase)
     phase = phase - phase2
     a = np.where(phase > 0.5)[0]
@@ -46,7 +46,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
         phase[a] = phase[a] - 1.0
 
     print('phase[0] = {}'.format(phase[0]))
-    HSTphase = (x - T0) / HSTper # convert to days
+    HSTphase = (x - T0) / HSTper   # convert to days
     phase2 = np.floor(HSTphase)
     HSTphase = HSTphase - phase2
     k = np.where(HSTphase > 0.5)[0]
@@ -132,6 +132,7 @@ def occultnl(rl, c1, c2, c3, c4, b0):
     mulimbf[4, indx] = mulimb2 * dt
     np.atleast_1d(mulimb0)[indx] = mulimb
     b0 = bt0
+
     return mulimb0, mulimbf
 
 
@@ -185,23 +186,14 @@ def occultuniform(b0, w):
 
 def wfc3_systematic_model_grid_selection(selection):
     """
-    Model grid up to the 4th order for HST & delta_lambda, with linear T
+    Model grid up to the 4th order for HST & delta_lambda, with linear T.
 
-    Parameters
-    ----------
-    selection: str
-        which model grid to use must be `'fix_time'`, `'fit_time'` , `'fit_inclin'`,
-        `'fit_msmpr'`, or `'fit_ecc'`
-
-    Return
-    ------
-    wfc3_grid: np.array
-        grid containing which systematics to model
-
+    :param selection: string; which model grid to use, must be 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
+    :return: wfc3_grid: array; grid containing which systematics to model
     """
 
-    # fix time
-    if (selection == 'fix_time'):
+    # Fix time
+    if selection == 'fix_time':
         grid_WFC3_fix_time = np.array([[0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                        [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1],
                                        [0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
@@ -254,8 +246,8 @@ def wfc3_systematic_model_grid_selection(selection):
                                        [0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]])
         wfc3_grid = grid_WFC3_fix_time
 
-    # fit for time
-    if (selection == 'fit_time'):
+    # Fit for time
+    if selection == 'fit_time':
         grid_WFC3_fit_time = np.array([[0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                        [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1],
                                        [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
@@ -309,8 +301,8 @@ def wfc3_systematic_model_grid_selection(selection):
 
         wfc3_grid = grid_WFC3_fit_time
 
-    # fit for inclination
-    if (selection == 'fit_inclin'):
+    # Fit for inclination
+    if selection == 'fit_inclin':
         grid_WFC3_fit_inclin = np.array([[0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                          [0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1],
                                          [0,0,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
@@ -364,8 +356,8 @@ def wfc3_systematic_model_grid_selection(selection):
 
         wfc3_grid = grid_WFC3_fit_inclin
 
-    # fit for MsMpR
-    if (selection == 'fit_msmpr'):
+    # Fit for MsMpR
+    if selection == 'fit_msmpr':
         grid_WFC3_fit_msmpr = np.array([[0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                         [0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1],
                                         [0,0,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
@@ -419,7 +411,7 @@ def wfc3_systematic_model_grid_selection(selection):
 
         wfc3_grid = grid_WFC3_fit_msmpr
 
-    if (selection == 'fit_all'):
+    if selection == 'fit_all':
         grid_WFC3_fit_all = np.array([[0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                       [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1],
                                       [0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],
@@ -472,8 +464,8 @@ def wfc3_systematic_model_grid_selection(selection):
                                       [0,0,0,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0]])
         wfc3_grid = grid_WFC3_fit_all
 
-    # fit for eccentricity
-    if (selection == 'fit_ecc'):
+    # Fit for eccentricity
+    if selection == 'fit_ecc':
         grid_WFC3_fit_ecc = np.array([[0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
                                       [0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1],
                                       [0,0,1,1,1,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0,1,1],

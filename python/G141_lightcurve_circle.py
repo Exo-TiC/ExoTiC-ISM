@@ -29,6 +29,7 @@ limb_darkening.py contains a python translation of the 3D limb darkening code in
 fitting the models.  Again, the two are not exactly consistent but in this case the difference is small (good to about 3 decimals).
 
 Inital translation of Python to IDL was done by Matthew Hill mhill92@gmail.
+Continued refinement by Iva Laginja (laginja.iva@gmail.com).
 """
 
 from mpfit import mpfit
@@ -138,6 +139,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
                  e.g. 'whitelight', or 'bin1', or '115-120micron'
 
     """
+
     print('Welcome to the Wakeford WFC3 analysis pipeline. All data will now be marginalised according to quality and usefulness.')
     print('If results are not as expected - a new observation stratgy is reccomended, or you can bloody well wait for '
           'JWST to make your lives better. PRESS control+C now if this was an unintended action.')
@@ -472,7 +474,10 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     # SECOND RUN THROUGH with MPFIT
     #..........................................
     print('..........................................')
-    print('As we seem to have found how shit each of the systematic models are at fitting the data compared to a Mandel&Agol transit model we can now use the scatter on their residuals to inflate the uncertainties for the data. We will then go ahead and refit for each systematic model if that is okay with you. If not control+c is still a valid option.')
+    print('As we seem to have found how shit each of the systematic models are at fitting the data compared to a'
+          'Mandel&Agol transit model we can now use the scatter on their residuals to inflate the uncertainties for the'
+          'data. We will then go ahead and refit for each systematic model if that is okay with you. If not, Control+c'
+          'is still a valid option.')
     for s in range(0, nsys):
         print('................................')
         print(' SYSTEMATIC MODEL {}'.format(s))
@@ -486,7 +491,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         T0 = p0[8]
         epoch = p0[2]
         Per = p0[7]
-
 
         HSTphase = np.zeros(nexposure)
         HSTphase = (x - T0) / constant[10]                       
@@ -506,7 +510,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         if (a[0] != -1):
             phase[a] = phase[a] - 1.0
 
-        #      MPFIT - ONE       
+        # MPFIT - ONE
         parinfo = []
         print(p0.shape[0])
         for i, value in enumerate(p0):
