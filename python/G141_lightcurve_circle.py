@@ -254,8 +254,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # Change these to your specific
         # dirsen  = raw_input("Directory for limb darkening sensitivity files: ")
         # direc = raw_input("Directory for limb darkening stellar models files: ")
-        dirsen='/Users/mhill/Projects/lcextract/Limb_darkening/'
-        direc='/Users/mhill/Projects/lcextract/Limb_darkening/3DGrid/'
+        dirsen='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/'
+        direc='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/3DGrid/'
         grating = 'G141'
         wsdata = wavelength
         widek = np.arange(len(wavelength))
