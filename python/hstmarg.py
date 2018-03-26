@@ -97,7 +97,7 @@ def occultnl(rl, c1, c2, c3, c4, b0):
     nr = np.int64(2)
     dmumax = 1.0
 
-    while ((dmumax > fac * 1.e-3) and (nr <= 131072)):
+    while (dmumax > fac * 1.e-3) and (nr <= 131072):
         print(nr)
         mulimbp = mulimb
         nr = nr * 2
@@ -143,21 +143,13 @@ def occultnl(rl, c1, c2, c3, c4, b0):
 
 def occultuniform(b0, w):
     """
-    This routine computes the lightcurve for occultation
-    of a uniform source without microlensing  (Mandel & Agol 2002).
+    Compute the lightcurve for occultation of a uniform source without microlensing  (Mandel & Agol 2002).
 
-    Parameters
-    ----------
-    b0: np.array
-        impact parameter in units of rs
-    w: np.array
-        occulting star size in units of rs
-
-    Returns
-    -------
-    muo1: float
-        fraction of flux at each b0 for a uniform source
+    :param b0: array; impact parameter in units of rs
+    :param w: array; occulting star size in units of rs
+    :return: muo1: float; fraction of flux at each b0 for a uniform source
     """
+
     if (abs(w - 0.5) < 1.0e-3):
         w = 0.5
 
@@ -167,22 +159,22 @@ def occultuniform(b0, w):
     for i in range(nb):
         # substitute z=b0(i) to shorten expressions
         z = np.atleast_1d(b0)[i]
-        if (z >= 1 + w):
+        if z >= 1+w:
             muo1[i] = 1.0
             continue
 
-        if (w >= 1 and z <= w - 1):
+        if w >= 1 and z <= w-1:
             muo1[i] = 0.0
             continue
 
-        if (z >= abs(1 - w) and z <= 1 + w):
+        if z >= abs(1-w) and z <= 1+w:
             kap1 = np.arccos(np.min(np.append((1 - w ** 2 + z ** 2) / 2 / z, 1.)))
             kap0 = np.arccos(np.min(np.append((w ** 2 + z ** 2 - 1) / 2 / w / z, 1.)))
             lambdae = w ** 2 * kap0 + kap1
             lambdae = (lambdae - 0.5 * np.sqrt(np.max(np.append(4. * z ** 2 - (1 + z ** 2 - w ** 2) ** 2, 0.)))) / np.pi
             muo1[i] = 1 - lambdae
 
-        if (z <= 1 - w):
+        if z <= 1-w:
             muo1[i] = 1 - w ** 2
             continue
 

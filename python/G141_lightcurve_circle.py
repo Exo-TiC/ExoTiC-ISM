@@ -63,7 +63,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         This requires the G141.WFC3.sensitivity.sav file, template.sav, kuruczlist.sav, and the kurucz folder with all models
     - MANDEL & AGOL (2002) transit model (occultnl.pro)
     - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (wfc3_systematic_model_grid_selection.pro)
-    - IMPACT PARAMETER caluclated if given an eccentricity (tap_transite2.pro)
+    - IMPACT PARAMETER calculated if given an eccentricity (tap_transite2.pro)
 
     :param x: time array
     :param y: array of normalised flux values equal to the length of the x array
@@ -109,8 +109,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     # SET THE CONSTANTS 
     # constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]
     constant = [2.5, 20.2, np.float64(6.67259e-11), 2400000.5, 86400, np.float64(7.15e7), np.float64(6.96e8),
-                np.float64(1.9e27),
-                np.float64(1.99e30), 5781.6, 0.06691666]
+                np.float64(1.9e27), np.float64(1.99e30), 5781.6, 0.06691666]
     JD = np.float64(2400000.5)
     Gr = np.float64(6.67259e-11)
     HSTper = np.float64(96.36) / (np.float64(24) * np.float64(60))
@@ -119,7 +118,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     nexposure = len(x)
 
     # SET THE PLANET STARTING PARAMETERS
-    # data_params = [rl,epoch,inclin,MsMpR,ecc,omega,Per,FeH,Teff]
+    # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff]
     rl = data_params[0]
     epoch = data_params[1]
     inclin = data_params[2] * ((2 * np.pi) / 360)
@@ -154,7 +153,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         ' input stellar metallicity and effective temperature which was selected dependent on the stellar log(g).')
 
     # ......................................
-    #     LIMB DARKENING     ;
+    # LIMB DARKENING
     if (LD3D == 'no'):
         kdir = ''
         grating = 'G141'
@@ -166,7 +165,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_kurucz_any(kdir, grating, widek, wsdata, k_metal,
                                                                                 k_temp)
 
-    if (LD3D == 'yes'):
+    if LD3D == 'yes':
         # Change these to your specific
         # dirsen  = raw_input("Directory for limb darkening sensitivity files: ")
         # direc = raw_input("Directory for limb darkening stellar models files: ")
@@ -264,7 +263,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         a = np.where(phase > 0.5)[0]
         phase[a] -= 1.0
         # same as above
-        # if (a[0] != -1):
+        # if a[0] != -1:
         #     phase[a] = phase[a] - 1.0
 
         #      MPFIT - ONE       
@@ -470,7 +469,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
-        if (k[0] != -1):
+        if k[0] != -1:
             HSTphase[k] = HSTphase[k] - 1.0
 
         phase = np.zeros(nexposure)
@@ -480,7 +479,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         phase2 = np.floor(phase)
         phase = phase - phase2
         a = np.where(phase > 0.5)[0]
-        if (a[0] != -1):
+        if a[0] != -1:
             phase[a] = phase[a] - 1.0
 
         # MPFIT - ONE
@@ -574,14 +573,14 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         phase2 = np.floor(phase)
         phase = phase - phase2
         a = np.where(phase > 0.5)[0]
-        if (len(a) > 0):
+        if len(a) > 0:
             phase[a] = phase[a] - 1.0
 
         HSTphase = (x - T0) / constant[10]
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
-        if (len(k) > 0):
+        if len(k) > 0:
             HSTphase[k] = HSTphase[k] - 1.0
 
         # ...........................................
@@ -833,7 +832,7 @@ if __name__ == '__main__':
 
     # SET-UP the parameters for the subroutine
     # ---------------------
-    # ;PLANET PARAMETERS
+    # PLANET PARAMETERS
     rl = np.float64(0.12169232)  # Rp/R* estimate
     epoch = np.float64(57957.970153390)  # in MJD
     inclin = np.float64(87.34635)  # this is converted into radians in the subroutine
