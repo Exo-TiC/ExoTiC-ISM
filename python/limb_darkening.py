@@ -9,9 +9,9 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     """
     Calculates stellar limb-darkening coefficents for a given wavelength bin.
 
-    Procedure from Sing et al. (2010, A&A, 510, A21)
-    Uses 3D limb darkening from Magic et al. (2015, A&A, 573, 90)
-    Uses photon FLUX Sum over (lambda*dlamba)
+    Procedure from Sing et al. (2010, A&A, 510, A21).
+    Uses 3D limb darkening from Magic et al. (2015, A&A, 573, 90).
+    Uses photon FLUX Sum over (lambda*dlamba).
     :param grating: string; grating to use ('G430L','G750L','WFC3','R500B','R500R')
     :param widek: array; index array of wsdata, indicating bin of pixels to use
     :param wsdata: array; data wavelength solution
@@ -109,7 +109,7 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     mu = sav['mmd'].mu
 
     # =============
-    # HST,GTC - load response function and interpolate onto kurucz model grid
+    # HST, GTC - load response function and interpolate onto kurucz model grid
     # =============
     if grating == 'G430L':
         sav = readsav(dirsen + 'G430L.sensitivity.sav')  # wssens,sensitivity
