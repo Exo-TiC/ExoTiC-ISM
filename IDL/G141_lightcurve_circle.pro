@@ -1380,8 +1380,17 @@ pro limb_fit_kurucz_any,kdir,grating,widek,wsdata,uLD,c1,c2,c3,c4,cp1,cp2,cp3,cp
 ;restore,'list.sav' 
 close,1
 
+; Read config file (mainly for paths)
+whereis,'W17_lightcurve_test', HST_fullpath
+HST_dir = FILE_DIRNAME(HST_fullpath)
 
+IF FILE_TEST(HST_dir + '/config_override.txt') THEN BEGIN
+  structure = read_params_vm(HST_dir + '/config_override.txt')
+ENDIF ELSE BEGIN
+  structure = read_params_vm(HST_dir + '/config.txt')
+ENDELSE
 
+; Start code
 !path = '~/IDL/pro:'+ !path
 set_plot,'x'
 device,RETAIN=2
@@ -1391,9 +1400,10 @@ device,RETAIN=2
 
 ;restore,'template_kurucz.sav' ;template_kurucz,template_kurucz_header
 ;  template_kurucz=template
-restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/templates.sav' ;template_kurucz,template_kurucz_header
+limbDir = structure.LIMBDARKENING
+restore, limbDir + 'templates.sav' ;template_kurucz,template_kurucz_header
 
- restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/kuruczlist.sav' ;list of kurucz models  17=solar vturub=2 km/s
+ restore, limbDir + 'kuruczlist.sav' ;list of kurucz models  17=solar vturub=2 km/s
 ;==== Select Metalicity
 ;M_H=[-1.0(),-0.5(),-0.3(2),-0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
 ;  model=li(0) ;-0.1
@@ -1405,9 +1415,9 @@ restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/templa
 ;  model=li(22) ;+0.3 k2
 ;  model=li(23) ;+0.5 k2
 ;  model=li(24)  ;+1.0
-model=li(k_metal)
+model = li(k_metal)
 
-direc='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/Kurucz/'
+direc = limbDir + 'Kurucz/'
 
 ;Teff=[3500(9),3750(20),4000(31),4250(42),4500(53),4750(64),5000(75),5250(86),5500(97),5750(108),6000(119),6250(129),6500(139)]
 ;==== Select Teff and Log g
@@ -1425,15 +1435,15 @@ direc='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/Kurucz/'
 ;N=129     ;  TEFF   6250.  GRAVITY 4.50000 F8
 N = k_temp
 
-st=(1221.+4)*N-N & $    
-  header=read_ascii(direc+model,template=template_kurucz_header,num_records=1,data_start=st) & $ 
+st = (1221.+4)*N-N & $    
+  header = read_ascii(direc+model,template=template_kurucz_header,num_records=1,data_start=st) & $ 
 ;  if (header eq 0) then goto,skipthis 
-  data=read_ascii(direc+model,template=template_kurucz,num_records=1221,data_start=3+st) & $
-  ws=data.(0)*10   
-  Teff_model=double(strmid(header.(0),6,6))
-  logg_model=double(strmid(header.(0),21,7))
-  MH_model=double(strmid(header.(0),43.4))
-  print,N,'  ',header
+  data = read_ascii(direc+model,template=template_kurucz,num_records=1221,data_start=3+st) & $
+  ws = data.(0)*10   
+  Teff_model = double(strmid(header.(0), 6, 6))
+  logg_model = double(strmid(header.(0), 21, 7))
+  MH_model = double(strmid(header.(0), 43.4))
+  print, N, '  ', header
 ;  if (abs(TEff_GTC-Teff_model) gt 500) or (abs(logg_GTC)-logg_model gt 0.5) or (abs(MH_GTC)-MH_model gt 0.2) then goto,nextmodel
 
 ;  if (ws(0) ne 90.9D0) then goto,skipthis 
@@ -1465,27 +1475,27 @@ mu=[1.000,   .900,  .800,  .700,  .600,  .500,  .400,  .300,  .250,  .200,  .150
 
 
 ;if (grating eq 'G430L') then restore,'ihd189733p.sav' ;f1..f16,mu,ws
-if (grating eq 'G750M') then restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G750L.sensitivity' ;f1..f16,mu,ws
+if (grating eq 'G750M') then restore,limbDirv+'G750L.sensitivity' ;f1..f16,mu,ws
 
 ;=============
 ; HST - load responce function and interpolate onto kurucz model grid
 ;==============
 if (grating eq 'G430L') then begin 
-  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G430L.sensitivity.sav';wssens,sensitivity
+  restore, limbDir+'G430L.sensitivity.sav';wssens,sensitivity
  G=31 & wdel=3 
 endif
 
 if (grating eq 'G750L') then begin
-   restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G750L.sensitivity'
+   restore, limbDir+'G750L.sensitivity'
 endif
 
 if (grating eq 'G750M') then begin 
-  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G750M.sensitivity.sav';wssens,sensitivity
+  restore, limbDir+'G750M.sensitivity.sav';wssens,sensitivity
  G=31 & wdel=0.554 
 endif
 
 if (grating eq 'R500B') then begin 
-  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/R500B.sensitivity.sav';wssens,sensitivity
+  restore ,limbDir+'R500B.sensitivity.sav';wssens,sensitivity
  G=31 & wdel=3.78201D0 
 endif
 ;
@@ -1496,12 +1506,12 @@ endif
 ; -----------------------------------------------------------------------
 ; WE ONLY REALLY USE THESE TWO IN THIS ROUTINE
 if (grating eq 'G141') then begin ;http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
-  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G141.WFC3.sensitivity.sav';wssens,sensitivity
+  restore, limbDir+'G141.WFC3.sensitivity.sav';wssens,sensitivity
   wdel=100 
 endif
 
 if (grating eq 'G102') then begin ;http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
-  restore,'/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/G102.WFC3.sensitivity.sav';wssens,sensitivity
+  restore, limbDir+'G102.WFC3.sensitivity.sav';wssens,sensitivity
   wdel=100 
 endif
 ; -----------------------------------------------------------------------
@@ -1866,8 +1876,19 @@ pro limb_fit_3D_choose,grating,widek,wsdata,uLD,c1,c2,c3,c4,cp1,cp2,cp3,cp4,aLD,
 ; window,4,xpos=80,ypos=0,xsize=1250,ysize=800  ;,xpos=80,ypos=500,xsize=1250,ysize=800
 ; window,5,xpos=80,ypos=600,xsize=500,ysize=500 ;,xpos=1450,ypos=800,xsize=1100,ysize=700
 
-dirsen='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/'
-direc='/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/3DGrid/'
+; Read config file (mainly for paths)
+whereis,'W17_lightcurve_test', HST_fullpath
+HST_dir = FILE_DIRNAME(HST_fullpath)
+
+IF FILE_TEST(HST_dir + '/config_override.txt') THEN BEGIN
+  structure = read_params_vm(HST_dir + '/config_override.txt')
+ENDIF ELSE BEGIN
+  structure = read_params_vm(HST_dir + '/config.txt')
+ENDELSE
+
+; Start code
+dirsen = structure.LIMBDARKENING
+direc = dirsen + '3DGrid/'
 print,'Current Directories Entered:'
 print,'  '+dirsen
 print,'  '+direc
@@ -1939,15 +1960,15 @@ mu=mmd.(3)
 ; HST,GTC - load responce function and interpolate onto kurucz model grid
 ;==============
 if (grating eq 'G430L') then begin 
- restore,dirsen+'G430L.sensitivity.sav';wssens,sensitivity
+ restore, dirsen+'G430L.sensitivity.sav';wssens,sensitivity
  wdel=3 
 endif
 if (grating eq 'G750M') then begin 
- restore,dirsen+'G750M.sensitivity.sav';wssens,sensitivity
+ restore, dirsen+'G750M.sensitivity.sav';wssens,sensitivity
  wdel=0.554 
 endif
 if (grating eq 'G750L') then begin 
- restore,dirsen+'G750L.sensitivity.sav';wssens,sensitivity
+ restore, dirsen+'G750L.sensitivity.sav';wssens,sensitivity
  wdel=4.882D0 
 endif
 if (grating eq 'G141') then begin ;http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
@@ -1955,16 +1976,16 @@ if (grating eq 'G141') then begin ;http://www.stsci.edu/hst/acs/analysis/referen
   wdel=1 
 endif
 if (grating eq 'G102') then begin ;http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
-  restore,dirsen+'G141.WFC3.sensitivity.sav';wssens,sensitivity
+  restore, dirsen+'G141.WFC3.sensitivity.sav';wssens,sensitivity
   wdel=1 
 endif
 ;GTC
 if (grating eq 'R500B') then begin 
- restore,dirsen+'R500B.sensitivity.sav';wssens,sensitivity
+ restore, dirsen+'R500B.sensitivity.sav';wssens,sensitivity
  wdel=3.78201D0 
 endif
 if (grating eq 'R500R') then begin 
- restore,dirsen+'R500R.sensitivity.sav';wssens,sensitivity
+ restore, dirsen+'R500R.sensitivity.sav';wssens,sensitivity
  wdel=4.88D0 
 endif
 
@@ -2183,7 +2204,7 @@ aLD=Co(2,1) & bLD=Co(2,3) ;quadratic
 ;if (a eq 'TEFF  50000.  GRAVITY 5.0') then goto,skipthis ;
 
 
-save,filename='3D.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header
+save, filename='3D.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header
 
                           ;loop over individual Kurucz models
 skipthis: ;
