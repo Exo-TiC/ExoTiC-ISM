@@ -14,8 +14,8 @@ IDL's WHERE function also returns -1 if nothing is found vs python returning an 
 is important and is taken into account in the occulation functions.
 
 Running python G141_lightcurve_circle.py from the command line will execute the main() function.
-The code has only been testted significantly up to the first attempt at fitting the transit models, even that may contain
-yet to be discovered bugs.  This point is marked in the code.  Everything after that point was a best attempt at 
+The code has only been tested significantly up to the first attempt at fitting the transit models, even that may contain
+yet to be discovered bugs. This point is marked in the code.  Everything after that point was a best attempt at
 quick translation from IDL. Running the code end to end does NOT produce consistent results with the IDL code so there are 
 definitely bugs somewhere.
 
@@ -34,6 +34,7 @@ Continued refinement by Iva Laginja (laginja.iva@gmail.com).
 
 from mpfit import mpfit
 import numpy as np
+import os
 from limb_darkening import limb_fit_3D_choose
 import hstmarg
 
@@ -106,36 +107,50 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     print('If results are not as expected - a new observation stratgy is reccomended, or you can bloody well wait for '
           'JWST to make your lives better. PRESS control+C now if this was an unintended action.')
 
+    # DEFINE DIRECTORIES
+    mainDir = '..'
+    limbDir = os.path.join(mainDir, 'Limb-darkening')
+    inDir = os.path.join(mainDir, 'data')
+    outDir = os.path.join(mainDir, 'outputs')
+
     # SET THE CONSTANTS 
-    # constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]
+    # constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]   # Description
     constant = [2.5, 20.2, np.float64(6.67259e-11), 2400000.5, 86400, np.float64(7.15e7), np.float64(6.96e8),
                 np.float64(1.9e27), np.float64(1.99e30), 5781.6, 0.06691666]
-    JD = np.float64(2400000.5)
+    gain = 2.5
+    rdnoise = 20.2
     Gr = np.float64(6.67259e-11)
+    JDconst = 2400000.5
+    day_to_sec = 86400
+    #JD = np.float64(2400000.5)
+    Rjup = np.float64(7.15e7)
+    Rsun = np.float64(6.96e8)
+    MJup = np.float64(1.9e27)
+    Msun = np.float64(1.99e30)
+    HST_second = 5781.6
+    HST_period = 0.06691666
     HSTper = np.float64(96.36) / (np.float64(24) * np.float64(60))
 
-    # TOTAL NUMBER OF EXPOSURES IN THE OBSERVATION
-    nexposure = len(x)
+    nexposure = len(x)   # Total number of exposures in the observation
 
     # SET THE PLANET STARTING PARAMETERS
-    # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff]
-    rl = data_params[0]
-    epoch = data_params[1]
-    inclin = data_params[2] * ((2 * np.pi) / 360)
+    # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff]   # Description
+    rl = data_params[0]                             # Rp/R* estimate
+    epoch = data_params[1]                          # in MJD
+    inclin = data_params[2] * ((2 * np.pi) / 360)   # inclination, converting it to radians
     MsMpR = data_params[3]
-    ecc = data_params[4]
-    omega = data_params[5] * ((2 * np.pi) / 360)
-    Per = data_params[6] * constant[4]
-    constant1 = ((constant[2] * Per * Per) / (4 * np.pi * np.pi)) ** (1 / 3)
+    ecc = data_params[4]                            # eccentricity
+    omega = data_params[5] * ((2 * np.pi) / 360)    # orbital omega
+    Per = data_params[6] * day_to_sec              # period in seconds
+    constant1 = ((Gr * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
     aval = constant1 * (MsMpR) ** (1 / 3)
 
     FeH = data_params[7]
-    Teff = data_params[8]
+    Teff = data_params[8]   # effective temperature
 
     flux0 = y[0]
     T0 = x[0]
-
-    img_date = x
+    img_date = x   # time array
 
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATICS & LD
     m = 0.0  # Linear Slope
@@ -169,8 +184,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # Change these to your specific
         # dirsen  = raw_input("Directory for limb darkening sensitivity files: ")
         # direc = raw_input("Directory for limb darkening stellar models files: ")
-        dirsen = '/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/'
-        direc = '/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/3DGrid/'
+        dirsen = limbDir
+        direc = os.path.join(limbDir, '3DGrid')
         grating = 'G141'
         wsdata = wavelength
         widek = np.arange(len(wavelength))
@@ -247,7 +262,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         print('  ')
 
         HSTphase = np.zeros(nexposure)
-        HSTphase = (img_date - T0) / constant[10]
+        HSTphase = (img_date - T0) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
@@ -256,7 +271,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # if len(k) > 0:
         #     HSTphase[k] = HSTphase[k] - 1.0
 
-        phase = (img_date - epoch) / (Per / constant[4])
+        phase = (img_date - epoch) / (Per / day_to_sec)
 
         phase2 = np.floor(phase)
         phase = phase - phase2
@@ -345,7 +360,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         sh4_err = pcerror[21]
 
         # Recalculate a/R*
-        constant1 = (constant[2] * Per * Per / (4 * np.pi * np.pi)) ** (1 / 3.)
+        constant1 = (Gr * Per * Per / (4 * np.pi * np.pi)) ** (1 / 3.)
         aval = constant1 * (MsMpR) ** (1 / 3.)
 
         print('Transit depth = {} +/- {}     centered at  {}'.format(rl, rl_err, epoch))
@@ -359,7 +374,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         if len(a) > 0:
             phase[a] = phase[a] - 1.0
 
-        HSTphase = (x - T0) / constant[10]
+        HSTphase = (x - T0) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
@@ -465,7 +480,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         Per = p0[7]
 
         HSTphase = np.zeros(nexposure)
-        HSTphase = (x - T0) / constant[10]
+        HSTphase = (x - T0) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
@@ -474,7 +489,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
         phase = np.zeros(nexposure)
         for j in range(nexposure):
-            phase[j] = (x[j] - epoch) / (Per / constant[4])
+            phase[j] = (x[j] - epoch) / (Per / day_to_sec)
 
         phase2 = np.floor(phase)
         phase = phase - phase2
@@ -562,7 +577,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         xshift4_err = pcerror[21]
 
         # Recalculate a/R*
-        constant1 = (constant[2] * Per * Per / (4 * np.pi * np.pi)) ** (1 / 3.)
+        constant1 = (Gr * Per * Per / (4 * np.pi * np.pi)) ** (1 / 3.)
         aval = constant1 * (MsMpR) ** (1 / 3.)
 
         print('Transit depth = {} +/- {}     centered at  {}'.format(rl, rl_err, epoch))
@@ -576,7 +591,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         if len(a) > 0:
             phase[a] = phase[a] - 1.0
 
-        HSTphase = (x - T0) / constant[10]
+        HSTphase = (x - T0) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
