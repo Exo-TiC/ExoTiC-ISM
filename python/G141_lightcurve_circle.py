@@ -72,18 +72,18 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err)
     :param data_params: priors for each parameter used in the fit passed in an array in the form
         data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
-        rl: transit depth (Rp/R*)
-        epoch: center of transit time (in MJD)
-        inclin: inclination of the planetary orbit
-        MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
+        - rl: transit depth (Rp/R*)
+        - epoch: center of transit time (in MJD)
+        - inclin: inclination of the planetary orbit
+        - MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
                constant1 = (G*Per*Per/(4*!pi*!pi))^(1D0/3D0) -> MsMpR = (a_Rs/constant1)^3D0
-        ecc: eccentricity of the system
-        omega: omega of the system (degrees)
-        Per: Period of the planet in days
-        FeH: Stellar metallicity index
+        - ecc: eccentricity of the system
+        - omega: omega of the system (degrees)
+        - Per: Period of the planet in days
+        - FeH: Stellar metallicity index
              M_H=[-5.0(14),-4.5(13),-4.0(12),-3.5(11),-3.0(10),-2.5(9),-2.0(8),-1.5(7),-1.0(5),-0.5(3),-0.3(2),
                   -0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
-        Teff: Stellar Temperature index
+        - Teff: Stellar Temperature index
               FOR stellar log(g) = 4.0
                 Teff = [3500(8),3750(19),4000(30),4250(41),4500(52), 4750(63),5000(74),5250(85),5500(96),5750(107),
                 6000(118),6250(129),6500(139)]
@@ -104,6 +104,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
     print(
         'Welcome to the Wakeford WFC3 analysis pipeline. All data will now be marginalised according to quality and usefulness.')
+
     print('If results are not as expected - a new observation stratgy is reccomended, or you can bloody well wait for '
           'JWST to make your lives better. PRESS control+C now if this was an unintended action.')
 
@@ -115,8 +116,11 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
     # SET THE CONSTANTS 
     # constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]   # Description
+    # Constants in array
     constant = [2.5, 20.2, np.float64(6.67259e-11), 2400000.5, 86400, np.float64(7.15e7), np.float64(6.96e8),
                 np.float64(1.9e27), np.float64(1.99e30), 5781.6, 0.06691666]
+
+    # Constants individually (but same as above)
     gain = 2.5
     rdnoise = 20.2
     Gr = np.float64(6.67259e-11)
@@ -136,9 +140,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     # SET THE PLANET STARTING PARAMETERS
     # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff]   # Description
     rl = data_params[0]                             # Rp/R* estimate
-    epoch = data_params[1]                          # in MJD
+    epoch = data_params[1]                          # cener of transit time in MJD
     inclin = data_params[2] * ((2 * np.pi) / 360)   # inclination, converting it to radians
-    MsMpR = data_params[3]
+    MsMpR = data_params[3]                          # density of the system
     ecc = data_params[4]                            # eccentricity
     omega = data_params[5] * ((2 * np.pi) / 360)    # orbital omega
     Per = data_params[6] * day_to_sec              # period in seconds
@@ -152,7 +156,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     T0 = x[0]
     img_date = x   # time array
 
-    # SET THE STARTING PARAMETERS FOR THE SYSTEMATICS & LD
+    # SET THE STARTING PARAMETERS FOR THE SYSTEMATICS & Limb Darkening (LD)
     m = 0.0  # Linear Slope
     HSTP1 = 0.0  # Correct HST orbital phase
     HSTP2 = 0.0  # Correct HST orbital phase^2
@@ -167,9 +171,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         'As you have clearly decided to proceed, we will now determine the stellar limb-darkening parameters given the'
         ' input stellar metallicity and effective temperature which was selected dependent on the stellar log(g).')
 
-    # ......................................
+
     # LIMB DARKENING
-    if (LD3D == 'no'):
+    if LD3D == 'no':
         kdir = ''
         grating = 'G141'
         wsdata = wavelength
@@ -198,13 +202,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
     print('Thank you for your patience. Next up is the lightcurve fitting with MPFIT using L-M minimization.')
     # ....................................
-    # PLACE ALL THE PRIORS IN AN ARRAY
-    p0 = [rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m, HSTP1, HSTP2, HSTP3, HSTP4, xshift1,
-          xshift2, xshift3, xshift4]
+    # PLACE ALL THE PRIORS IN AN ARRAY - because we need to loop over them in a later step
+    #p0 = [rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4]   # len(p0) = number of parameters nparams
+    # It is not actually used yet
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE ;
     grid = hstmarg.wfc3_systematic_model_grid_selection(grid_selection)
-    nsys, nparams = grid.shape
+    nsys, nparams = grid.shape   # nsys = number of systems?
 
     #  SET UP THE ARRAYS  ;
     # sav arrays for the first step throught to get the err inflation
@@ -248,12 +252,18 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     # evidence BIC
     sys_evidenceBIC = np.zeros((nsys))
 
-    # '----------      ------------     ------------'
-    # '          1ST FIT         '
-    # '----------      ------------     ------------'
-    print('..........................................')
+
+    #################################
+    #             1ST FIT           #
+    #################################
+
+    print('\n 1ST FIT \n')
     print(
-        'The first run through of the data for each of the WFC3 stochastic models outlined in Table 2 of Wakeford et al. (2016a) is now being preformed. Using this fit we will scale the uncertainties you input to incorporate the inherent scatter in the data for each model.')
+        'The first run through of the data for each of the WFC3 stochastic models outlined in Table 2 of Wakeford et '
+        'al. (2016a) is now being preformed. Using this fit we will scale the uncertainties you input to incorporate '
+        'the inherent scatter in the data for each model.')
+
+    # Loop over all systems (= parameter combinations)
     for s in range(0, nsys):
         print('................................')
         print(' SYSTEMATIC MODEL {}'.format(s))
@@ -281,7 +291,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # if a[0] != -1:
         #     phase[a] = phase[a] - 1.0
 
-        #      MPFIT - ONE       
+        #### MPFIT - ONE ####
+
+        # PLACE ALL THE PRIORS IN AN ARRAY - because we need to loop over them in a later step
         p0 = [rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m, HSTP1, HSTP2, HSTP3, HSTP4,
               xshift1, xshift2, xshift3, xshift4]
         parinfo = []
@@ -314,49 +326,52 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # Redefine all of the parameters given the MPFIT output
         w_params[s, :] = mpfit_result.params
 
+        # Populate parameters with fits results
         rl = mpfit_result.params[0]
-        rl_err = pcerror[0]
         flux0 = mpfit_result.params[1]
-        flux0_err = pcerror[1]
         epoch = mpfit_result.params[2]
-        epoch_err = pcerror[2]
         inclin = mpfit_result.params[3]
-        inclin_err = pcerror[3]
         msmpr = mpfit_result.params[4]
-        msmpr_err = pcerror[4]
         ecc = mpfit_result.params[5]
-        ecc_err = pcerror[5]
         omega = mpfit_result.params[6]
-        omega_err = pcerror[6]
         per = mpfit_result.params[7]
-        per_err = pcerror[7]
         T0 = mpfit_result.params[8]
-        T0_err = pcerror[8]
         c1 = mpfit_result.params[9]
-        c1_err = pcerror[9]
         c2 = mpfit_result.params[10]
-        c2_err = pcerror[10]
         c3 = mpfit_result.params[11]
-        c3_err = pcerror[11]
         c4 = mpfit_result.params[12]
-        c4_err = pcerror[12]
         m = mpfit_result.params[13]
-        m_err = pcerror[13]
         hst1 = mpfit_result.params[14]
-        hst1_err = pcerror[14]
         hst2 = mpfit_result.params[15]
-        hst2_err = pcerror[15]
         hst3 = mpfit_result.params[16]
-        hst3_err = pcerror[16]
         hst4 = mpfit_result.params[17]
-        hst4_err = pcerror[17]
         sh1 = mpfit_result.params[18]
-        sh1_err = pcerror[18]
         sh2 = mpfit_result.params[19]
-        sh2_err = pcerror[19]
         sh3 = mpfit_result.params[20]
-        sh3_err = pcerror[20]
         sh4 = mpfit_result.params[21]
+
+        # populate errors from pcerror array
+        rl_err = pcerror[0]
+        flux0_err = pcerror[1]
+        epoch_err = pcerror[2]
+        inclin_err = pcerror[3]
+        msmpr_err = pcerror[4]
+        ecc_err = pcerror[5]
+        omega_err = pcerror[6]
+        per_err = pcerror[7]
+        T0_err = pcerror[8]
+        c1_err = pcerror[9]
+        c2_err = pcerror[10]
+        c3_err = pcerror[11]
+        c4_err = pcerror[12]
+        m_err = pcerror[13]
+        hst1_err = pcerror[14]
+        hst2_err = pcerror[15]
+        hst3_err = pcerror[16]
+        hst4_err = pcerror[17]
+        sh1_err = pcerror[18]
+        sh2_err = pcerror[19]
+        sh3_err = pcerror[20]
         sh4_err = pcerror[21]
 
         # Recalculate a/R*
@@ -456,10 +471,11 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     #########################################################################################################################
     #########################################################################################################################
 
-    # ..........................................
-    # ..........................................
-    # SECOND RUN THROUGH with MPFIT
-    # ..........................................
+
+    #################################
+    # SECOND RUN THROUGH with MPFIT #
+    #################################
+
     print('..........................................')
     print('As we seem to have found how shit each of the systematic models are at fitting the data compared to a'
           'Mandel&Agol transit model we can now use the scatter on their residuals to inflate the uncertainties for the'
@@ -831,6 +847,7 @@ if __name__ == '__main__':
     """
     This is a translation of the W17_lightcurve_test.pro
     """
+    dataDir = os.path.join('..', 'data')
     # SET THE CONSTANTS
     dtosec = 86400
     big_G = np.float64(6.67259e-11)
@@ -842,8 +859,8 @@ if __name__ == '__main__':
     HST_period = 0.06691666
 
     # READ in the txt file for the lightcurve data
-    x, y, err, sh = np.loadtxt('../data/W17_white_lightcurve_test_data.txt', skiprows=7, unpack=True)
-    wavelength = np.loadtxt('../data/W17_wavelength_test_data.txt', skiprows=3)
+    x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'), skiprows=7, unpack=True)
+    wavelength = np.loadtxt(os.path.join(dataDir, 'W17_wavelength_test_data.txt'), skiprows=3)
 
     # SET-UP the parameters for the subroutine
     # ---------------------
