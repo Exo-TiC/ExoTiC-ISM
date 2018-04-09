@@ -1,4 +1,5 @@
 import numpy as np
+import os
 from scipy.io import readsav
 from scipy.interpolate import interp1d, splev, splrep
 from astropy.modeling.models import custom_model
@@ -84,7 +85,7 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     model = file
     header = file
     #  if (header eq 0) then goto,skipthis 
-    sav = readsav(direc + file)
+    sav = readsav(os.path.join(direc, file))
     ws = sav['mmd'].lam[0]  # wavelength
     f = sav['mmd'].flx
     Teff_model = Teff_Grid[optT]
@@ -112,43 +113,43 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     # HST, GTC - load response function and interpolate onto kurucz model grid
     # =============
     if grating == 'G430L':
-        sav = readsav(dirsen + 'G430L.sensitivity.sav')  # wssens,sensitivity
+        sav = readsav(os.path.join(dirsen, 'G430L.sensitivity.sav'))  # wssens,sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 3
 
     if grating == 'G750M':
-        sav = readsav(dirsen + 'G750M.sensitivity.sav')  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'G750M.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 0.554
 
     if grating == 'G750L':
-        sav = readsav(dirsen + 'G750L.sensitivity.sav')  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'G750L.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 4.882
 
     if grating == 'G141':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
-        sav = readsav(dirsen + 'G141.WFC3.sensitivity.sav')  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'G141.WFC3.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 1
 
     if grating == 'G102':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
-        sav = readsav(dirsen + 'G141.WFC3.sensitivity.sav')  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'G141.WFC3.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 1
 
     if grating == 'R500B':
-        sav = readsav(dirsen + 'R500B.sensitivity.sav')  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'R500B.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 3.78201
 
     if grating == 'R500R':
-        sav = readsav(dirsen + 'R500R.sensitivity.sav')  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'R500R.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 4.88
@@ -266,6 +267,7 @@ def quadratic_limb_darkening(x, aLD=0.0, bLD=0.0):
 
 
 if __name__ == '__main__':
+
     dirsen = '/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/'
     direc = '/Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/3DGrid/'
     wavelength = np.loadtxt('W17_wavelength_test_data.txt', skiprows=3)
