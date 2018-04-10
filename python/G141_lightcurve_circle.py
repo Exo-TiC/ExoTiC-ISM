@@ -574,7 +574,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         xshift4 = mpfit_result.params[21]
 
         rl_err = pcerror[0]
-        flux0_err = pcerror[2]
+        flux0_err = pcerror[1]
         epoch_err = pcerror[2]
         inclin_err = pcerror[3]
         msmpr_err = pcerror[4]
