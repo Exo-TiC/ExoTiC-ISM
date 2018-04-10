@@ -176,13 +176,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     if LD3D == 'no':
         kdir = ''
         grating = 'G141'
-        wsdata = wavelength
         widek = np.arange(len(wavelength))
         k_metal = data_params[6]
         k_temp = data_params[7]
 
-        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_kurucz_any(kdir, grating, widek, wsdata, k_metal,
+        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_kurucz_any(kdir, grating, widek, wavelength, k_metal,
                                                                                 k_temp)
+        # This function did not get translated into python yet, but it is also not used at the moment
 
     if LD3D == 'yes':
         # Change these to your specific
@@ -191,14 +191,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         dirsen = limbDir
         direc = os.path.join(limbDir, '3DGrid')
         grating = 'G141'
-        wsdata = wavelength
         widek = np.arange(len(wavelength))
         M_H = data_params[6]
         Teff = data_params[7]
         logg = data_params[8]
 
-        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg,
-                                                                               dirsen, direc)
+        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grating, widek, wavelength, M_H, Teff,
+                                                                               logg, dirsen, direc)
 
     print('Thank you for your patience. Next up is the lightcurve fitting with MPFIT using L-M minimization.')
     # ....................................
@@ -328,7 +327,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         w_params[s, :] = mpfit_result.params
 
         # Populate parameters with fits results
-        # NEW stick to array format
         rl = mpfit_result.params[0]
         flux0 = mpfit_result.params[1]
         epoch = mpfit_result.params[2]
@@ -352,8 +350,12 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         sh3 = mpfit_result.params[20]
         sh4 = mpfit_result.params[21]
 
+        # Stick to array format
+        for i in range(len(p0)):
+            p0[i] = mpfit_result.params[i]
+
         # populate errors from pcerror array
-        # NEW stick to array format
+        # We don't need all of these
         rl_err = pcerror[0]
         flux0_err = pcerror[1]
         epoch_err = pcerror[2]
@@ -406,9 +408,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
             (np.sin(phase * 2 * np.pi)) ** 2 + (np.cos(inclin) * np.cos(phase * 2 * np.pi)) ** 2)
         mulimb01, mulimbf1 = hstmarg.occultnl(rl, c1, c2, c3, c4, b0)
         b01 = np.copy(b0)
-        systematic_model = (phase * m + 1.0) * (
-                HSTphase * hst1 + HSTphase ** 2. * hst2 + HSTphase ** 3. * hst3 + HSTphase ** 4. * hst4 + 1.0) * (
-                                   sh * sh1 + sh ** 2. * sh2 + sh ** 3. * sh3 + sh ** 4. * sh4 + 1.0)
+        systematic_model = (phase * m + 1.0) * \
+                           (HSTphase * hst1 + HSTphase ** 2. * hst2 + HSTphase ** 3. * hst3 + HSTphase ** 4. * hst4 + 1.0) * \
+                           (sh * sh1 + sh ** 2. * sh2 + sh ** 3. * sh3 + sh ** 4. * sh4 + 1.0)
 
         w_model = mulimb01 * flux0 * systematic_model
 
@@ -484,6 +486,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
           'Mandel&Agol transit model we can now use the scatter on their residuals to inflate the uncertainties for the'
           'data. We will then go ahead and refit for each systematic model if that is okay with you. If not, Control+c'
           'is still a valid option.')
+
     for s in range(0, nsys):
         print('................................')
         print(' SYSTEMATIC MODEL {}'.format(s))
