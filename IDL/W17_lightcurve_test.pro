@@ -55,6 +55,7 @@ MsMpR = (aor/(constant1))^3D0
 
 
 LD3D = 'yes'
+
 IF (LD3D EQ 'no') THEN BEGIN
 ; These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon. 
 FeH = 2 ;Fe/H = -0.25
@@ -69,7 +70,7 @@ Teff = 6550
 logg = 4.2
 endif
 
-data_params = [rl,epoch,inclin,MsMpR,ecc,omega,Per,FeH,Teff,logg]
+data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
 grid_selection = 'fit_time'
 out_folder = structure.OUTPUTS
 run_name = 'wl_time_wm3d'

@@ -115,7 +115,7 @@ PRINT, 'Welcome to the Wakeford WFC3 analysis pipeline. All data will now be mar
 nexposure = n_elements(x)
   
 ;;SET THE PLANET STARTING PARAMETERS
-;data_params = [rl,epoch,inclin,MsMpR,ecc,omega,Per,FeH,Teff]
+;data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff]
 rl = data_params(0)
 epoch = data_params(1)
 inclin = data_params(2) * ((2*!pi)/360D0)
