@@ -294,6 +294,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         #### MPFIT - ONE ####
 
         # PLACE ALL THE PRIORS IN AN ARRAY - because we need to loop over them in a later step
+        # NEW take this out of loop
         p0 = [rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m, HSTP1, HSTP2, HSTP3, HSTP4,
               xshift1, xshift2, xshift3, xshift4]
         parinfo = []
@@ -327,6 +328,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         w_params[s, :] = mpfit_result.params
 
         # Populate parameters with fits results
+        # NEW stick to array format
         rl = mpfit_result.params[0]
         flux0 = mpfit_result.params[1]
         epoch = mpfit_result.params[2]
@@ -351,6 +353,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         sh4 = mpfit_result.params[21]
 
         # populate errors from pcerror array
+        # NEW stick to array format
         rl_err = pcerror[0]
         flux0_err = pcerror[1]
         epoch_err = pcerror[2]
@@ -548,48 +551,49 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # Redefine all of the parameters given the MPFIT output
 
         rl = mpfit_result.params[0]
-        rl_err = pcerror[0]
         flux0 = mpfit_result.params[1]
-        flux0_err = pcerror[2]
         epoch = mpfit_result.params[2]
-        epoch_err = pcerror[2]
         inclin = mpfit_result.params[3]
-        inclin_err = pcerror[3]
         msmpr = mpfit_result.params[4]
-        msmpr_err = pcerror[4]
         ecc = mpfit_result.params[5]
-        ecc_err = pcerror[5]
         omega = mpfit_result.params[6]
-        omega_err = pcerror[6]
         per = mpfit_result.params[7]
-        per_err = pcerror[7]
         T0 = mpfit_result.params[8]
-        T0_err = pcerror[8]
         c1 = mpfit_result.params[9]
-        c1_err = pcerror[9]
         c2 = mpfit_result.params[10]
-        c2_err = pcerror[10]
         c3 = mpfit_result.params[11]
-        c3_err = pcerror[11]
         c4 = mpfit_result.params[12]
-        c4_err = pcerror[12]
         m = mpfit_result.params[13]
-        m_err = pcerror[13]
         HSTP1 = mpfit_result.params[14]
-        HSTP1_err = pcerror[14]
         HSTP2 = mpfit_result.params[15]
-        HSTP2_err = pcerror[15]
         HSTP3 = mpfit_result.params[16]
-        HSTP3_err = pcerror[16]
         HSTP4 = mpfit_result.params[17]
-        HSTP4_err = pcerror[17]
         xshift1 = mpfit_result.params[18]
-        xshift1_err = pcerror[18]
         xshift2 = mpfit_result.params[19]
-        xshift2_err = pcerror[19]
         xshift3 = mpfit_result.params[20]
-        xshift3_err = pcerror[20]
         xshift4 = mpfit_result.params[21]
+
+        rl_err = pcerror[0]
+        flux0_err = pcerror[2]
+        epoch_err = pcerror[2]
+        inclin_err = pcerror[3]
+        msmpr_err = pcerror[4]
+        ecc_err = pcerror[5]
+        omega_err = pcerror[6]
+        per_err = pcerror[7]
+        T0_err = pcerror[8]
+        c1_err = pcerror[9]
+        c2_err = pcerror[10]
+        c3_err = pcerror[11]
+        c4_err = pcerror[12]
+        m_err = pcerror[13]
+        HSTP1_err = pcerror[14]
+        HSTP2_err = pcerror[15]
+        HSTP3_err = pcerror[16]
+        HSTP4_err = pcerror[17]
+        xshift1_err = pcerror[18]
+        xshift2_err = pcerror[19]
+        xshift3_err = pcerror[20]
         xshift4_err = pcerror[21]
 
         # Recalculate a/R*
@@ -635,13 +639,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
                                    sh * sh1 + sh ** 2. * sh2 + sh ** 3. * sh3 + sh ** 4. * sh4 + 1.0)
 
         fit_model = mulimb01 * flux0 * systematic_model
-
         residuals = (y - fit_model) / flux0
-
         resid_scatter = np.std(w_residuals)
-
         fit_data = y / (flux0 * systematic_model)
-
         fit_err = np.copy(err)  # * (1.0 + resid_scatter)
 
         # IF (plotting EQ 'on') THEN BEGIN
@@ -654,42 +654,25 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # .............................
         # Arrays to save to file
 
-        # stats
-        sys_stats[s, :] = [AIC, BIC, DOF, CHI, resid_scatter]
-        # img_date
-        sys_date[s, :] = x
-        # phase
-        sys_phase[s, :] = phase
-        # raw lightcurve flux
-        # sys_rawflux(s,*) = y
+        sys_stats[s, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats
+        sys_date[s, :] = x                                      # img_date
+        sys_phase[s, :] = phase                                 # phase
+        # sys_rawflux(s,*) = y                                  # raw lightcurve flux
         # sys_rawflux_err(s,*) = err
-        # corrected lightcurve flux
-        sys_flux[s, :] = fit_data
+        sys_flux[s, :] = fit_data                               # corrected lightcurve flux
         sys_flux_err[s, :] = fit_err
-        # residuals
-        sys_residuals[s, :] = residuals
-        # smooth model
-        sys_model[s, :] = mulimb02
-        # smooth phase
-        sys_model_phase[s, :] = x2
-        # systematic model
-        sys_systematic_model[s, :] = systematic_model
-        # parameters
-        sys_params[s, :] = mpfit_result.params
-        # parameter errors
-        sys_params_err[s, :] = pcerror
-        # depth
-        sys_depth[s] = rl
-        # depth error
-        sys_depth_err[s] = rl_err
-        # transit time
-        sys_epoch[s] = epoch
-        # transit time error
-        sys_epoch_err[s] = epoch_err
-        # evidence AIC
-        sys_evidenceAIC[s] = evidence_AIC
-        # evidence BIC
-        sys_evidenceBIC[s] = evidence_BIC
+        sys_residuals[s, :] = residuals                         # residuals
+        sys_model[s, :] = mulimb02                              # smooth model
+        sys_model_phase[s, :] = x2                              # smooth phase
+        sys_systematic_model[s, :] = systematic_model           # systematic model
+        sys_params[s, :] = mpfit_result.params                  # parameters
+        sys_params_err[s, :] = pcerror                          # parameter errors
+        sys_depth[s] = rl                                       # depth
+        sys_depth_err[s] = rl_err                               # depth error
+        sys_epoch[s] = epoch                                    # transit time
+        sys_epoch_err[s] = epoch_err                            # transit time error
+        sys_evidenceAIC[s] = evidence_AIC                       # evidence AIC
+        sys_evidenceBIC[s] = evidence_BIC                       # evidence BIC
 
     # SAVE, filename=out_folder+'analysis_circle_G141_'+run_name+'.sav', sys_stats, sys_date, sys_phase, sys_rawflux, sys_rawflux_err, sys_flux, sys_flux_err, sys_residuals, sys_model, sys_model_phase, sys_systematic_model, sys_params, sys_params_err, sys_depth, sys_depth_err, sys_epoch, sys_epoch_err, sys_evidenceAIC, sys_evidenceBIC
     # .......................................
@@ -878,6 +861,7 @@ if __name__ == '__main__':
     MsMpR = (aor / (constant1)) ** 3
 
     LD3D = 'yes'
+
     if LD3D == 'yes':
         # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon.
         FeH = 2  # Fe/H = -0.25
