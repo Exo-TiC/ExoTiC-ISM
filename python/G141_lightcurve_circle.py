@@ -152,8 +152,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     FeH = data_params[7]
     Teff = data_params[8]   # effective temperature
 
-    flux0 = y[0]
-    T0 = x[0]
+    flux0 = y[0]   # first flux data point
+    T0 = x[0]      # first time data point
     img_date = x   # time array
 
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATICS & Limb Darkening (LD)
@@ -192,9 +192,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         direc = os.path.join(limbDir, '3DGrid')
         grating = 'G141'
         widek = np.arange(len(wavelength))
-        M_H = data_params[6]
-        Teff = data_params[7]
-        logg = data_params[8]
+        M_H = data_params[6]    # metallicity
+        Teff = data_params[7]   # effective temperature
+        logg = data_params[8]   # log(g), gravitation
 
         uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grating, widek, wavelength, M_H, Teff,
                                                                                logg, dirsen, direc)
@@ -501,12 +501,15 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         epoch = p0[2]
         Per = p0[7]
 
+        # Phase
         HSTphase = np.zeros(nexposure)
         HSTphase = (x - T0) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
-        if k[0] != -1:
+
+        if k[0].shape == 0:
+        #if k[0] != -1:         # in IDL this meant if condition of "where" statement is true nowhere
             HSTphase[k] = HSTphase[k] - 1.0
 
         phase = np.zeros(nexposure)
@@ -516,7 +519,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         phase2 = np.floor(phase)
         phase = phase - phase2
         a = np.where(phase > 0.5)[0]
-        if a[0] != -1:
+        if a[0].shape == 0:
+        #if a[0] != -1:
             phase[a] = phase[a] - 1.0
 
         # MPFIT - ONE
@@ -537,6 +541,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         pcerror[:nfree] = np.sqrt(
             np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
 
+        # From mpfit define the DOF, BIC, AIC & CHI
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
         BIC = bestnorm + nfree * np.log(len(x))
         AIC = bestnorm + nfree
@@ -637,9 +642,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
             (np.sin(x2 * 2 * np.pi)) ** 2 + (np.cos(inclin) * np.cos(x2 * 2 * np.pi)) ** 2)
         mulimb02, mulimbf2 = hstmarg.occultnl(rl, c1, c2, c3, c4, b0)
 
-        systematic_model = (phase * m + 1.0) * (
-                HSTphase * hst1 + HSTphase ** 2. * hst2 + HSTphase ** 3. * hst3 + HSTphase ** 4. * hst4 + 1.0) * (
-                                   sh * sh1 + sh ** 2. * sh2 + sh ** 3. * sh3 + sh ** 4. * sh4 + 1.0)
+        systematic_model = (phase * m + 1.0) * \
+                           (HSTphase * hst1 + HSTphase ** 2. * hst2 + HSTphase ** 3. * hst3 + HSTphase ** 4. * hst4 + 1.0) * \
+                           (sh * sh1 + sh ** 2. * sh2 + sh ** 3. * sh3 + sh ** 4. * sh4 + 1.0)
 
         fit_model = mulimb01 * flux0 * systematic_model
         residuals = (y - fit_model) / flux0
