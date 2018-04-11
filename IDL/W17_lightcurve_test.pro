@@ -1,5 +1,17 @@
 ; W17_lightcurve_test.pro
 PRO W17_lightcurve_test
+
+; Read config file (mainly for paths)
+whereis,'W17_lightcurve_test', HST_fullpath
+HST_dir = FILE_DIRNAME(HST_fullpath)
+
+IF FILE_TEST(HST_dir + '/config_override.txt') THEN BEGIN
+  structure = read_params_vm(HST_dir + '/config_override.txt')
+ENDIF ELSE BEGIN
+  structure = read_params_vm(HST_dir + '/config.txt')
+ENDELSE
+
+; Start Hannah's code
 	set_plot, 'x'
 ; SET THE CONSTANTS 
 dtosec = 86400
@@ -14,8 +26,9 @@ HST_period = 0.06691666
 
 ; READ in the txt file for the lightcurve data
 ; the double precision seems important here as the x array is very specific
-data = ddread('/Users/ilaginja/Documents/Git/HST_Marginalization/data/W17_white_lightcurve_test_data.txt', offset=7, /countall, /double)
-wavelength = ddread('/Users/ilaginja/Documents/Git/HST_Marginalization/data/W17_wavelength_test_data.txt', offset=3, /countall, /double)
+dataDir = structure.INPUTDATA
+data = ddread(dataDir + 'W17_white_lightcurve_test_data.txt', offset=7, /countall, /double)
+wavelength = ddread(dataDir + 'W17_wavelength_test_data.txt', offset=3, /countall, /double)
 
 x = REFORM(data(0,*))
 y = REFORM(data(1,*))
@@ -42,6 +55,7 @@ MsMpR = (aor/(constant1))^3D0
 
 
 LD3D = 'yes'
+
 IF (LD3D EQ 'no') THEN BEGIN
 ; These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon. 
 FeH = 2 ;Fe/H = -0.25
@@ -56,9 +70,9 @@ Teff = 6550
 logg = 4.2
 endif
 
-data_params = [rl,epoch,inclin,MsMpR,ecc,omega,Per,FeH,Teff,logg]
+data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
 grid_selection = 'fit_time'
-out_folder = '/Users/ilaginja/Documents/Git/HST_Marginalization'
+out_folder = structure.OUTPUTS
 run_name = 'wl_time_wm3d'
 plotting='on'
 

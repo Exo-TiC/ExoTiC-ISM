@@ -1,8 +1,0 @@
-parabola
-gaussian
-gfit
-polar
-polar2
-lissajous
-lissa
-surprise
