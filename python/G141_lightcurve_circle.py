@@ -117,16 +117,16 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     # SET THE CONSTANTS 
     # constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]   # Description
     # Constants in array
-    constant = [2.5, 20.2, np.float64(6.67259e-11), 2400000.5, 86400, np.float64(7.15e7), np.float64(6.96e8),
-                np.float64(1.9e27), np.float64(1.99e30), 5781.6, 0.06691666]
+    #constant = [2.5, 20.2, np.float64(6.67259e-11), 2400000.5, 86400, np.float64(7.15e7), np.float64(6.96e8),
+    #            np.float64(1.9e27), np.float64(1.99e30), 5781.6, 0.06691666]
 
-    # Constants individually (but same as above)
+    # Constants individually (but same as above) - Why repeating them?
     gain = 2.5
     rdnoise = 20.2
     Gr = np.float64(6.67259e-11)
     JDconst = 2400000.5
     day_to_sec = 86400
-    #JD = np.float64(2400000.5)
+    JD = np.float64(2400000.5)
     Rjup = np.float64(7.15e7)
     Rsun = np.float64(6.96e8)
     MJup = np.float64(1.9e27)
@@ -134,6 +134,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     HST_second = 5781.6
     HST_period = 0.06691666
     HSTper = np.float64(96.36) / (np.float64(24) * np.float64(60))
+
+    # Put into array isntead of above
+    constant = [gain, rdnoise, Gr, JDconst, day_to_sec, Rjup, Rsun, MJup, Msun, HST_second, HST_period]
 
     nexposure = len(x)   # Total number of exposures in the observation
 
@@ -838,7 +841,10 @@ if __name__ == '__main__':
     """
     This is a translation of the W17_lightcurve_test.pro
     """
-    dataDir = os.path.join('..', 'data')
+    mainDir = '..'
+    outDir = os.path.join(mainDir, 'outputs')
+
+    dataDir = os.path.join(mainDir, 'data')
     # SET THE CONSTANTS
     dtosec = 86400
     big_G = np.float64(6.67259e-11)
@@ -883,7 +889,7 @@ if __name__ == '__main__':
 
     data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
     grid_selection = 'fit_time'
-    out_folder = '../outputs/Projects/lcextract/test_files/'  # Need to redefine this
+    out_folder = outDir
     run_name = 'wl_time_wm3d'
     plotting = 'on'
 

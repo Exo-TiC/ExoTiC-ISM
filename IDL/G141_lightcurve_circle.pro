@@ -150,11 +150,12 @@ PRINT, 'As you have clearly decided to proceed, we will now determine the stella
 
 ;......................................
 ;     LIMB DARKENING     ;
+
 IF (LD3D EQ 'no') THEN BEGIN
 kdir = '' 
 grating = 'G141'
 wsdata = wavelength
-widek=indgen(n_elements(wavelength))
+widek = indgen(n_elements(wavelength))
 k_metal = data_params(6)
 k_temp = data_params(7)
 
