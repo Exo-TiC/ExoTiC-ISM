@@ -1,5 +1,0 @@
-title: Parabola
-eq: x=maken(-10,10,100) & plot,a + b*x + c*x^2
-par:  a -50 50 0
-par:  b -50 50 0
-par:  c -10 10 1
