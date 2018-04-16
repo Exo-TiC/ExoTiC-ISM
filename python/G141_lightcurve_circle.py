@@ -103,17 +103,19 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     """
 
     print(
-        'Welcome to the Wakeford WFC3 analysis pipeline. All data will now be marginalised according to quality and usefulness.')
-
-    print('If results are not as expected - a new observation stratgy is reccomended, or you can bloody well wait for '
-          'JWST to make your lives better. PRESS control+C now if this was an unintended action.')
+        'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with 50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes. Please hold.')
 
     # DEFINE DIRECTORIES
+    # NEW We need to work out a universal format that we want people to put into this routine. 
     mainDir = '..'
     limbDir = os.path.join(mainDir, 'Limb-darkening')
     inDir = os.path.join(mainDir, 'data')
     outDir = os.path.join(mainDir, 'outputs','W17')
 
+
+# ----------------------
+    # NEW Is there a way in python to set constants across lots of routines?
+# ----------------------
     # SET THE CONSTANTS 
     # constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]   # Description
     # Constants in array
@@ -137,6 +139,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
     # Put into array isntead of above
     constant = [gain, rdnoise, Gr, JDconst, day_to_sec, Rjup, Rsun, MJup, Msun, HST_second, HST_period]
+# -----------------------------^^^^^
+
 
     nexposure = len(x)   # Total number of exposures in the observation
 
@@ -159,7 +163,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     T0 = x[0]      # first time data point
     img_date = x   # time array
 
-    # SET THE STARTING PARAMETERS FOR THE SYSTEMATICS & Limb Darkening (LD)
+    # SET THE STARTING PARAMETERS FOR THE SYSTEMATIC MODELS
     m = 0.0  # Linear Slope
     HSTP1 = 0.0  # Correct HST orbital phase
     HSTP2 = 0.0  # Correct HST orbital phase^2
@@ -170,12 +174,11 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     xshift3 = 0.0  # X-shift in wavelength^3
     xshift4 = 0.0  # X-shift in wavelength^4
 
-    print(
-        'As you have clearly decided to proceed, we will now determine the stellar limb-darkening parameters given the'
-        ' input stellar metallicity and effective temperature which was selected dependent on the stellar log(g).')
 
-
+    # =======================
     # LIMB DARKENING
+    # NEW We should be able to make it so that this is just the same parameters for each call, just one used the 3D model and the other uses the 1D model grid. 
+    # NEW The idea here would be to select the 3D grid automatically if the parameter is close to one of the options in the grid - BUT we would need to make sure that the user is told if the 3D model is used. You will need to look for differences between limb_fit_kurucz_any.pro and limb_fit_3D_choose.pro
     if LD3D == 'no':
         kdir = ''
         grating = 'G141'
@@ -201,8 +204,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
         uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grating, widek, wavelength, M_H, Teff,
                                                                                logg, dirsen, direc)
+    # =======================
 
-    print('Thank you for your patience. Next up is the lightcurve fitting with MPFIT using L-M minimization.')
+
     # ....................................
     # PLACE ALL THE PRIORS IN AN ARRAY - because we need to loop over them in a later step
     #p0 = [rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4]   # len(p0) = number of parameters nparams
@@ -210,7 +214,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE ;
     grid = hstmarg.wfc3_systematic_model_grid_selection(grid_selection)
-    nsys, nparams = grid.shape   # nsys = number of systems?
+    nsys, nparams = grid.shape   # nsys = number of systematic models
 
     #  SET UP THE ARRAYS  ;
     # sav arrays for the first step throught to get the err inflation
@@ -262,7 +266,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     print('\n 1ST FIT \n')
     print(
         'The first run through of the data for each of the WFC3 stochastic models outlined in Table 2 of Wakeford et '
-        'al. (2016a) is now being preformed. Using this fit we will scale the uncertainties you input to incorporate '
+        'al. (2016) is now being preformed. Using this fit we will scale the uncertainties you input to incorporate '
         'the inherent scatter in the data for each model.')
 
     # Loop over all systems (= parameter combinations)
@@ -273,6 +277,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         print(systematics)
         print('  ')
 
+        #NEW In IDL you need to define all of your arrays size before you fill them in a loop. I am not sure if this is the same in Python.  
         HSTphase = np.zeros(nexposure)
         HSTphase = (img_date - T0) / HST_period
         phase2 = np.floor(HSTphase)
@@ -293,8 +298,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # if a[0] != -1:
         #     phase[a] = phase[a] - 1.0
 
-        #### MPFIT - ONE ####
 
+        #### MPFIT - ONE ####
         # PLACE ALL THE PRIORS IN AN ARRAY - because we need to loop over them in a later step
         # NEW take this out of loop
         p0 = [rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m, HSTP1, HSTP2, HSTP3, HSTP4,
@@ -358,20 +363,20 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
             p0[i] = mpfit_result.params[i]
 
         # populate errors from pcerror array
-        # We don't need all of these
+        # NEW We don't need all of these but does it hurt to keep them?
         rl_err = pcerror[0]
         flux0_err = pcerror[1]
         epoch_err = pcerror[2]
         inclin_err = pcerror[3]
         msmpr_err = pcerror[4]
         ecc_err = pcerror[5]
-        omega_err = pcerror[6]
-        per_err = pcerror[7]
+        omega_err = pcerror[6] # NEW don't need.
+        per_err = pcerror[7] # NEW don't need.
         T0_err = pcerror[8]
-        c1_err = pcerror[9]
-        c2_err = pcerror[10]
-        c3_err = pcerror[11]
-        c4_err = pcerror[12]
+        c1_err = pcerror[9] # NEW don't need.
+        c2_err = pcerror[10] # NEW don't need.
+        c3_err = pcerror[11] # NEW don't need.
+        c4_err = pcerror[12] # NEW don't need.
         m_err = pcerror[13]
         hst1_err = pcerror[14]
         hst2_err = pcerror[15]
@@ -428,7 +433,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # ..........................................
         # CHOPPING OUT THE BAD PARTS
         # ..........................................
-
+# NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets. 
         cut_down = 2.57  # Play around with this value if you want.
         # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard deviation, although this is only a very timy inflation of the uncertainty and I need to find a more statistically riggrous way to do this. 
         # Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
@@ -485,10 +490,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     #################################
 
     print('..........................................')
-    print('As we seem to have found how shit each of the systematic models are at fitting the data compared to a'
-          'Mandel&Agol transit model we can now use the scatter on their residuals to inflate the uncertainties for the'
-          'data. We will then go ahead and refit for each systematic model if that is okay with you. If not, Control+c'
-          'is still a valid option.')
+    print('Each systematic model will now be re-fit with the previously determined parameters serving as the new starting points.')
 
     for s in range(0, nsys):
         print('................................')
@@ -497,8 +499,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         print(systematics)
         print('  ')
 
+# Rescale the err array by the standard deviation of the residuals from the fit. 
         err *= (1.0 - w_scatter[s])
-
+# re-set the arrays and start again. This is to ensure that we reached a minima in the chi-squared space.
         p0 = w_params[s, :]
         T0 = p0[8]
         epoch = p0[2]
@@ -560,7 +563,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         evidence_AIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * AIC
 
         # Redefine all of the parameters given the MPFIT output
-
         rl = mpfit_result.params[0]
         flux0 = mpfit_result.params[1]
         epoch = mpfit_result.params[2]
@@ -607,14 +609,14 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         xshift3_err = pcerror[20]
         xshift4_err = pcerror[21]
 
-        # Recalculate a/R*
+        # Recalculate a/R* based on the new MsMpR value which may have been fit in the routine.
         constant1 = (Gr * Per * Per / (4 * np.pi * np.pi)) ** (1 / 3.)
         aval = constant1 * (MsMpR) ** (1 / 3.)
 
         print('Transit depth = {} +/- {}     centered at  {}'.format(rl, rl_err, epoch))
 
         # OUTPUTS
-        # Re-Calculate each of the arrays dependent on the output parameters
+        # Re-Calculate each of the arrays dependent on the output parameters for the epoch
         phase = (x - epoch) / (Per / 86400)
         phase2 = np.floor(phase)
         phase = phase - phase2
