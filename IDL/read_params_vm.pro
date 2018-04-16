@@ -35,7 +35,7 @@
 ; knowledge of the CeCILL-C license and that you accept its terms.
 ;
 
-;+
+ ;+
 ; NAME:
 ;   READ_PARAMS_VM - Read a parameter file to pass parameters to IDL when
 ;                    using a Virtual Machine

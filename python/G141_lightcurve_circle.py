@@ -112,7 +112,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     mainDir = '..'
     limbDir = os.path.join(mainDir, 'Limb-darkening')
     inDir = os.path.join(mainDir, 'data')
-    outDir = os.path.join(mainDir, 'outputs')
+    outDir = os.path.join(mainDir, 'outputs','W17')
 
     # SET THE CONSTANTS 
     # constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]   # Description
