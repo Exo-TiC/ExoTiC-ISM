@@ -112,6 +112,8 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     # =============
     # HST, GTC - load response function and interpolate onto kurucz model grid
     # =============
+
+    # FOR STIS
     if grating == 'G430L':
         sav = readsav(os.path.join(dirsen, 'G430L.sensitivity.sav'))  # wssens,sensitivity
         wssens = sav['wssens']
@@ -129,7 +131,10 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 4.882
+    # =============
 
+
+# FOR WFC3
     if grating == 'G141':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
         sav = readsav(os.path.join(dirsen, 'G141.WFC3.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
@@ -141,18 +146,10 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 1
+    # =============
+    # =============
 
-    if grating == 'R500B':
-        sav = readsav(os.path.join(dirsen, 'R500B.sensitivity.sav'))  # wssens, sensitivity
-        wssens = sav['wssens']
-        sensitivity = sav['sensitivity']
-        wdel = 3.78201
 
-    if grating == 'R500R':
-        sav = readsav(os.path.join(dirsen, 'R500R.sensitivity.sav'))  # wssens, sensitivity
-        wssens = sav['wssens']
-        sensitivity = sav['sensitivity']
-        wdel = 4.88
 
     wsHST = wssens
     wsHST = np.concatenate((np.array([wsHST[0] - wdel - wdel, wsHST[0] - wdel]),
