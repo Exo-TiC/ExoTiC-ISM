@@ -14,14 +14,18 @@ def residuals():
 
 
 def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
+  # These are constants that are used in almost all of the routines and I am sure there is a way to make them common parameters rather than having to redefine them in each place - as you can some are redundantly redfined again below and some are just re-typed anyway. 
+  # ;constant = [GAIN,READNOISE,Gr,JD,DAY_TO_SEC,Rjup,Rsun,MJup,Msun,HST_SECOND,HST_PERIOD] 
     constant = [2.5, 20.2, 6.67259e-11, 2400000.5, 86400, 7.15e7, 6.96e8, 1.9e27, 1.99e30, 5781.6, 0.06691666]
     JD = 2400000.5
     Gr = 6.67259e-11
     HSTper = 96.36 / (24 * 60)
 
+# Define each of the parameters that are read into the fitting routine
     rl = p[0]
     epoch = p[2]
     inclin = p[3]
+    MsMpR = p[4]
     ecc = p[5]
     omega = p[6]
     Per = p[7]
@@ -32,13 +36,9 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     c4 = p[12]
     pi = np.float32(np.pi)
 
-    MsMpR = p[4]
-
-    constant1 = (constant[2] * Per * Per / (4 * pi * pi)) ** (1 / 3.)
-    aval = constant1 * MsMpR ** (1 / 3.)
-
+# Turn off the print statements if you want this function to be silent - these are here for sanity checks
     print(epoch)
-    phase = (x - epoch) / (Per / 86400)  # convert to days
+    phase = (x - epoch) / (Per / 86400)  # convert to days 
     phase2 = np.floor(phase)
     phase = phase - phase2
     a = np.where(phase > 0.5)[0]
@@ -53,9 +53,11 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     if k.size > 0:
         HSTphase[k] = HSTphase[k] - 1.0
 
+# Calculate the impact parameter as a function of the planetary phase across the star. 
     b0 = (Gr * Per * Per / (4 * pi * pi)) ** (1 / 3.) * (MsMpR ** (1 / 3.)) * np.sqrt(
         (np.sin(phase * 2 * pi)) ** 2 + (np.cos(inclin) * np.cos(phase * 2 * pi)) ** 2)
     print(b0)
+
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
     # b0 is the impact parameter funtion and I am not sure how this is handled in BATMAN - I will also look into this.
@@ -64,7 +66,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
             p[14] * HSTphase + p[15] * HSTphase ** 2 + p[16] * HSTphase ** 3 + p[17] * HSTphase ** 4 + 1.0) * (
                                p[18] * sh + p[19] * sh ** 2 + p[20] * sh ** 3 + p[21] * sh ** 4 + 1.0)
 
-    # model fit to data = transit model * baseline flux * systematic model
+    # model fit to data = transit model * baseline flux (flux0) * systematic model
     model = mulimb0 * p[1] * systematic_model
     # this would be the break point to get the model values
     # return model
@@ -78,6 +80,10 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     return [0, (y - model) / err]
 
 
+
+
+
+# This is the function that could be replaced by BATMAN - but if it works like this then I don't know that we need to change it. 
 def occultnl(rl, c1, c2, c3, c4, b0):
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
@@ -182,6 +188,10 @@ def occultuniform(b0, w):
             continue
 
     return muo1
+
+
+
+
 
 
 def wfc3_systematic_model_grid_selection(selection):
