@@ -56,6 +56,9 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     b0 = (Gr * Per * Per / (4 * pi * pi)) ** (1 / 3.) * (MsMpR ** (1 / 3.)) * np.sqrt(
         (np.sin(phase * 2 * pi)) ** 2 + (np.cos(inclin) * np.cos(phase * 2 * pi)) ** 2)
     print(b0)
+    # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
+    # The c1-c4 are the non-linear limb-darkening parameters
+    # b0 is the impact parameter funtion and I am not sure how this is handled in BATMAN - I will also look into this.
     mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
     systematic_model = (p[13] * phase + 1.0) * (
             p[14] * HSTphase + p[15] * HSTphase ** 2 + p[16] * HSTphase ** 3 + p[17] * HSTphase ** 4 + 1.0) * (
