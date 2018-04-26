@@ -172,15 +172,12 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     respwavebin[widek] = 1.0
     data_resp = interp1d(wsdata, respwavebin, bounds_error=False, fill_value=0)
     reswavebinout = data_resp(ws)  # interpolate data onto model wavelength grid
-    # Trim elements that are not needed in calculation
-    low = np.where(ws >= wsdata[0])[0].min()
-    high = np.where(ws <= wsdata[len(wsdata) - 1])[0].max()
-    ws2 = ws
-    ws3 = ws
-    fcalc = np.array([f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10])
-    phot1 = np.zeros(11)
 
-    for i in range(11):  # Loop over spectra at diff angles
+    fcalc = np.array([f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10])
+    phot1 = np.zeros(fcalc.shape[0])
+
+    # Integrate over the spectra to make synthetic photometric points.
+    for i in range(fcalc.shape[0]):  # Loop over spectra at diff angles
         fcal = fcalc[i, :]
         Tot = int_tabulated(ws, ws * respout * reswavebinout)
         phot1[i] = (int_tabulated(ws, ws * respout * reswavebinout * fcal, sort=True)) / Tot
