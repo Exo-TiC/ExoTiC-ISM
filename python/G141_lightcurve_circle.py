@@ -86,7 +86,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         - Teff: Stellar Temperature index
               FOR stellar log(g) = 4.0
                 Teff = [3500(8),3750(19),4000(30),4250(41),4500(52), 4750(63),5000(74),5250(85),5500(96),5750(107),
-                6000(118),6250(129),6500(139)]
+                6000(118),6250(129),6500(138)]
               FOR stellar log(g) = 4.5
                 Teff=[3500(9),3750(20),4000(31),4250(42),4500(53),4750(64),5000(75),5250(86),5500(97),5750(108),
                 6000(119),6250(129),6500(139)]
@@ -145,7 +145,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     nexposure = len(x)   # Total number of exposures in the observation
 
     # SET THE PLANET STARTING PARAMETERS
-    # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff]   # Description
+    # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]   # Description
     rl = data_params[0]                             # Rp/R* estimate
     epoch = data_params[1]                          # cener of transit time in MJD
     inclin = data_params[2] * ((2 * np.pi) / 360)   # inclination, converting it to radians
@@ -198,9 +198,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         direc = os.path.join(limbDir, '3DGrid')
         grating = 'G141'
         widek = np.arange(len(wavelength))
-        M_H = data_params[6]    # metallicity
-        Teff = data_params[7]   # effective temperature
-        logg = data_params[8]   # log(g), gravitation
+        M_H = data_params[7]    # metallicity
+        Teff = data_params[8]   # effective temperature
+        logg = data_params[9]   # log(g), gravitation
 
         uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grating, widek, wavelength, M_H, Teff,
                                                                                logg, dirsen, direc)
@@ -433,7 +433,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # ..........................................
         # CHOPPING OUT THE BAD PARTS
         # ..........................................
-# NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets. 
+        # NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets.
         cut_down = 2.57  # Play around with this value if you want.
         # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard deviation, although this is only a very timy inflation of the uncertainty and I need to find a more statistically riggrous way to do this. 
         # Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
