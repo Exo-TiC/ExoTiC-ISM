@@ -87,7 +87,6 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     file = 'mmu_t' + Ttxt + 'g' + Gtxt + 'm' + Mtxt + 'v05.flx'
     model = file  # not used anymore
     header = file  # not used anymore
-    #  if (header eq 0) then goto,skipthis
 
     # Read data from IDL .sav file
     sav = readsav(os.path.join(direc, file))  # readsav reads an IDL .sav file
@@ -190,7 +189,7 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     y = yall[1:]
     weights = x / x
 
-    # start fitting models
+    # Start fitting the different models
     fitter = LevMarLSQFitter()
 
     # Fit a four parameter non-linear limb darkening model and get fitted variables, c1, c2, c3, c4.
@@ -273,9 +272,9 @@ def quadratic_limb_darkening(x, aLD=0.0, bLD=0.0):
 
 if __name__ == '__main__':
 
-    dirsen = os.path.join('..', 'Limb-darkening')
-    direc = os.path.join('..', 'Limb-darkening', '3DGrid')
-    wavelength = np.loadtxt('W17_wavelength_test_data.txt', skiprows=3)
+    dirsen = os.path.join('..', 'Limb-darkening')   # Directory for sensitivity files
+    direc = os.path.join('..', 'Limb-darkening', '3DGrid')  # Directory for .sav files
+    wavelength = np.loadtxt(os.path.join('..', 'data', 'W17_wavelength_test_data.txt'), skiprows=3)
 
     # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon.
     FeH = -0.25
