@@ -61,7 +61,7 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
         optG = (abs(logg - logg_Grid)).argmin()
 
     if Teff_Grid[optT] == 5777:
-        logg_Grid = [4.4]
+        logg_Grid = np.array([4.4])
         optG = 0
 
     if Teff_Grid[optT] == 6000:
@@ -69,11 +69,11 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
         optG = (abs(logg - logg_Grid)).argmin()
 
     if Teff_Grid[optT] == 6500:
-        logg_Grid = [4.0, 4.5]
+        logg_Grid = np.array([4.0, 4.5])
         optG = (abs(logg - logg_Grid)).argmin()
 
     if Teff_Grid[optT] == 7000:
-        logg_Grid = [4.5]
+        logg_Grid =  np.array([4.5])
         optG = 0
 
     # ==== Select Teff and Log g. Mtxt, Ttxt and Gtxt are then put together as string to load correct files.
