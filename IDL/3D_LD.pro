@@ -60,6 +60,8 @@ ENDIF ELSE BEGIN
   structure = read_params_vm(HST_dir + '/config.txt')
 ENDELSE
 
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; Start code
 dirsen = structure.LIMBDARKENING
 direc = dirsen + '3DGrid/'
@@ -112,6 +114,7 @@ model=file
   Teff_model=Teff_grid(optT)
   logg_model=logg_grid(optg)
   MH_model=string(m_h_grid(optm))
+
   print,'  ',header
   f0=f[*,0]
   f1=f[*,1]
@@ -123,15 +126,19 @@ model=file
   f7=f[*,7]
   f8=f[*,8]
   f9=f[*,9]
-  f10=f[*,10]
+  f10=f[*,10]   # DIFF - number of flux measurements
 
 ; Mu from grid
 ;    0.00000    0.0100000    0.0500000     0.100000     0.200000     0.300000   0.500000     0.700000     0.800000     0.900000      1.00000
 mu=mmd.(3)
+# DIFF - how mu is defined
 
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; +++++++++++++ This is where they're basically the same? ++++++++++++++++++++++
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;=============
-; HST,GTC - load responce function and interpolate onto kurucz model grid
+; HST,GTC - load responce function and interpolate onto kurucz model grid   # DIFF - check which ones really needed
 ;==============
 if (grating eq 'G430L') then begin
  restore, dirsen+'G430L.sensitivity.sav';wssens,sensitivity
@@ -172,10 +179,12 @@ respwavebin=wsdata/wsdata*0.0D0
 widek=widek+2 ; need to add two indicies to compensate for padding with 2 zeros
 respwavebin(widek)=1.0D0
 linterp,wsdata,respwavebin,ws,reswavebinout  ;interpolate data onto model wavelength grid
+
   ;Trim elements that are not needed in calculation
   low=where(ws ge wsdata(0)) & low=low[0]
   high=where(ws le wsdata(n_elements(wsdata)-1)) & high=high(n_elements(high)-1)
   ws2=ws & ws3=ws
+
   ;trim,low,high,ws,respout,reswavebinout,f0,f1,f2
   ;trim,low,high,ws2,f3,f4,f5,f6,f7
   ;trim,low,high,ws3,f8,f9,f10
@@ -185,12 +194,12 @@ linterp,wsdata,respwavebin,ws,reswavebinout  ;interpolate data onto model wavele
 ; oplot,ws,respout,color=1000 & oplot,ws,reswavebinout,color=321321
 
 ;help,f,f10
-fcalc=[[f0],[f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10]]
+fcalc=[[f0],[f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10]]   # DIFF
 ;help,fcalc
-phot1=dblarr(11)
+phot1=dblarr(11)   # DIFF - not anymore in python
 
 ; integrate over the spectra to make synthetic phomometric points
-for i=0,10 do begin & $ ; loop over spectra at diff angles
+for i=0,10 do begin & $ ; loop over spectra at diff angles   # DIFF - not anymore in python
     fcal=fcalc(*,i) & $
     Tot=INT_TABULATED(ws,ws*respout*reswavebinout) & $
     phot1(i)=(INT_TABULATED(ws,ws*respout*reswavebinout*fcal,/sort,/double))/Tot & $
@@ -206,8 +215,8 @@ Co=dblarr(6,4)
 for i=0,0 do begin
 ;=== Corot 4-parameter
 A = [0.0,0.0,0.0,0.0]       ; c1,c2,c3,c4
-x=mu(1:10)
-y=yall(1:10,i)
+x=mu(1:10)   # DIFF - not in python
+y=yall(1:10,i)   # DIFF - not in python
 weights = x/x
 fa = {X:x, Y:y, ERR:weights}  ;create structure of data to be fitt
 p0=A   ;initial guess
@@ -226,7 +235,7 @@ x2=findgen(100)*0.01
       a[1]*(1. - x2^(2./2.)) + $
       a[2]*(1. - x2^(3./2.)) + $
       a[3]*(1. - x2^(4./2.))  )  )
-f4=f
+f4=f   # DIFF - irrelevant
 ; wset,4
 ; if (i eq 0) then plot,x,y,psym=1,xtitle='Mu',ytitle='I/Io',title='model '+header
 ; oplot,x2,f,color=cgcolor('red', !D.Table_Size-2)
@@ -243,11 +252,12 @@ f4=f
 Co(0,*)=a
 endfor   ;loop over bandpasses
 ;=====================================================================
+
 for i=0,0 do begin
 ;=== Corot 3-parameter
 A = [0.0,0.0,0.0,0.0]       ; c1,c2,c3,c4
-x=mu(1:10)
-y=yall(1:10,i)
+x=mu(1:10)   # DIFF
+y=yall(1:10,i)   # DIFF
 weights = x/x
 fa = {X:x, Y:y, ERR:weights}  ;create structure of data to be fitt
 p0=A   ;initial guess
@@ -284,8 +294,8 @@ endfor   ;loop over bandpasses
 ;=== Corot quadratic
 for i=0,0 do begin
 A = [0.0,0.0,0.0,0.0]       ; c1,c2,c3,c4
-x=mu(1:10)
-y=yall(1:10,i)
+x=mu(1:10)   # DIFF
+y=yall(1:10,i)  # DIFF
 weights = x/x
 fa = {X:x, Y:y, ERR:weights}  ;create structure of data to be fitt
 p0=A   ;initial guess
@@ -316,8 +326,8 @@ endfor   ;loop over bandpasses
 ;=== Corot linear
 for i=0,0 do begin
 A = [0.0,0.0,0.0,0.0]       ; c1,c2,c3,c4
-x=mu(1:10)
-y=yall(1:10,i)
+x=mu(1:10)   # DIFF
+y=yall(1:10,i)   # DIFF
 weights = x/x
 fa = {X:x, Y:y, ERR:weights}  ;create structure of data to be fitt
 p0=A   ;initial guess
@@ -378,7 +388,7 @@ aLD=Co(2,1) & bLD=Co(2,3) ;quadratic
 ;if (a eq 'TEFF  50000.  GRAVITY 5.0') then goto,skipthis ;
 
 
-save, filename='3D.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header
+save, filename='3D.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header   # DIFF
 
                           ;loop over individual Kurucz models
 skipthis: ;

@@ -22,6 +22,8 @@ ENDIF ELSE BEGIN
   structure = read_params_vm(HST_dir + '/config.txt')
 ENDELSE
 
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; Start code
 !path = '~/IDL/pro:'+ !path
 set_plot,'x'
@@ -32,10 +34,14 @@ device,RETAIN=2
 
 ;restore,'template_kurucz.sav' ;template_kurucz,template_kurucz_header
 ;  template_kurucz=template
+
+;==== Folders
 limbDir = structure.LIMBDARKENING
 restore, limbDir + 'templates.sav' ;template_kurucz,template_kurucz_header
-
+# "restore" basically loads the file   # DIFF - load files
  restore, limbDir + 'kuruczlist.sav' ;list of kurucz models  17=solar vturub=2 km/s
+
+ # DIFF picking the metallicity ######### from here...
 ;==== Select Metalicity
 ;M_H=[-1.0(),-0.5(),-0.3(2),-0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
 ;  model=li(0) ;-0.1
@@ -48,9 +54,11 @@ restore, limbDir + 'templates.sav' ;template_kurucz,template_kurucz_header
 ;  model=li(23) ;+0.5 k2
 ;  model=li(24)  ;+1.0
 model = li(k_metal)
+# ... to here ##########################
 
-direc = limbDir + 'Kurucz/'
+direc = limbDir + 'Kurucz/'   # DIFF - just another folder
 
+ # DIFF picking Teff and logg ######### from here...
 ;Teff=[3500(9),3750(20),4000(31),4250(42),4500(53),4750(64),5000(75),5250(86),5500(97),5750(108),6000(119),6250(129),6500(139)]
 ;==== Select Teff and Log g
 ;N=9   ;  TEFF   3500.  GRAVITY 4.50000 M0
@@ -66,15 +74,21 @@ direc = limbDir + 'Kurucz/'
 ;N=119     ;  TEFF   6000.  GRAVITY 4.50000 G0
 ;N=129     ;  TEFF   6250.  GRAVITY 4.50000 F8
 N = k_temp
+# ... to here ##########################
 
+ # DIFF reading data from file ######### from here...
 st = (1221.+4)*N-N & $
+
   header = read_ascii(direc+model,template=template_kurucz_header,num_records=1,data_start=st) & $
 ;  if (header eq 0) then goto,skipthis
+
   data = read_ascii(direc+model,template=template_kurucz,num_records=1221,data_start=3+st) & $
   ws = data.(0)*10
+
   Teff_model = double(strmid(header.(0), 6, 6))
   logg_model = double(strmid(header.(0), 21, 7))
   MH_model = double(strmid(header.(0), 43.4))
+
   print, N, '  ', header
 ;  if (abs(TEff_GTC-Teff_model) gt 500) or (abs(logg_GTC)-logg_model gt 0.5) or (abs(MH_GTC)-MH_model gt 0.2) then goto,nextmodel
 
@@ -97,11 +111,12 @@ st = (1221.+4)*N-N & $
   f13=data.(14)*f0/100000.
   f14=data.(15)*f0/100000.
   f15=data.(16)*f0/100000.
-  f16=data.(17)*f0/100000.
+  f16=data.(17)*f0/100000.   # DIFF - number of flux measurements
+  # ... to here ##########################
 
 mu=[1.000,   .900,  .800,  .700,  .600,  .500,  .400,  .300,  .250,  .200,  .150,  .125,  .100,  .075,  .050,  .025 , .010]
 
-
+# DIFF - how mu is defined
 
 mu=[1.000,   .900,  .800,  .700,  .600,  .500,  .400,  .300,  .250,  .200,  .150,  .125,  .100,  .075,  .050,  .025 , .010]
 
@@ -109,8 +124,12 @@ mu=[1.000,   .900,  .800,  .700,  .600,  .500,  .400,  .300,  .250,  .200,  .150
 ;if (grating eq 'G430L') then restore,'ihd189733p.sav' ;f1..f16,mu,ws
 if (grating eq 'G750M') then restore,limbDirv+'G750L.sensitivity' ;f1..f16,mu,ws
 
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+; +++++++++++++ This is where they're basically the same? ++++++++++++++++++++++
+; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 ;=============
-; HST - load responce function and interpolate onto kurucz model grid
+; HST - load responce function and interpolate onto kurucz model grid   # DIFF - check which ones really needed
 ;==============
 if (grating eq 'G430L') then begin
   restore, limbDir+'G430L.sensitivity.sav';wssens,sensitivity
@@ -172,11 +191,11 @@ linterp,wsdata,respwavebin,ws,reswavebinout  ;interpolate data onto model wavele
 ;plot,ws,f0/max(f0),xrange=[wsdata(0),wsdata(n_elements(wsdata)-1)],yrange=[0,1], title='Model Kurucz spectra (white) , STIS response curve (red), & Desired Wavelength bin (green)',/xstyle,/ystyle
 ;oplot,ws,respout,color=1000 & oplot,ws,reswavebinout,color=321321
 
-fcalc=[[f0],[f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10],[f11],[f12],[f13],[f14],[f15],[f16]]
-phot1=dblarr(17)
+fcalc=[[f0],[f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10],[f11],[f12],[f13],[f14],[f15],[f16]]   # DIFF
+phot1=dblarr(17)   # DIFF - not anymore in python
 
 ; integrate over the spectra to make synthetic phomometric points
-for i=0,16 do begin & $ ; loop over spectra at diff angles
+for i=0,16 do begin & $ ; loop over spectra at diff angles   # DIFF - not anymore in python
     fcal=fcalc(*,i) & $
     Tot=INT_TABULATED(ws,ws*respout*reswavebinout) & $
     phot1(i)=(INT_TABULATED(ws,ws*respout*reswavebinout*fcal,/sort,/double))/Tot & $
@@ -189,15 +208,15 @@ endfor
 ;device,/landscape,/color
 ;device,file='limb_fit_kurucz_nicmos.ps'
 ;title='Non-linear limb-dark,  Kurucz ip00t5000g4.5k8, Black Points= model, Red=fitt coeff'
-yall=[[phot1/phot1(0)]]  ;,[phot3/phot3(0)],[phot2/phot2(0)],[phot4/phot4(0)],[phot187/phot187(0)],[phot166/phot166(0)]]
+yall=[[phot1/phot1(0)]]  ;,[phot3/phot3(0)],[phot2/phot2(0)],[phot4/phot4(0)],[phot187/phot187(0)],[phot166/phot166(0)]]   # DIFF - first index in line
 Co=dblarr(6,4)
 
 ;=====================================================================
 for i=0,0 do begin
 ;=== Corot 4-parameter
 A = [0.0,0.0,0.0,0.0]       ; c1,c2,c3,c4
-x=mu(0:16)
-y=yall(0:16,i)
+x=mu(0:16)   # DIFF - not in python
+y=yall(0:16,i)   # DIFF - not in python
 weights = x/x
 fa = {X:x, Y:y, ERR:weights}  ;create structure of data to be fitt
 p0=A   ;initial guess
@@ -216,6 +235,7 @@ x2=findgen(100)*0.01
       a(1)*(1. - x2^(2./2.)) + $
       a(2)*(1. - x2^(3./2.)) + $
       a(3)*(1. - x2^(4./2.))  )  )
+# DIFF - irrelevant
 ;wset,4
 ;if (i eq 0) then plot,x,y,psym=1,xtitle='Mu',ytitle='I/Io',title='model '+header
 ;oplot,x2,f,color=red
@@ -232,11 +252,12 @@ x2=findgen(100)*0.01
 Co(0,*)=a
 endfor   ;loop over bandpasses
 ;=====================================================================
+
 for i=0,0 do begin
 ;=== Corot 3-parameter
 A = [0.0,0.0,0.0,0.0]       ; c1,c2,c3,c4
-x=mu(0:14)
-y=yall(0:14,i)
+x=mu(0:14)   # DIFF
+y=yall(0:14,i)   # DIFF
 weights = x/x
 fa = {X:x, Y:y, ERR:weights}  ;create structure of data to be fitt
 p0=A   ;initial guess
@@ -273,8 +294,8 @@ endfor   ;loop over bandpasses
 ;=== Corot quadratic
 for i=0,0 do begin
 A = [0.0,0.0,0.0,0.0]       ; c1,c2,c3,c4
-x=mu(0:14)
-y=yall(0:14,i)
+x=mu(0:14)   # DIFF
+y=yall(0:14,i)   # DIFF
 weights = x/x
 fa = {X:x, Y:y, ERR:weights}  ;create structure of data to be fitt
 p0=A   ;initial guess
@@ -305,8 +326,8 @@ endfor   ;loop over bandpasses
 ;=== Corot linear
 for i=0,0 do begin
 A = [0.0,0.0,0.0,0.0]       ; c1,c2,c3,c4
-x=mu(0:14)
-y=yall(0:14,i)
+x=mu(0:14)   # DIFF
+y=yall(0:14,i)   # DIFF
 weights = x/x
 fa = {X:x, Y:y, ERR:weights}  ;create structure of data to be fitt
 p0=A   ;initial guess
@@ -356,7 +377,7 @@ aLD=Co(2,1) & bLD=Co(2,3) ;quadratic
 ;if (a eq 'TEFF  50000.  GRAVITY 5.0') then goto,skipthis ;
 
 
-save,filename='Kurucz.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header
+save,filename='Kurucz.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header   # DIFF
 
                           ;loop over individual Kurucz models
 skipthis: ;
