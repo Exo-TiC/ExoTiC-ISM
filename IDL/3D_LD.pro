@@ -134,7 +134,11 @@ mu=mmd.(3)
 # DIFF - how mu is defined
 
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-; +++++++++++++ This is where they're basically the same? ++++++++++++++++++++++
+; +++++++++++++ This is where they're basically the same? ++++++++++++
+; What I need from section that differs:
+  ws
+  f1, f2, ...
+  mu
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;=============
@@ -388,7 +392,7 @@ aLD=Co(2,1) & bLD=Co(2,3) ;quadratic
 ;if (a eq 'TEFF  50000.  GRAVITY 5.0') then goto,skipthis ;
 
 
-save, filename='3D.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header   # DIFF
+save, filename='3D.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header   # DIFF - but nothing gets saved in python
 
                           ;loop over individual Kurucz models
 skipthis: ;

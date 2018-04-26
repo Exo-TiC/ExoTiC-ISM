@@ -77,14 +77,19 @@ N = k_temp
 # ... to here ##########################
 
  # DIFF reading data from file ######### from here...
+ # Defining some parameter, I think it tells you where the header stops and the actual data starts
 st = (1221.+4)*N-N & $
 
+# Read the header from restored file
   header = read_ascii(direc+model,template=template_kurucz_header,num_records=1,data_start=st) & $
 ;  if (header eq 0) then goto,skipthis
 
+# Read data from restored file
   data = read_ascii(direc+model,template=template_kurucz,num_records=1221,data_start=3+st) & $
-  ws = data.(0)*10
+  ws = data.(0)*10   # Why like this? # need later
 
+  # strmid cuts out a part of a string strmid(string, first_char, length)
+  # double makes a double precision float
   Teff_model = double(strmid(header.(0), 6, 6))
   logg_model = double(strmid(header.(0), 21, 7))
   MH_model = double(strmid(header.(0), 43.4))
@@ -125,7 +130,11 @@ mu=[1.000,   .900,  .800,  .700,  .600,  .500,  .400,  .300,  .250,  .200,  .150
 if (grating eq 'G750M') then restore,limbDirv+'G750L.sensitivity' ;f1..f16,mu,ws
 
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-; +++++++++++++ This is where they're basically the same? ++++++++++++++++++++++
+; +++++++++++++ This is where they're basically the same? ++++++++++++
+; What I need from section that differs:
+  ws
+  f1, f2, ..., fn
+  mu
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;=============
@@ -377,7 +386,7 @@ aLD=Co(2,1) & bLD=Co(2,3) ;quadratic
 ;if (a eq 'TEFF  50000.  GRAVITY 5.0') then goto,skipthis ;
 
 
-save,filename='Kurucz.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header   # DIFF
+save,filename='Kurucz.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header   # DIFF - but nothing gets saved in python
 
                           ;loop over individual Kurucz models
 skipthis: ;
