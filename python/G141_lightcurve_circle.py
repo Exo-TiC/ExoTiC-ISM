@@ -109,7 +109,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
     # NEW We need to work out a universal format that we want people to put into this routine. 
     mainDir = '..'
     limbDir = os.path.join(mainDir, 'Limb-darkening')
-    inDir = os.path.join(mainDir, 'data')
+    dataDir = os.path.join(mainDir, 'data')
     outDir = os.path.join(mainDir, 'outputs','W17')
 
 
