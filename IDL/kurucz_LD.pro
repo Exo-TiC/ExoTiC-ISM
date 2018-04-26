@@ -38,7 +38,7 @@ device,RETAIN=2
 ;==== Folders
 limbDir = structure.LIMBDARKENING
 restore, limbDir + 'templates.sav' ;template_kurucz,template_kurucz_header
-# "restore" basically loads the file   # DIFF - load files
+# "restore" loads the file   # DIFF - load files
  restore, limbDir + 'kuruczlist.sav' ;list of kurucz models  17=solar vturub=2 km/s
 
  # DIFF picking the metallicity ######### from here...
@@ -54,6 +54,13 @@ restore, limbDir + 'templates.sav' ;template_kurucz,template_kurucz_header
 ;  model=li(23) ;+0.5 k2
 ;  model=li(24)  ;+1.0
 model = li(k_metal)   # k_metal is the INDEX of M_H position instead of M_H itself
+# 'li' is the only "column" in the "kuruczlist.sav" file. It cointains a list of model names,
+# and k_metal tells you which one to use.
+sav = readsav(os.path.join('../Limb-darkening', 'kuruczlist.sav'))
+li = sav['li']
+model = sav['li'][k_metal]
+
+
 # ... to here ##########################
 
 direc = limbDir + 'Kurucz/'   # DIFF - just another folder
@@ -73,7 +80,8 @@ direc = limbDir + 'Kurucz/'   # DIFF - just another folder
 ;N=108  ;  TEFF   5750.  GRAVITY 4.50000 G3
 ;N=119     ;  TEFF   6000.  GRAVITY 4.50000 G0
 ;N=129     ;  TEFF   6250.  GRAVITY 4.50000 F8
-N = k_temp   # k_temp is the INDEX of Teff position instead of Teff itself
+N = k_temp   # k_temp is the INDEX of Teff position instead of Teff itself, so that we know which part
+# of the model file picked via metallicity we have to look at
 # ... to here ##########################
 
  # DIFF reading data from file ######### from here...
@@ -81,10 +89,12 @@ N = k_temp   # k_temp is the INDEX of Teff position instead of Teff itself
 st = (1221.+4)*N-N & $
 
 # Read the header from restored file
+# I don't nead the header if I don't need the Teff, logg and M_H of the used model.
   header = read_ascii(direc+model,template=template_kurucz_header,num_records=1,data_start=st) & $
 ;  if (header eq 0) then goto,skipthis
 
 # Read data from restored file
+# I should focus on reading the data and ignore the header for now.
   data = read_ascii(direc+model,template=template_kurucz,num_records=1221,data_start=3+st) & $
   ws = data.(0)*10   # Why like this? # need later
 
