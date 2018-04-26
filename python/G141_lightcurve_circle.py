@@ -183,8 +183,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         kdir = ''
         grating = 'G141'
         widek = np.arange(len(wavelength))
-        k_metal = data_params[6]
-        k_temp = data_params[7]
+        k_metal = data_params[6]  # --> [7]?
+        k_temp = data_params[7]   # --> [8]?
 
         uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_kurucz_any(kdir, grating, widek, wavelength, k_metal,
                                                                                 k_temp)
@@ -195,7 +195,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         # dirsen  = raw_input("Directory for limb darkening sensitivity files: ")
         # direc = raw_input("Directory for limb darkening stellar models files: ")
         dirsen = limbDir
-        direc = os.path.join(limbDir, '3DGrid')
         grating = 'G141'
         widek = np.arange(len(wavelength))
         M_H = data_params[7]    # metallicity
@@ -203,7 +202,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         logg = data_params[9]   # log(g), gravitation
 
         uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grating, widek, wavelength, M_H, Teff,
-                                                                               logg, dirsen, direc)
+                                                                               logg, dirsen)
     # =======================
 
 

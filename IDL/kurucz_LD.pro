@@ -53,7 +53,7 @@ restore, limbDir + 'templates.sav' ;template_kurucz,template_kurucz_header
 ;  model=li(22) ;+0.3 k2
 ;  model=li(23) ;+0.5 k2
 ;  model=li(24)  ;+1.0
-model = li(k_metal)
+model = li(k_metal)   # k_metal is the INDEX of M_H position instead of M_H itself
 # ... to here ##########################
 
 direc = limbDir + 'Kurucz/'   # DIFF - just another folder
@@ -73,7 +73,7 @@ direc = limbDir + 'Kurucz/'   # DIFF - just another folder
 ;N=108  ;  TEFF   5750.  GRAVITY 4.50000 G3
 ;N=119     ;  TEFF   6000.  GRAVITY 4.50000 G0
 ;N=129     ;  TEFF   6250.  GRAVITY 4.50000 F8
-N = k_temp
+N = k_temp   # k_temp is the INDEX of Teff position instead of Teff itself
 # ... to here ##########################
 
  # DIFF reading data from file ######### from here...

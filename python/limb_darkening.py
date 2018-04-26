@@ -6,7 +6,7 @@ from astropy.modeling.models import custom_model
 from astropy.modeling.fitting import LevMarLSQFitter
 
 
-def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
+def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
     """
     Calculates stellar limb-darkening coefficents for a given wavelength bin.
 
@@ -26,92 +26,101 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, direc):
     cp1, cp2, cp3, cp4: float; three-parameter limb darkening coefficients
     c1, c2, c3, c4: float; non-linear limb-darkening coefficients
     """
+    grid_models = 'kurucz'   # 'kurucz' or '3D'
 
-    print('Current Directories Entered:')
-    print('  ' + dirsen)
-    print('  ' + direc)
+    if grid_models == 'kurucz':
 
-    # Select Metallicity
-    M_H_Grid = np.array([-3.0, -2.0, -1.0, 0.0])  # Grid values points with metallicity values available to us
-    M_H_Grid_load = ['30', '20', '10', '00']  # Grid values points
-    optM = (abs(M_H - M_H_Grid)).argmin()  # Check which available grid value our input is closest to user input (M_H).
+        direc = os.path.join(dirsen, 'Kurucz')
 
-    # Select Teff
-    Teff_Grid = np.array(
-        [4000, 4500, 5000, 5500, 5777, 6000, 6500, 7000])  # Grid value points with Teff values available to us
-    optT = (abs(Teff - Teff_Grid)).argmin()  # Check which available grid value our input is closest to
+    elif grid_models == '3D':
 
-    # Select logg, depending on Teff. If several logg possibilities are given for one Teff, pick the one that is closest
-    # to user input (logg).
+        direc = os.path.join(dirsen, '3DGrid')
 
-    if Teff_Grid[optT] == 4000:
-        logg_Grid = np.array([1.5, 2.0, 2.5])
-        optG = (abs(logg - logg_Grid)).argmin()
+        print('Current Directories Entered:')
+        print('  ' + dirsen)
+        print('  ' + direc)
 
-    if Teff_Grid[optT] == 4500:
-        logg_Grid = np.array([2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0])
-        optG = (abs(logg - logg_Grid)).argmin()
+        # Select Metallicity
+        M_H_Grid = np.array([-3.0, -2.0, -1.0, 0.0])  # Grid values points with metallicity values available to us
+        M_H_Grid_load = ['30', '20', '10', '00']  # Grid values points
+        optM = (abs(M_H - M_H_Grid)).argmin()  # Check which available grid value our input is closest to user input (M_H).
 
-    if Teff_Grid[optT] == 5000:
-        logg_Grid = np.array([2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0])
-        optG = (abs(logg - logg_Grid)).argmin()
+        # Select Teff
+        Teff_Grid = np.array(
+            [4000, 4500, 5000, 5500, 5777, 6000, 6500, 7000])  # Grid value points with Teff values available to us
+        optT = (abs(Teff - Teff_Grid)).argmin()  # Check which available grid value our input is closest to
 
-    if Teff_Grid[optT] == 5500:
-        logg_Grid = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
-        optG = (abs(logg - logg_Grid)).argmin()
+        # Select logg, depending on Teff. If several logg possibilities are given for one Teff, pick the one that is closest
+        # to user input (logg).
 
-    if Teff_Grid[optT] == 5777:
-        logg_Grid = np.array([4.4])
-        optG = 0
+        if Teff_Grid[optT] == 4000:
+            logg_Grid = np.array([1.5, 2.0, 2.5])
+            optG = (abs(logg - logg_Grid)).argmin()
 
-    if Teff_Grid[optT] == 6000:
-        logg_Grid = np.array([3.5, 4.0, 4.5])
-        optG = (abs(logg - logg_Grid)).argmin()
+        if Teff_Grid[optT] == 4500:
+            logg_Grid = np.array([2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0])
+            optG = (abs(logg - logg_Grid)).argmin()
 
-    if Teff_Grid[optT] == 6500:
-        logg_Grid = np.array([4.0, 4.5])
-        optG = (abs(logg - logg_Grid)).argmin()
+        if Teff_Grid[optT] == 5000:
+            logg_Grid = np.array([2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0])
+            optG = (abs(logg - logg_Grid)).argmin()
 
-    if Teff_Grid[optT] == 7000:
-        logg_Grid =  np.array([4.5])
-        optG = 0
+        if Teff_Grid[optT] == 5500:
+            logg_Grid = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
+            optG = (abs(logg - logg_Grid)).argmin()
 
-    # ==== Select Teff and Log g. Mtxt, Ttxt and Gtxt are then put together as string to load correct files.
-    Mtxt = M_H_Grid_load[optM]
-    Ttxt = "{:2.0f}".format(Teff_Grid[optT] / 100)
-    if (Teff_Grid[optT] == 5777):
-        Ttxt = "{:4.0f}".format(Teff_Grid[optT])
-    Gtxt = "{:2.0f}".format(logg_Grid[optG] * 10)
+        if Teff_Grid[optT] == 5777:
+            logg_Grid = np.array([4.4])
+            optG = 0
 
-    #
-    file = 'mmu_t' + Ttxt + 'g' + Gtxt + 'm' + Mtxt + 'v05.flx'
-    model = file  # not used anymore
-    header = file  # not used anymore
+        if Teff_Grid[optT] == 6000:
+            logg_Grid = np.array([3.5, 4.0, 4.5])
+            optG = (abs(logg - logg_Grid)).argmin()
 
-    # Read data from IDL .sav file
-    sav = readsav(os.path.join(direc, file))  # readsav reads an IDL .sav file
-    ws = sav['mmd'].lam[0]  # read in wavelength
-    flux = sav['mmd'].flx  # read in flux
-    Teff_model = Teff_Grid[optT]
-    logg_model = logg_Grid[optG]
-    MH_model = str(M_H_Grid[optM])
-    print('  ' + header)
+        if Teff_Grid[optT] == 6500:
+            logg_Grid = np.array([4.0, 4.5])
+            optG = (abs(logg - logg_Grid)).argmin()
 
-    f0 = flux[0]
-    f1 = flux[1]
-    f2 = flux[2]
-    f3 = flux[3]
-    f4 = flux[4]
-    f5 = flux[5]
-    f6 = flux[6]
-    f7 = flux[7]
-    f8 = flux[8]
-    f9 = flux[9]
-    f10 = flux[10]
+        if Teff_Grid[optT] == 7000:
+            logg_Grid =  np.array([4.5])
+            optG = 0
 
-    # Mu from grid
-    # 0.00000    0.0100000    0.0500000     0.100000     0.200000     0.300000   0.500000     0.700000     0.800000     0.900000      1.00000
-    mu = sav['mmd'].mu
+        # ==== Select Teff and Log g. Mtxt, Ttxt and Gtxt are then put together as string to load correct files.
+        Mtxt = M_H_Grid_load[optM]
+        Ttxt = "{:2.0f}".format(Teff_Grid[optT] / 100)
+        if (Teff_Grid[optT] == 5777):
+            Ttxt = "{:4.0f}".format(Teff_Grid[optT])
+        Gtxt = "{:2.0f}".format(logg_Grid[optG] * 10)
+
+        #
+        file = 'mmu_t' + Ttxt + 'g' + Gtxt + 'm' + Mtxt + 'v05.flx'
+        model = file  # not used anymore
+        header = file  # not used anymore
+
+        # Read data from IDL .sav file
+        sav = readsav(os.path.join(direc, file))  # readsav reads an IDL .sav file
+        ws = sav['mmd'].lam[0]  # read in wavelength
+        flux = sav['mmd'].flx  # read in flux
+        Teff_model = Teff_Grid[optT]
+        logg_model = logg_Grid[optG]
+        MH_model = str(M_H_Grid[optM])
+        print('  ' + header)
+
+        f0 = flux[0]
+        f1 = flux[1]
+        f2 = flux[2]
+        f3 = flux[3]
+        f4 = flux[4]
+        f5 = flux[5]
+        f6 = flux[6]
+        f7 = flux[7]
+        f8 = flux[8]
+        f9 = flux[9]
+        f10 = flux[10]
+
+        # Mu from grid
+        # 0.00000    0.0100000    0.0500000     0.100000     0.200000     0.300000   0.500000     0.700000     0.800000     0.900000      1.00000
+        mu = sav['mmd'].mu
 
     # =============
     # HST, GTC - load response function and interpolate onto kurucz model grid
@@ -273,7 +282,6 @@ def quadratic_limb_darkening(x, aLD=0.0, bLD=0.0):
 if __name__ == '__main__':
 
     dirsen = os.path.join('..', 'Limb-darkening')   # Directory for sensitivity files
-    direc = os.path.join('..', 'Limb-darkening', '3DGrid')  # Directory for .sav files
     wavelength = np.loadtxt(os.path.join('..', 'data', 'W17_wavelength_test_data.txt'), skiprows=3)
 
     # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon.
@@ -284,4 +292,4 @@ if __name__ == '__main__':
     wsdata = wavelength
     widek = np.arange(len(wavelength))
 
-    result = limb_fit_3D_choose(grating, widek, wsdata, FeH, Teff, logg, dirsen, direc)
+    result = limb_fit_3D_choose(grating, widek, wsdata, FeH, Teff, logg, dirsen)
