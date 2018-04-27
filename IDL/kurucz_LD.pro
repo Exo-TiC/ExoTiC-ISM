@@ -38,10 +38,10 @@ device,RETAIN=2
 ;==== Folders
 limbDir = structure.LIMBDARKENING
 restore, limbDir + 'templates.sav' ;template_kurucz,template_kurucz_header
-# "restore" loads the file   # DIFF - load files
+# "restore" loads the file
  restore, limbDir + 'kuruczlist.sav' ;list of kurucz models  17=solar vturub=2 km/s
 
- # DIFF picking the metallicity ######### from here...
+
 ;==== Select Metalicity
 ;M_H=[-1.0(),-0.5(),-0.3(2),-0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
 ;  model=li(0) ;-0.1
@@ -61,11 +61,10 @@ li = sav['li']
 model = sav['li'][k_metal]
 
 
-# ... to here ##########################
 
-direc = limbDir + 'Kurucz/'   # DIFF - just another folder
+direc = limbDir + 'Kurucz/'
 
- # DIFF picking Teff and logg ######### from here...
+
 ;Teff=[3500(9),3750(20),4000(31),4250(42),4500(53),4750(64),5000(75),5250(86),5500(97),5750(108),6000(119),6250(129),6500(139)]
 ;==== Select Teff and Log g
 ;N=9   ;  TEFF   3500.  GRAVITY 4.50000 M0
@@ -82,9 +81,8 @@ direc = limbDir + 'Kurucz/'   # DIFF - just another folder
 ;N=129     ;  TEFF   6250.  GRAVITY 4.50000 F8
 N = k_temp   # k_temp is the INDEX of Teff position instead of Teff itself, so that we know which part
 # of the model file picked via metallicity we have to look at
-# ... to here ##########################
 
- # DIFF reading data from file ######### from here...
+
  # Defining some parameter, I think it tells you where the header stops and the actual data starts
 st = (1221.+4)*N-N & $
 
@@ -126,12 +124,11 @@ st = (1221.+4)*N-N & $
   f13=data.(14)*f0/100000.
   f14=data.(15)*f0/100000.
   f15=data.(16)*f0/100000.
-  f16=data.(17)*f0/100000.   # DIFF - number of flux measurements
-  # ... to here ##########################
+  f16=data.(17)*f0/100000.
+
 
 mu=[1.000,   .900,  .800,  .700,  .600,  .500,  .400,  .300,  .250,  .200,  .150,  .125,  .100,  .075,  .050,  .025 , .010]
 
-# DIFF - how mu is defined
 
 mu=[1.000,   .900,  .800,  .700,  .600,  .500,  .400,  .300,  .250,  .200,  .150,  .125,  .100,  .075,  .050,  .025 , .010]
 
@@ -148,7 +145,7 @@ if (grating eq 'G750M') then restore,limbDirv+'G750L.sensitivity' ;f1..f16,mu,ws
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;=============
-; HST - load responce function and interpolate onto kurucz model grid   # DIFF - check which ones really needed
+; HST - load responce function and interpolate onto kurucz model grid
 ;==============
 if (grating eq 'G430L') then begin
   restore, limbDir+'G430L.sensitivity.sav';wssens,sensitivity
@@ -210,11 +207,11 @@ linterp,wsdata,respwavebin,ws,reswavebinout  ;interpolate data onto model wavele
 ;plot,ws,f0/max(f0),xrange=[wsdata(0),wsdata(n_elements(wsdata)-1)],yrange=[0,1], title='Model Kurucz spectra (white) , STIS response curve (red), & Desired Wavelength bin (green)',/xstyle,/ystyle
 ;oplot,ws,respout,color=1000 & oplot,ws,reswavebinout,color=321321
 
-fcalc=[[f0],[f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10],[f11],[f12],[f13],[f14],[f15],[f16]]   # DIFF
-phot1=dblarr(17)   # DIFF - not anymore in python
+fcalc=[[f0],[f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10],[f11],[f12],[f13],[f14],[f15],[f16]]
+phot1=dblarr(17)
 
 ; integrate over the spectra to make synthetic phomometric points
-for i=0,16 do begin & $ ; loop over spectra at diff angles   # DIFF - not anymore in python
+for i=0,16 do begin & $ ; loop over spectra at diff angles
     fcal=fcalc(*,i) & $
     Tot=INT_TABULATED(ws,ws*respout*reswavebinout) & $
     phot1(i)=(INT_TABULATED(ws,ws*respout*reswavebinout*fcal,/sort,/double))/Tot & $
@@ -254,7 +251,7 @@ x2=findgen(100)*0.01
       a(1)*(1. - x2^(2./2.)) + $
       a(2)*(1. - x2^(3./2.)) + $
       a(3)*(1. - x2^(4./2.))  )  )
-# DIFF - irrelevant
+
 ;wset,4
 ;if (i eq 0) then plot,x,y,psym=1,xtitle='Mu',ytitle='I/Io',title='model '+header
 ;oplot,x2,f,color=red
@@ -396,7 +393,7 @@ aLD=Co(2,1) & bLD=Co(2,3) ;quadratic
 ;if (a eq 'TEFF  50000.  GRAVITY 5.0') then goto,skipthis ;
 
 
-save,filename='Kurucz.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header   # DIFF - but nothing gets saved in python
+save,filename='Kurucz.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header
 
                           ;loop over individual Kurucz models
 skipthis: ;

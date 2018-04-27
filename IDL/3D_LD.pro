@@ -126,12 +126,12 @@ model=file
   f7=f[*,7]
   f8=f[*,8]
   f9=f[*,9]
-  f10=f[*,10]   # DIFF - number of flux measurements
+  f10=f[*,10]
 
 ; Mu from grid
 ;    0.00000    0.0100000    0.0500000     0.100000     0.200000     0.300000   0.500000     0.700000     0.800000     0.900000      1.00000
 mu=mmd.(3)
-# DIFF - how mu is defined
+
 
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ; +++++++++++++ This is where they're basically the same? ++++++++++++
@@ -142,7 +142,7 @@ mu=mmd.(3)
 ; ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 ;=============
-; HST,GTC - load responce function and interpolate onto kurucz model grid   # DIFF - check which ones really needed
+; HST,GTC - load responce function and interpolate onto kurucz model grid
 ;==============
 if (grating eq 'G430L') then begin
  restore, dirsen+'G430L.sensitivity.sav';wssens,sensitivity
@@ -198,12 +198,12 @@ linterp,wsdata,respwavebin,ws,reswavebinout  ;interpolate data onto model wavele
 ; oplot,ws,respout,color=1000 & oplot,ws,reswavebinout,color=321321
 
 ;help,f,f10
-fcalc=[[f0],[f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10]]   # DIFF
+fcalc=[[f0],[f1],[f2],[f3],[f4],[f5],[f6],[f7],[f8],[f9],[f10]]
 ;help,fcalc
-phot1=dblarr(11)   # DIFF - not anymore in python
+phot1=dblarr(11)
 
 ; integrate over the spectra to make synthetic phomometric points
-for i=0,10 do begin & $ ; loop over spectra at diff angles   # DIFF - not anymore in python
+for i=0,10 do begin & $ ; loop over spectra at diff angles
     fcal=fcalc(*,i) & $
     Tot=INT_TABULATED(ws,ws*respout*reswavebinout) & $
     phot1(i)=(INT_TABULATED(ws,ws*respout*reswavebinout*fcal,/sort,/double))/Tot & $
@@ -212,7 +212,7 @@ endfor
 
 
 ;===== fit coefficients
-yall=[[phot1/phot1(10)]]  ;,[phot3/phot3(0)],[phot2/phot2(0)],[phot4/phot4(0)],[phot187/phot187(0)],[phot166/phot166(0)]]
+yall=[[phot1/phot1(10)]]  ;,[phot3/phot3(0)],[phot2/phot2(0)],[phot4/phot4(0)],[phot187/phot187(0)],[phot166/phot166(0)]] # DIFF - first index in line
 Co=dblarr(6,4)
 
 ;=====================================================================
@@ -239,7 +239,7 @@ x2=findgen(100)*0.01
       a[1]*(1. - x2^(2./2.)) + $
       a[2]*(1. - x2^(3./2.)) + $
       a[3]*(1. - x2^(4./2.))  )  )
-f4=f   # DIFF - irrelevant
+
 ; wset,4
 ; if (i eq 0) then plot,x,y,psym=1,xtitle='Mu',ytitle='I/Io',title='model '+header
 ; oplot,x2,f,color=cgcolor('red', !D.Table_Size-2)
@@ -392,7 +392,7 @@ aLD=Co(2,1) & bLD=Co(2,3) ;quadratic
 ;if (a eq 'TEFF  50000.  GRAVITY 5.0') then goto,skipthis ;
 
 
-save, filename='3D.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header   # DIFF - but nothing gets saved in python
+save, filename='3D.limbdarkinging.fit.now.sav',x,y,uld,c2,c3,c4,header
 
                           ;loop over individual Kurucz models
 skipthis: ;
