@@ -1,5 +1,6 @@
-import numpy as np
 import os
+import numpy as np
+import pandas as pd
 from scipy.io import readsav
 from scipy.interpolate import interp1d, splev, splrep
 from astropy.modeling.models import custom_model
@@ -31,6 +32,60 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
     if grid_models == 'kurucz':
 
         direc = os.path.join(dirsen, 'Kurucz')
+
+        print('Current Directories Entered:')
+        print('  ' + dirsen)
+        print('  ' + direc)
+
+        # Determine which model is to be used, by using the index k_metal/M_H to figure out the file name we need
+        direc = 'Kurucz'
+        file_list = 'kuruczlist.sav'
+        sav1 = readsav(os.path.join(dirsen, file_list))
+        model = bytes.decode(sav1['li'][M_H])  # Convert object of type "byte" to "string"
+
+        # Where in the model file is the section for the Teff we want? Index k_temp/Teff tells us that.
+        N = Teff
+        header_rows = 3    #  How many rows in each section do we ignore for the data reading
+        data_rows = 1221   # How  many rows of data are we reading
+        line_skip_data = (N + 1) * header_rows + N * data_rows   # Calculate how many lines in the model file we need to skip in order to get to the part we need (for the Teff we want).
+        line_skip_header = N * (data_rows + header_rows)
+
+        # Read the header, in case we want to have the actual Teff, logg and M_H info.
+        # headerinfo is a pandas object.
+        headerinfo = pd.read_csv(os.path.join(dirsen, direc, model), delim_whitespace=True, header=None,
+                                 skiprows=line_skip_header, nrows=1)
+
+        Teff_model = headerinfo[1].values[0]
+        logg_model = headerinfo[3].values[0]
+        MH_model = headerinfo[6].values[0]
+        MH_model = float(MH_model[1:-1])     # Convert from string to float; the ones above are floats directly
+
+        # Read the data; data is a pandas object.
+        data = pd.read_csv(os.path.join(dirsen, direc, model), delim_whitespace=True, header=None,
+                              skiprows=line_skip_data, nrows=data_rows)
+
+        # Unpack the data
+        ws = data[0].values * 10   # Import wavelength data
+        f0 = data[1].values / (ws * ws)
+        f1 = data[2].values * f0 / 100000.
+        f2 = data[3].values * f0 / 100000.
+        f3 = data[4].values * f0 / 100000.
+        f4 = data[5].values * f0 / 100000.
+        f5 = data[6].values * f0 / 100000.
+        f6 = data[7].values * f0 / 100000.
+        f7 = data[8].values * f0 / 100000.
+        f8 = data[9].values * f0 / 100000.
+        f9 = data[10].values * f0 / 100000.
+        f10 = data[11].values * f0 / 100000.
+        f11 = data[12].values * f0 / 100000.
+        f12 = data[13].values * f0 / 100000.
+        f13 = data[14].values * f0 / 100000.
+        f14 = data[15].values * f0 / 100000.
+        f15 = data[16].values * f0 / 100000.
+        f16 = data[17].values * f0 / 100000.
+
+        # Define mu
+        mu = np.array([1.000, .900, .800, .700, .600, .500, .400, .300, .250, .200, .150, .125, .100, .075, .050, .025, .010])
 
     elif grid_models == '3D':
 
