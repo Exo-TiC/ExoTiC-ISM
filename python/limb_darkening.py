@@ -27,7 +27,7 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
     cp1, cp2, cp3, cp4: float; three-parameter limb darkening coefficients
     c1, c2, c3, c4: float; non-linear limb-darkening coefficients
     """
-    grid_models = 'kurucz'   # 'kurucz' or '3D'
+    grid_models = '3D'   # 'kurucz' or '3D'
 
     if grid_models == 'kurucz':
 
@@ -83,6 +83,10 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
         f14 = data[15].values * f0 / 100000.
         f15 = data[16].values * f0 / 100000.
         f16 = data[17].values * f0 / 100000.
+
+        # Make single big array of them
+        fcalc = np.array([f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16])
+        phot1 = np.zeros(fcalc.shape[0])
 
         # Define mu
         mu = np.array([1.000, .900, .800, .700, .600, .500, .400, .300, .250, .200, .150, .125, .100, .075, .050, .025, .010])
@@ -173,6 +177,10 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
         f9 = flux[9]
         f10 = flux[10]
 
+        # Make single big array of them
+        fcalc = np.array([f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10])
+        phot1 = np.zeros(fcalc.shape[0])
+
         # Mu from grid
         # 0.00000    0.0100000    0.0500000     0.100000     0.200000     0.300000   0.500000     0.700000     0.800000     0.900000      1.00000
         mu = sav['mmd'].mu
@@ -235,9 +243,6 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
     respwavebin[widek] = 1.0
     data_resp = interp1d(wsdata, respwavebin, bounds_error=False, fill_value=0)
     reswavebinout = data_resp(ws)  # interpolate data onto model wavelength grid
-
-    fcalc = np.array([f0, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10])
-    phot1 = np.zeros(fcalc.shape[0])
 
     # Integrate over the spectra to make synthetic photometric points.
     for i in range(fcalc.shape[0]):  # Loop over spectra at diff angles
@@ -348,3 +353,5 @@ if __name__ == '__main__':
     widek = np.arange(len(wavelength))
 
     result = limb_fit_3D_choose(grating, widek, wsdata, FeH, Teff, logg, dirsen)
+
+    print(result)
