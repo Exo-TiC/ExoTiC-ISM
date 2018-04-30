@@ -1402,9 +1402,9 @@ device,RETAIN=2
 ;restore,'template_kurucz.sav' ;template_kurucz,template_kurucz_header
 ;  template_kurucz=template
 limbDir = structure.LIMBDARKENING
-restore, limbDir + 'templates.sav' ;template_kurucz,template_kurucz_header
+restore, limbDir + 'templates.sav' ; "template_kurucz", "template_kurucz_header"
 
- restore, limbDir + 'kuruczlist.sav' ;list of kurucz models  17=solar vturub=2 km/s
+ restore, limbDir + 'kuruczlist.sav' ; "li" - list of kurucz models  17=solar vturub=2 km/s
 ;==== Select Metalicity
 ;M_H=[-1.0(),-0.5(),-0.3(2),-0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
 ;  model=li(0) ;-0.1
