@@ -250,12 +250,12 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
         Tot = int_tabulated(ws, ws * respout * reswavebinout)
         phot1[i] = (int_tabulated(ws, ws * respout * reswavebinout * fcal, sort=True)) / Tot
 
-    yall = phot1 / phot1[10]
+    yall = phot1 / phot1[10]   # DIFF
     Co = np.zeros((6, 4))
 
     A = [0.0, 0.0, 0.0, 0.0]  # c1, c2, c3, c4
-    x = mu[1:]
-    y = yall[1:]
+    x = mu[1:]   # DIFF
+    y = yall[1:] # DIFF
     weights = x / x
 
     # Start fitting the different models
