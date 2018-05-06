@@ -7,9 +7,9 @@ from astropy.modeling.models import custom_model
 from astropy.modeling.fitting import LevMarLSQFitter
 
 
-def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_models):
+def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model):
     """
-    Calculates stellar limb-darkening coefficents for a given wavelength bin.
+    Calculates stellar limb-darkening coefficients for a given wavelength bin.
 
     Procedure from Sing et al. (2010, A&A, 510, A21).
     Uses 3D limb darkening from Magic et al. (2015, A&A, 573, 90).
@@ -21,15 +21,14 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
     :param Teff: float; stellar effective temperature (K)
     :param logg: float; stellar gravity
     :param dirsen:
-    :param direc:
+    :param ld_model: string; '1D' or '3D', makes choice between limb darkening models
     :return: uLD: float; linear limb darkening coefficient
     aLD, bLD: float; quadratic limb darkening coefficients
     cp1, cp2, cp3, cp4: float; three-parameter limb darkening coefficients
     c1, c2, c3, c4: float; non-linear limb-darkening coefficients
     """
-    #ld_models = '3D'   # '1D' or '3D'
 
-    if ld_models == '1D':
+    if ld_model == '1D':
 
         direc = os.path.join(dirsen, 'Kurucz')
 
@@ -91,7 +90,9 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
         # Define mu
         mu = np.array([1.000, .900, .800, .700, .600, .500, .400, .300, .250, .200, .150, .125, .100, .075, .050, .025, .010])
 
-    elif ld_models == '3D':
+        # Passed on to main body of function are: ws, fcalc, phot1, mu
+
+    elif ld_model == '3D':
 
         direc = os.path.join(dirsen, '3DGrid')
 
@@ -185,6 +186,8 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
         # 0.00000    0.0100000    0.0500000     0.100000     0.200000     0.300000   0.500000     0.700000     0.800000     0.900000      1.00000
         mu = sav['mmd'].mu
 
+        # Passed on to main body of function are: ws, fcalc, phot1, mu
+
     # =============
     # HST, GTC - load response function and interpolate onto kurucz model grid
     # =============
@@ -254,8 +257,8 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
     Co = np.zeros((6, 4))
 
     A = [0.0, 0.0, 0.0, 0.0]  # c1, c2, c3, c4
-    x = mu[1:]
-    y = yall[1:]
+    x = mu[1:]     # wavelength
+    y = yall[1:]   # flux
     weights = x / x
 
     # Start fitting the different models
