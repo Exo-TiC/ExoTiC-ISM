@@ -7,7 +7,7 @@ from astropy.modeling.models import custom_model
 from astropy.modeling.fitting import LevMarLSQFitter
 
 
-def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model):
+def limb_fit_3D_choose(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
     """
     Calculates stellar limb-darkening coefficients for a given wavelength bin.
 
@@ -20,7 +20,7 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
     :param M_H: float; stellar metallicity
     :param Teff: float; stellar effective temperature (K)
     :param logg: float; stellar gravity
-    :param dirsen:
+    :param dirsen: string; path to main limb darkening directory
     :param ld_model: string; '1D' or '3D', makes choice between limb darkening models
     :return: uLD: float; linear limb darkening coefficient
     aLD, bLD: float; quadratic limb darkening coefficients
@@ -36,11 +36,17 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
         print('  ' + dirsen)
         print('  ' + direc)
 
-        # Determine which model is to be used, by using the index k_metal/M_H to figure out the file name we need
+        # Select metallicity
+        M_H_Grid = np.array([-0.1, -0.2, -0.3, -0.5, -1.0, -1.5, -2.0, -2.5, -3.0, -3.5, -4.0, -4.5, -5.0, 0.0, 0.1, 0.2, 0.3, 0.5, 1.0])
+        M_H_Grid_load = np.array([0, 1, 2, 3, 5, 7, 8, 9, 10, 11, 12, 13, 14, 17, 20, 21, 22, 23, 24])
+        optM = (abs(M_H - M_H_Grid)).argmin()
+        MH_ind = M_H_Grid_load[optM]
+
+        # Determine which model is to be used, by using the input metallicity M_H to figure out the file name we need
         direc = 'Kurucz'
         file_list = 'kuruczlist.sav'
         sav1 = readsav(os.path.join(dirsen, file_list))
-        model = bytes.decode(sav1['li'][M_H])  # Convert object of type "byte" to "string"
+        model = bytes.decode(sav1['li'][MH_ind])  # Convert object of type "byte" to "string"
 
         # Where in the model file is the section for the Teff we want? Index k_temp/Teff tells us that.
         N = Teff
@@ -100,18 +106,18 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
         print('  ' + dirsen)
         print('  ' + direc)
 
-        # Select Metallicity
+        # Select metallicity
         M_H_Grid = np.array([-3.0, -2.0, -1.0, 0.0])  # Grid values points with metallicity values available to us
         M_H_Grid_load = ['30', '20', '10', '00']  # Grid values points
-        optM = (abs(M_H - M_H_Grid)).argmin()  # Check which available grid value our input is closest to user input (M_H).
+        optM = (abs(M_H - M_H_Grid)).argmin()  # Check which available grid value our input is closest to user input (M_H) --> actualy, argmin gets the INDEX of the closest value
 
         # Select Teff
         Teff_Grid = np.array(
             [4000, 4500, 5000, 5500, 5777, 6000, 6500, 7000])  # Grid value points with Teff values available to us
         optT = (abs(Teff - Teff_Grid)).argmin()  # Check which available grid value our input is closest to
 
-        # Select logg, depending on Teff. If several logg possibilities are given for one Teff, pick the one that is closest
-        # to user input (logg).
+        # Select logg, depending on Teff. If several logg possibilities are given for one Teff, pick the one that is
+        # closest to user input (logg).
 
         if Teff_Grid[optT] == 4000:
             logg_Grid = np.array([1.5, 2.0, 2.5])
@@ -226,6 +232,8 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
         wdel = 1
     # =============
     # =============
+
+    widek = np.arange(len(wsdata))
 
     wsHST = wssens
     wsHST = np.concatenate((np.array([wsHST[0] - wdel - wdel, wsHST[0] - wdel]),
