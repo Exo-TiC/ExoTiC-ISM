@@ -54,10 +54,10 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
         headerinfo = pd.read_csv(os.path.join(dirsen, direc, model), delim_whitespace=True, header=None,
                                  skiprows=line_skip_header, nrows=1)
 
-        Teff_model = headerinfo[1].values[0]
-        logg_model = headerinfo[3].values[0]
+        Teff_model = headerinfo[1].values[0]    # NOT-REUSED
+        logg_model = headerinfo[3].values[0]    # NOT-REUSED
         MH_model = headerinfo[6].values[0]
-        MH_model = float(MH_model[1:-1])     # Convert from string to float; the ones above are floats directly
+        MH_model = float(MH_model[1:-1])     # Convert from string to float; the ones above are floats directly   # NOT-REUSED
 
         # Read the data; data is a pandas object.
         data = pd.read_csv(os.path.join(dirsen, direc, model), delim_whitespace=True, header=None,
@@ -154,16 +154,16 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
 
         #
         file = 'mmu_t' + Ttxt + 'g' + Gtxt + 'm' + Mtxt + 'v05.flx'
-        model = file  # not used anymore
-        header = file  # not used anymore
+        model = file  # NOT-REUSED
+        header = file
 
         # Read data from IDL .sav file
         sav = readsav(os.path.join(direc, file))  # readsav reads an IDL .sav file
         ws = sav['mmd'].lam[0]  # read in wavelength
         flux = sav['mmd'].flx  # read in flux
-        Teff_model = Teff_Grid[optT]
-        logg_model = logg_Grid[optG]
-        MH_model = str(M_H_Grid[optM])
+        Teff_model = Teff_Grid[optT]        # NOT-REUSED
+        logg_model = logg_Grid[optG]        # NOT-REUSED
+        MH_model = str(M_H_Grid[optM])      # NOT-REUSED
         print('  ' + header)
 
         f0 = flux[0]
@@ -254,12 +254,12 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_model
         phot1[i] = (int_tabulated(ws, ws * respout * reswavebinout * fcal, sort=True)) / Tot
 
     yall = phot1 / phot1[0]   # I shouldn't matter which one we normalize with, but every array will always have a first entry, so taking the first element is the most robust option.
-    Co = np.zeros((6, 4))
+    Co = np.zeros((6, 4))   # NOT-REUSED
 
-    A = [0.0, 0.0, 0.0, 0.0]  # c1, c2, c3, c4
+    A = [0.0, 0.0, 0.0, 0.0]  # c1, c2, c3, c4      # NOT-REUSED
     x = mu[1:]     # wavelength
     y = yall[1:]   # flux
-    weights = x / x
+    weights = x / x   # NOT-REUSED
 
     # Start fitting the different models
     fitter = LevMarLSQFitter()
