@@ -39,7 +39,7 @@ from limb_darkening import limb_fit_3D_choose
 import hstmarg
 
 
-def G141_lightcurve_circle(x, y, err, sh, data_params, ld_models, wavelength, grid_selection, out_folder, run_name,
+def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grid_selection, out_folder, run_name,
                            plotting):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
@@ -93,7 +93,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_models, wavelength, gr
               FOR stellar log(g) = 5.0
                 Teff=[3500(10),3750(21),4000(32),4250(43),4500(54),4750(65),5000(76),5250(87),5500(98),5750(109),
                 6000(120),6250(130),6500(140)]
-    :param ld_models:
+    :param ld_model:
     :param wavelength: array of wavelengths covered to compute y
     :param grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
     :param out_folder: string of folder path to save the data to, e.g. '/Volumes/DATA1/user/HST/Planet/sav_file/'
@@ -179,7 +179,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_models, wavelength, gr
     # LIMB DARKENING
     # NEW We should be able to make it so that this is just the same parameters for each call, just one used the 3D model and the other uses the 1D model grid. 
     # NEW The idea here would be to select the 3D grid automatically if the parameter is close to one of the options in the grid - BUT we would need to make sure that the user is told if the 3D model is used. You will need to look for differences between limb_fit_kurucz_any.pro and limb_fit_3D_choose.pro
-    if ld_models == '1D':
+    if ld_model == '1D':
         kdir = ''
         grating = 'G141'
         widek = np.arange(len(wavelength))
@@ -190,7 +190,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_models, wavelength, gr
                                                                                 k_temp)
         # This function did not get translated into python yet, but it is also not used at the moment
 
-    if ld_models == '3D':
+    if ld_model == '3D':
         # Change these to your specific
         # dirsen  = raw_input("Directory for limb darkening sensitivity files: ")
         # direc = raw_input("Directory for limb darkening stellar models files: ")
@@ -202,7 +202,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_models, wavelength, gr
         logg = data_params[9]   # log(g), gravitation
 
         uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grating, widek, wavelength, M_H, Teff,
-                                                                               logg, dirsen, ld_models)
+                                                                               logg, dirsen, ld_model)
     # =======================
 
 
@@ -874,15 +874,15 @@ if __name__ == '__main__':
     constant1 = (big_G * persec * persec / np.float32(4 * 3.1415927 * 3.1415927)) ** (1 / 3.)
     MsMpR = (aor / (constant1)) ** 3
 
-    ld_models = '1D'   # Which limb darkening models to use, '1D' or '3D'
+    ld_model = '1D'   # Which limb darkening models to use, '1D' or '3D'
 
-    if ld_models == '1D':
+    if ld_model == '1D':
         # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon.
         FeH = 2  # Fe/H = -0.25
         Teff = 139  # logg = 4.2, Teff = 6550 K - logg is incorporated into the temperature selection for now.
         logg = 4.2
 
-    elif ld_models == '3D':
+    elif ld_model == '3D':
         FeH = -0.25
         Teff = 6550
         logg = 4.2
@@ -893,4 +893,4 @@ if __name__ == '__main__':
     run_name = 'wl_time_wm3d'
     plotting = 'on'
 
-    G141_lightcurve_circle(x, y, err, sh, data_params, ld_models, wavelength, grid_selection, out_folder, run_name, plotting)
+    G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grid_selection, out_folder, run_name, plotting)
