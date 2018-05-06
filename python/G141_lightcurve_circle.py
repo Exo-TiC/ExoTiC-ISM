@@ -39,7 +39,7 @@ from limb_darkening import limb_fit_3D_choose
 import hstmarg
 
 
-def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grid_selection, out_folder, run_name,
+def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, out_folder, run_name,
                            plotting):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
@@ -179,30 +179,25 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gri
     # LIMB DARKENING
     # NEW We should be able to make it so that this is just the same parameters for each call, just one used the 3D model and the other uses the 1D model grid. 
     # NEW The idea here would be to select the 3D grid automatically if the parameter is close to one of the options in the grid - BUT we would need to make sure that the user is told if the 3D model is used. You will need to look for differences between limb_fit_kurucz_any.pro and limb_fit_3D_choose.pro
+
+
     if ld_model == '1D':
         kdir = ''
-        grating = 'G141'
-        widek = np.arange(len(wavelength))
-        k_metal = data_params[6]  # --> [7]?
-        k_temp = data_params[7]   # --> [8]?
+        k_metal = data_params[7]
+        k_temp = data_params[8]
 
-        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_kurucz_any(kdir, grating, widek, wavelength, k_metal,
+        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_kurucz_any(kdir, grat, widek, wavelength, k_metal,
                                                                                 k_temp)
         # This function did not get translated into python yet, but it is also not used at the moment
 
     if ld_model == '3D':
-        # Change these to your specific
-        # dirsen  = raw_input("Directory for limb darkening sensitivity files: ")
-        # direc = raw_input("Directory for limb darkening stellar models files: ")
-        dirsen = limbDir
-        grating = 'G141'
-        widek = np.arange(len(wavelength))
+
         M_H = data_params[7]    # metallicity
         Teff = data_params[8]   # effective temperature
         logg = data_params[9]   # log(g), gravitation
 
-        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grating, widek, wavelength, M_H, Teff,
-                                                                               logg, dirsen, ld_model)
+        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grat, wavelength, M_H, Teff,
+                                                                               logg, limbDir, ld_model)
     # =======================
 
 
@@ -888,9 +883,9 @@ if __name__ == '__main__':
         logg = 4.2
 
     data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
+    grat = 'G141'   # Which grating to use
     grid_selection = 'fit_time'
-    out_folder = outDir
     run_name = 'wl_time_wm3d'
-    plotting = 'on'
+    plotting = True
 
-    G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grid_selection, out_folder, run_name, plotting)
+    G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name, plotting)
