@@ -80,7 +80,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         - ecc: eccentricity of the system
         - omega: omega of the system (degrees)
         - Per: Period of the planet in days
-        - FeH: Stellar metallicity index
+        - FeH: Stellar metallicity index - just write down range?
              M_H=[-5.0(14),-4.5(13),-4.0(12),-3.5(11),-3.0(10),-2.5(9),-2.0(8),-1.5(7),-1.0(5),-0.5(3),-0.3(2),
                   -0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
         - Teff: Stellar Temperature index
@@ -103,7 +103,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     """
 
     print(
-        'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with 50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes. Please hold.')
+        'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with'
+        '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes'
+        'Please hold.')
 
     # DEFINE DIRECTORIES
     # NEW We need to work out a universal format that we want people to put into this routine. 
@@ -137,10 +139,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     HST_period = 0.06691666
     HSTper = np.float64(96.36) / (np.float64(24) * np.float64(60))
 
-    # Put into array isntead of above
+    # Put into array instead of above
     constant = [gain, rdnoise, Gr, JDconst, day_to_sec, Rjup, Rsun, MJup, Msun, HST_second, HST_period]
-# -----------------------------^^^^^
-
+    # -----------------------------
 
     nexposure = len(x)   # Total number of exposures in the observation
 
@@ -178,7 +179,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # =======================
     # LIMB DARKENING
     # NEW We should be able to make it so that this is just the same parameters for each call, just one used the 3D model and the other uses the 1D model grid. 
-    # NEW The idea here would be to select the 3D grid automatically if the parameter is close to one of the options in the grid - BUT we would need to make sure that the user is told if the 3D model is used. You will need to look for differences between limb_fit_kurucz_any.pro and limb_fit_3D_choose.pro
+    # NEW The idea here would be to select the 3D grid automatically if the parameter is close to one of the options in the grid -
+    # BUT we would need to make sure that the user is told if the 3D model is used. You will need to look for differences between limb_fit_kurucz_any.pro and limb_fit_3D_choose.pro
 
 
     if ld_model == '1D':
@@ -428,7 +430,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # ..........................................
         # NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets.
         cut_down = 2.57  # Play around with this value if you want.
-        # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard deviation, although this is only a very timy inflation of the uncertainty and I need to find a more statistically riggrous way to do this. 
+        # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
+        # deviation, although this is only a very timy inflation of the uncertainty and I need to find a more statistically riggrous way to do this.
         # Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
 
         # if plotting:
@@ -680,8 +683,11 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         sys_evidenceAIC[s] = evidence_AIC                       # evidence AIC
         sys_evidenceBIC[s] = evidence_BIC                       # evidence BIC
 
-    # SAVE, filename=out_folder+'analysis_circle_G141_'+run_name+'.sav', sys_stats, sys_date, sys_phase, sys_rawflux, sys_rawflux_err, sys_flux, sys_flux_err, sys_residuals, sys_model, sys_model_phase, sys_systematic_model, sys_params, sys_params_err, sys_depth, sys_depth_err, sys_epoch, sys_epoch_err, sys_evidenceAIC, sys_evidenceBIC
+    # SAVE, filename=out_folder+'analysis_circle_G141_'+run_name+'.sav', sys_stats, sys_date, sys_phase, sys_rawflux,
+    # sys_rawflux_err, sys_flux, sys_flux_err, sys_residuals, sys_model, sys_model_phase, sys_systematic_model,
+    # sys_params, sys_params_err, sys_depth, sys_depth_err, sys_epoch, sys_epoch_err, sys_evidenceAIC, sys_evidenceBIC
     # .......................................
+
     # MARGINALISATION
     a = (np.sort(sys_evidenceAIC))[::-1]
     print('TOP 10 SYSTEMATIC MODELS')
@@ -829,17 +835,20 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     marg_aors_err = variance_theta_aor
     print(marg_aors, marg_aors_err)
 
-    # SAVE, filename=out_folder+'analysis_circle_G141_marginalised_'+run_name+'.sav', w_q, best_sys, marg_rl, marg_rl_err, marg_epoch, marg_epoch_err, marg_inclin_rad, marg_inclin_rad_err, marg_inclin_deg, marg_inclin_deg_err, marg_msmpr, marg_msmpr_err, marg_aors, marg_aors_err, rl_sdnr, pos 
+    # SAVE, filename=out_folder+'analysis_circle_G141_marginalised_'+run_name+'.sav', w_q, best_sys, marg_rl,
+    # marg_rl_err, marg_epoch, marg_epoch_err, marg_inclin_rad, marg_inclin_rad_err, marg_inclin_deg,
+    # marg_inclin_deg_err, marg_msmpr, marg_msmpr_err, marg_aors, marg_aors_err, rl_sdnr, pos
 
 
 if __name__ == '__main__':
     """
     This is a translation of the W17_lightcurve_test.pro
     """
+
     mainDir = '..'
     outDir = os.path.join(mainDir, 'outputs')
-
     dataDir = os.path.join(mainDir, 'data')
+
     # SET THE CONSTANTS
     dtosec = 86400
     big_G = np.float64(6.67259e-11)
