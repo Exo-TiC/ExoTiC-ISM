@@ -7,7 +7,7 @@ from astropy.modeling.models import custom_model
 from astropy.modeling.fitting import LevMarLSQFitter
 
 
-def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
+def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen, ld_models):
     """
     Calculates stellar limb-darkening coefficents for a given wavelength bin.
 
@@ -27,9 +27,9 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
     cp1, cp2, cp3, cp4: float; three-parameter limb darkening coefficients
     c1, c2, c3, c4: float; non-linear limb-darkening coefficients
     """
-    grid_models = '3D'   # '1D' or '3D'
+    #ld_models = '3D'   # '1D' or '3D'
 
-    if grid_models == '1D':
+    if ld_models == '1D':
 
         direc = os.path.join(dirsen, 'Kurucz')
 
@@ -91,7 +91,7 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
         # Define mu
         mu = np.array([1.000, .900, .800, .700, .600, .500, .400, .300, .250, .200, .150, .125, .100, .075, .050, .025, .010])
 
-    elif grid_models == '3D':
+    elif ld_models == '3D':
 
         direc = os.path.join(dirsen, '3DGrid')
 
