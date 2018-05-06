@@ -35,7 +35,7 @@ Continued refinement by Iva Laginja (laginja.iva@gmail.com).
 from mpfit import mpfit
 import numpy as np
 import os
-from limb_darkening import limb_fit_3D_choose
+from limb_darkening import limb_dark_fit
 import hstmarg
 
 
@@ -60,8 +60,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     Here a 4-parameter limb darkening law is used as outlined in Claret, 2010 and Sing et al. 2010.
 
     MAJOR PROGRAMS INCLUDED IN THIS ROUTINE:
-    - KURUCZ LIMB-DARKENING procedure (kurucz_limb_fit_any.pro or limb_fit_3D_choose.pro)
-        This requires the G141.WFC3.sensitivity.sav file, template.sav, kuruczlist.sav, and the kurucz folder with all models
+    - LIMB-DARKENING (from limb_darkening.py)
+        This requires the G141.WFC3.sensitivity.sav file, template.sav, kuruczlist.sav, and the kurucz folder with all
+        models, as well as the 3D models in the folder 3DGrid.
     - MANDEL & AGOL (2002) transit model (occultnl.pro)
     - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (wfc3_systematic_model_grid_selection.pro)
     - IMPACT PARAMETER calculated if given an eccentricity (tap_transite2.pro)
@@ -80,19 +81,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         - ecc: eccentricity of the system
         - omega: omega of the system (degrees)
         - Per: Period of the planet in days
-        - FeH: Stellar metallicity index - just write down range?
-             M_H=[-5.0(14),-4.5(13),-4.0(12),-3.5(11),-3.0(10),-2.5(9),-2.0(8),-1.5(7),-1.0(5),-0.5(3),-0.3(2),
-                  -0.2(1),-0.1(0),0.0(17),0.1(20),0.2(21),0.3(22),0.5(23),1.0(24)]
-        - Teff: Stellar Temperature index
-              FOR stellar log(g) = 4.0
-                Teff = [3500(8),3750(19),4000(30),4250(41),4500(52), 4750(63),5000(74),5250(85),5500(96),5750(107),
-                6000(118),6250(129),6500(138)]
-              FOR stellar log(g) = 4.5
-                Teff=[3500(9),3750(20),4000(31),4250(42),4500(53),4750(64),5000(75),5250(86),5500(97),5750(108),
-                6000(119),6250(129),6500(139)]
-              FOR stellar log(g) = 5.0
-                Teff=[3500(10),3750(21),4000(32),4250(43),4500(54),4750(65),5000(76),5250(87),5500(98),5750(109),
-                6000(120),6250(130),6500(140)]
+        - FeH: Stellar metallicity - limited ranges available
+        - Teff: Stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
+        - logg: stellar gravity - depends on whether 1D or 3D limb darkening models are used
     :param ld_model:
     :param wavelength: array of wavelengths covered to compute y
     :param grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
@@ -178,32 +169,17 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
     # =======================
     # LIMB DARKENING
-    # NEW We should be able to make it so that this is just the same parameters for each call, just one used the 3D model and the other uses the 1D model grid. 
-    # NEW The idea here would be to select the 3D grid automatically if the parameter is close to one of the options in the grid -
-    # BUT we would need to make sure that the user is told if the 3D model is used. You will need to look for differences between limb_fit_kurucz_any.pro and limb_fit_3D_choose.pro
+    # NEW The idea here would be to select the 3D grid automatically if the parameter is close to one of the options in
+    # the grid - BUT we would need to make sure that the user is told if the 3D model is used.
 
+    M_H = data_params[7]    # metallicity
+    Teff = data_params[8]   # effective temperature
+    logg = data_params[9]   # log(g), gravitation
 
-    if ld_model == '1D':
-        kdir = ''
-        k_metal = data_params[7]
-        k_temp = data_params[8]
-
-        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_kurucz_any(kdir, grat, widek, wavelength, k_metal,
-                                                                                k_temp)
-        # This function did not get translated into python yet, but it is also not used at the moment
-
-    if ld_model == '3D':
-
-        M_H = data_params[7]    # metallicity
-        Teff = data_params[8]   # effective temperature
-        logg = data_params[9]   # log(g), gravitation
-
-        uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_fit_3D_choose(grat, wavelength, M_H, Teff,
-                                                                               logg, limbDir, ld_model)
+    uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_dark_fit(grat, wavelength, M_H, Teff,
+                                                                           logg, limbDir, ld_model)
     # =======================
 
-
-    # ....................................
     # PLACE ALL THE PRIORS IN AN ARRAY - because we need to loop over them in a later step
     #p0 = [rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4]   # len(p0) = number of parameters nparams
     # It is not actually used yet
@@ -883,7 +859,7 @@ if __name__ == '__main__':
     if ld_model == '1D':
         # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon.
         FeH = -2.5
-        Teff = 139  # logg = 4.2, Teff = 6550 K - logg is incorporated into the temperature selection for now.
+        Teff = 6550
         logg = 4.2
 
     elif ld_model == '3D':
