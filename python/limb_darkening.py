@@ -27,9 +27,9 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
     cp1, cp2, cp3, cp4: float; three-parameter limb darkening coefficients
     c1, c2, c3, c4: float; non-linear limb-darkening coefficients
     """
-    grid_models = '3D'   # 'kurucz' or '3D'
+    grid_models = '3D'   # '1D' or '3D'
 
-    if grid_models == 'kurucz':
+    if grid_models == '1D':
 
         direc = os.path.join(dirsen, 'Kurucz')
 

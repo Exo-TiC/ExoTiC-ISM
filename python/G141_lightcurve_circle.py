@@ -276,7 +276,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         print(systematics)
         print('  ')
 
-        #NEW In IDL you need to define all of your arrays size before you fill them in a loop. I am not sure if this is the same in Python.  
         HSTphase = np.zeros(nexposure)
         HSTphase = (img_date - T0) / HST_period
         phase2 = np.floor(HSTphase)
@@ -369,13 +368,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, LD3D, wavelength, grid_se
         inclin_err = pcerror[3]
         msmpr_err = pcerror[4]
         ecc_err = pcerror[5]
-        omega_err = pcerror[6] # NEW don't need.
-        per_err = pcerror[7] # NEW don't need.
+        # omega_err = pcerror[6] 
+        # per_err = pcerror[7] 
         T0_err = pcerror[8]
-        c1_err = pcerror[9] # NEW don't need.
-        c2_err = pcerror[10] # NEW don't need.
-        c3_err = pcerror[11] # NEW don't need.
-        c4_err = pcerror[12] # NEW don't need.
+        # c1_err = pcerror[9] 
+        # c2_err = pcerror[10] 
+        # c3_err = pcerror[11] 
+        # c4_err = pcerror[12] 
         m_err = pcerror[13]
         hst1_err = pcerror[14]
         hst2_err = pcerror[15]
