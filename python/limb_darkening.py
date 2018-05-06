@@ -250,12 +250,12 @@ def limb_fit_3D_choose(grating, widek, wsdata, M_H, Teff, logg, dirsen):
         Tot = int_tabulated(ws, ws * respout * reswavebinout)
         phot1[i] = (int_tabulated(ws, ws * respout * reswavebinout * fcal, sort=True)) / Tot
 
-    yall = phot1 / phot1[10]   # DIFF
+    yall = phot1 / phot1[0]   # I shouldn't matter which one we normalize with, but every array will always have a first entry, so taking the first element is the most robust option.
     Co = np.zeros((6, 4))
 
     A = [0.0, 0.0, 0.0, 0.0]  # c1, c2, c3, c4
-    x = mu[1:]   # DIFF
-    y = yall[1:] # DIFF
+    x = mu[1:]
+    y = yall[1:]
     weights = x / x
 
     # Start fitting the different models
