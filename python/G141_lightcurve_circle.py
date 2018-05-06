@@ -873,7 +873,7 @@ if __name__ == '__main__':
 
     if ld_model == '1D':
         # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon.
-        FeH = 2  # Fe/H = -0.25
+        FeH = -2.5
         Teff = 139  # logg = 4.2, Teff = 6550 K - logg is incorporated into the temperature selection for now.
         logg = 4.2
 
