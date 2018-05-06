@@ -48,10 +48,29 @@ def limb_fit_3D_choose(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
         sav1 = readsav(os.path.join(dirsen, file_list))
         model = bytes.decode(sav1['li'][MH_ind])  # Convert object of type "byte" to "string"
 
-        # Where in the model file is the section for the Teff we want? Index k_temp/Teff tells us that.
-        N = Teff
-        header_rows = 3    #  How many rows in each section do we ignore for the data reading
-        data_rows = 1221   # How  many rows of data are we reading
+        # Select Teff and subsequently logg
+        Teff_Grid = np.array([3500, 3750, 4000, 4250, 4500, 4750, 5000, 5250, 5500, 5750, 6000, 6250, 6500])
+        optT = (abs(Teff - Teff_Grid)).argmin()
+
+        logg_Grid = np.array([4.0, 4.5, 5.0])
+        optG = (abs(logg - logg_Grid)).argmin()
+
+        if logg_Grid[optG] == 4.0:
+            Teff_Grid_load = np.array([8, 19, 30, 41, 52, 63, 74, 85, 96, 107, 118, 129, 138])
+            T_ind = Teff_Grid_load[optT]
+
+        if logg_Grid[optG] == 4.5:
+            Teff_Grid_load = np.array([9, 20, 31, 42, 53, 64, 75, 86, 97, 108, 119, 129, 139])
+            T_ind = Teff_Grid_load[optT]
+
+        if logg_Grid[optG] == 5.0:
+            Teff_Grid_load = np.array([10, 21, 32, 43, 54, 65, 76, 87, 98, 109, 120, 130, 140])
+            T_ind = Teff_Grid_load[optT]
+
+        # Where in the model file is the section for the Teff we want? Index T_ind tells us that.
+        N = T_ind
+        header_rows = 3    #  How many rows in each section we ignore for the data reading
+        data_rows = 1221   # How  many rows of data we read
         line_skip_data = (N + 1) * header_rows + N * data_rows   # Calculate how many lines in the model file we need to skip in order to get to the part we need (for the Teff we want).
         line_skip_header = N * (data_rows + header_rows)
 
