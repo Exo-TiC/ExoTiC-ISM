@@ -7,15 +7,15 @@ from astropy.modeling.models import custom_model
 from astropy.modeling.fitting import LevMarLSQFitter
 
 
-def limb_fit_3D_choose(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
+def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
     """
     Calculates stellar limb-darkening coefficients for a given wavelength bin.
 
+    What is used for 1D models - Kurucz (?)
     Procedure from Sing et al. (2010, A&A, 510, A21).
     Uses 3D limb darkening from Magic et al. (2015, A&A, 573, 90).
     Uses photon FLUX Sum over (lambda*dlamba).
     :param grating: string; grating to use ('G430L','G750L','WFC3','R500B','R500R')
-    :param widek: array; index array of wsdata, indicating bin of pixels to use
     :param wsdata: array; data wavelength solution
     :param M_H: float; stellar metallicity
     :param Teff: float; stellar effective temperature (K)
@@ -27,6 +27,8 @@ def limb_fit_3D_choose(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
     cp1, cp2, cp3, cp4: float; three-parameter limb darkening coefficients
     c1, c2, c3, c4: float; non-linear limb-darkening coefficients
     """
+
+    print('You are using the', str(ld_model), 'limb darkening models.')
 
     if ld_model == '1D':
 
@@ -374,14 +376,13 @@ if __name__ == '__main__':
     dirsen = os.path.join('..', 'Limb-darkening')   # Directory for sensitivity files
     wavelength = np.loadtxt(os.path.join('..', 'data', 'W17_wavelength_test_data.txt'), skiprows=3)
 
-    # These numbers represent specific points in the grid for now. This will be updated to automatic grid selection soon.
-    FeH = -0.25
-    Teff = 6550
-    logg = 4.2    # choice of logg depends on Teff
+    # Chose your parameters
+    ld_model = '1D'
+    FeH = -2.0
+    Teff = 6000
+    logg = 4.5    # choice of logg depends on Teff in 3D models
     grating = 'G141'
-    wsdata = wavelength
-    widek = np.arange(len(wavelength))
 
-    result = limb_fit_3D_choose(grating, widek, wsdata, FeH, Teff, logg, dirsen)
+    result = limb_dark_fit(grating, wavelength, FeH, Teff, logg, dirsen, ld_model)
 
     print(result)
