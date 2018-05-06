@@ -148,9 +148,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     constant1 = ((Gr * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
     aval = constant1 * (MsMpR) ** (1 / 3)
 
-    FeH = data_params[7]
-    Teff = data_params[8]   # effective temperature
-
     flux0 = y[0]   # first flux data point
     T0 = x[0]      # first time data point
     img_date = x   # time array
@@ -674,7 +671,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     pos = np.where(sys_evidenceAIC > -500)
     if len(pos) == 0:
         pos = -1
-    npos = len(pos[0])
+    npos = len(pos[0])   # NOT-REUSED
     print('POS positions = {}'.format(pos))
 
     count_AIC = sys_evidenceAIC[pos]
@@ -686,7 +683,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     count_epoch_err = sys_epoch_err[pos]
 
     count_residuals = sys_residuals[pos, :]
-    count_date = sys_date[pos, :]
+    count_date = sys_date[pos, :]   
     count_flux = sys_flux[pos, :]
     count_flux_err = sys_flux_err[pos, :]
     count_phase = sys_phase[pos, :]
