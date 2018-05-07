@@ -287,7 +287,11 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
         Tot = int_tabulated(ws, ws * respout * reswavebinout)
         phot1[i] = (int_tabulated(ws, ws * respout * reswavebinout * fcal, sort=True)) / Tot
 
-    yall = phot1 / phot1[0]   # I shouldn't matter which one we normalize with, but every array will always have a first entry, so taking the first element is the most robust option.
+    if ld_model == '1D':
+        yall = phot1 / phot1[0]
+    elif ld_model == '3D':
+        yall = phot1 / phot1[10]
+
     Co = np.zeros((6, 4))   # NOT-REUSED
 
     A = [0.0, 0.0, 0.0, 0.0]  # c1, c2, c3, c4      # NOT-REUSED
