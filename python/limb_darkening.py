@@ -7,7 +7,7 @@ from astropy.modeling.models import custom_model
 from astropy.modeling.fitting import LevMarLSQFitter
 
 
-def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
+def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
     """
     Calculates stellar limb-darkening coefficients for a given wavelength bin.
 
@@ -21,7 +21,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
     :param Teff: float; stellar effective temperature (K)
     :param logg: float; stellar gravity
     :param dirsen: string; path to main limb darkening directory
-    :param ld_model: string; '1D' or '3D', makes choice between limb darkening models
+    :param ld_model: string; '1D' or '3D', makes choice between limb darkening models; default is 1D
     :return: uLD: float; linear limb darkening coefficient
     aLD, bLD: float; quadratic limb darkening coefficients
     cp1, cp2, cp3, cp4: float; three-parameter limb darkening coefficients
@@ -383,9 +383,9 @@ if __name__ == '__main__':
     wavelength = np.loadtxt(os.path.join('..', 'data', 'W17_wavelength_test_data.txt'), skiprows=3)
 
     # Chose your parameters
-    ld_model = '3D'
-    FeH = -2.0
-    Teff = 6000
+    ld_model = '1D'
+    FeH = 0.0
+    Teff = 6500
     logg = 4.5    # choice of logg depends on Teff in 3D models
     grating = 'G141'
 
