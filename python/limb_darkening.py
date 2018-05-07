@@ -59,32 +59,34 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
 
         if logg_Grid[optG] == 4.0:
             Teff_Grid_load = np.array([8, 19, 30, 41, 52, 63, 74, 85, 96, 107, 118, 129, 138])
-            T_ind = Teff_Grid_load[optT]
 
-        if logg_Grid[optG] == 4.5:
+        elif logg_Grid[optG] == 4.5:
             Teff_Grid_load = np.array([9, 20, 31, 42, 53, 64, 75, 86, 97, 108, 119, 129, 139])
-            T_ind = Teff_Grid_load[optT]
 
-        if logg_Grid[optG] == 5.0:
+        elif logg_Grid[optG] == 5.0:
             Teff_Grid_load = np.array([10, 21, 32, 43, 54, 65, 76, 87, 98, 109, 120, 130, 140])
-            T_ind = Teff_Grid_load[optT]
 
         # Where in the model file is the section for the Teff we want? Index T_ind tells us that.
-        N = T_ind
+        T_ind = Teff_Grid_load[optT]
         header_rows = 3    #  How many rows in each section we ignore for the data reading
         data_rows = 1221   # How  many rows of data we read
-        line_skip_data = (N + 1) * header_rows + N * data_rows   # Calculate how many lines in the model file we need to skip in order to get to the part we need (for the Teff we want).
-        line_skip_header = N * (data_rows + header_rows)
+        line_skip_data = (T_ind + 1) * header_rows + T_ind * data_rows   # Calculate how many lines in the model file we need to skip in order to get to the part we need (for the Teff we want).
+        line_skip_header = T_ind * (data_rows + header_rows)
 
         # Read the header, in case we want to have the actual Teff, logg and M_H info.
         # headerinfo is a pandas object.
         headerinfo = pd.read_csv(os.path.join(dirsen, direc, model), delim_whitespace=True, header=None,
                                  skiprows=line_skip_header, nrows=1)
 
-        Teff_model = headerinfo[1].values[0]    # NOT-REUSED
-        logg_model = headerinfo[3].values[0]    # NOT-REUSED
+        Teff_model = headerinfo[1].values[0]
+        logg_model = headerinfo[3].values[0]
         MH_model = headerinfo[6].values[0]
-        MH_model = float(MH_model[1:-1])     # Convert from string to float; the ones above are floats directly   # NOT-REUSED
+        MH_model = float(MH_model[1:-1])
+
+        print('\nClosest values to your inputs:')
+        print('Teff: ', Teff_model)
+        print('M_H: ', MH_model)
+        print('log(g): ', logg_model)
 
         # Read the data; data is a pandas object.
         data = pd.read_csv(os.path.join(dirsen, direc, model), delim_whitespace=True, header=None,
@@ -128,14 +130,13 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
         print('  ' + direc)
 
         # Select metallicity
-        M_H_Grid = np.array([-3.0, -2.0, -1.0, 0.0])  # Grid values points with metallicity values available to us
-        M_H_Grid_load = ['30', '20', '10', '00']  # Grid values points
-        optM = (abs(M_H - M_H_Grid)).argmin()  # Check which available grid value our input is closest to user input (M_H) --> actualy, argmin gets the INDEX of the closest value
+        M_H_Grid = np.array([-3.0, -2.0, -1.0, 0.0])  # Available metallicity values in 3D models
+        M_H_Grid_load = ['30', '20', '10', '00']  # The according identifiers to individual available M_H values
+        optM = (abs(M_H - M_H_Grid)).argmin()  # Find index at which the closes M_H values from available values is to the input M_H.
 
         # Select Teff
-        Teff_Grid = np.array(
-            [4000, 4500, 5000, 5500, 5777, 6000, 6500, 7000])  # Grid value points with Teff values available to us
-        optT = (abs(Teff - Teff_Grid)).argmin()  # Check which available grid value our input is closest to
+        Teff_Grid = np.array([4000, 4500, 5000, 5500, 5777, 6000, 6500, 7000])  # Available Teff values in 3D models
+        optT = (abs(Teff - Teff_Grid)).argmin()  # Find index at which the Teff values is, that is closest to input Teff.
 
         # Select logg, depending on Teff. If several logg possibilities are given for one Teff, pick the one that is
         # closest to user input (logg).
@@ -144,31 +145,31 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
             logg_Grid = np.array([1.5, 2.0, 2.5])
             optG = (abs(logg - logg_Grid)).argmin()
 
-        if Teff_Grid[optT] == 4500:
+        elif Teff_Grid[optT] == 4500:
             logg_Grid = np.array([2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0])
             optG = (abs(logg - logg_Grid)).argmin()
 
-        if Teff_Grid[optT] == 5000:
+        elif Teff_Grid[optT] == 5000:
             logg_Grid = np.array([2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0])
             optG = (abs(logg - logg_Grid)).argmin()
 
-        if Teff_Grid[optT] == 5500:
+        elif Teff_Grid[optT] == 5500:
             logg_Grid = np.array([3.0, 3.5, 4.0, 4.5, 5.0])
             optG = (abs(logg - logg_Grid)).argmin()
 
-        if Teff_Grid[optT] == 5777:
+        elif Teff_Grid[optT] == 5777:
             logg_Grid = np.array([4.4])
             optG = 0
 
-        if Teff_Grid[optT] == 6000:
+        elif Teff_Grid[optT] == 6000:
             logg_Grid = np.array([3.5, 4.0, 4.5])
             optG = (abs(logg - logg_Grid)).argmin()
 
-        if Teff_Grid[optT] == 6500:
+        elif Teff_Grid[optT] == 6500:
             logg_Grid = np.array([4.0, 4.5])
             optG = (abs(logg - logg_Grid)).argmin()
 
-        if Teff_Grid[optT] == 7000:
+        elif Teff_Grid[optT] == 7000:
             logg_Grid =  np.array([4.5])
             optG = 0
 
@@ -188,10 +189,14 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
         sav = readsav(os.path.join(direc, file))  # readsav reads an IDL .sav file
         ws = sav['mmd'].lam[0]  # read in wavelength
         flux = sav['mmd'].flx  # read in flux
-        Teff_model = Teff_Grid[optT]        # NOT-REUSED
-        logg_model = logg_Grid[optG]        # NOT-REUSED
-        MH_model = str(M_H_Grid[optM])      # NOT-REUSED
-        print('  ' + header)
+        Teff_model = Teff_Grid[optT]
+        logg_model = logg_Grid[optG]
+        MH_model = str(M_H_Grid[optM])
+
+        print('\nClosest values to your inputs:')
+        print('Teff: ', Teff_model)
+        print('M_H: ', MH_model)
+        print('log(g): ', logg_model)
 
         f0 = flux[0]
         f1 = flux[1]
@@ -317,6 +322,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model):
     linear = fitter(linear, x, y)
     uLD = linear.c1.value
 
+    print('\nLimb darkening parameters:')
     print("4param \t{:0.8f}\t{:0.8f}\t{:0.8f}\t{:0.8f}".format(c1, c2, c3, c4))
     print("3param \t{:0.8f}\t{:0.8f}\t{:0.8f}".format(cp2, cp3, c4))
     print("Quad \t{:0.8f}\t{:0.8f}".format(aLD, bLD))
@@ -377,7 +383,7 @@ if __name__ == '__main__':
     wavelength = np.loadtxt(os.path.join('..', 'data', 'W17_wavelength_test_data.txt'), skiprows=3)
 
     # Chose your parameters
-    ld_model = '1D'
+    ld_model = '3D'
     FeH = -2.0
     Teff = 6000
     logg = 4.5    # choice of logg depends on Teff in 3D models
@@ -385,4 +391,4 @@ if __name__ == '__main__':
 
     result = limb_dark_fit(grating, wavelength, FeH, Teff, logg, dirsen, ld_model)
 
-    print(result)
+    print('\n Full result: ', result)
