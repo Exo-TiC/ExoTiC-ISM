@@ -106,33 +106,17 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     outDir = os.path.join(mainDir, 'outputs', 'W17')
 
 
-# ----------------------
+    # ----------------------
     # NEW Is there a way in python to set constants across lots of routines?
     # It's ok to just define them here, but most of them don't get used later on anyway?
-# ----------------------
-    # SET THE CONSTANTS 
-    # constant = [GAIN, READNOISE, G, JD, DAY_TO_SEC, Rjup, Rsun, MJup, Msun, HST_SECOND, HST_PERIOD]   # Description
-    # Constants in array
-    #constant = [2.5, 20.2, np.float64(6.67259e-11), 2400000.5, 86400, np.float64(7.15e7), np.float64(6.96e8),
-    #            np.float64(1.9e27), np.float64(1.99e30), 5781.6, 0.06691666]
+    # ----------------------
+    # SET THE CONSTANTS
 
     # Constants individually (but same as above) - Why repeating them?
-    gain = 2.5   # NOT-REUSED
-    rdnoise = 20.2   # NOT-REUSED
     Gr = np.float64(6.67259e-11)
-    JDconst = 2400000.5   # NOT-REUSED
     day_to_sec = 86400
-    JD = np.float64(2400000.5)   # NOT-REUSED
-    Rjup = np.float64(7.15e7)   # NOT-REUSED
-    Rsun = np.float64(6.96e8)   # NOT-REUSED
-    MJup = np.float64(1.9e27)   # NOT-REUSED
-    Msun = np.float64(1.99e30)   # NOT-REUSED
-    HST_second = 5781.6   # NOT-REUSED
     HST_period = 0.06691666
-    HSTper = np.float64(96.36) / (np.float64(24) * np.float64(60))   # NOT-REUSED
 
-    # Put into array instead of above
-    #constant = np.array([gain, rdnoise, Gr, JDconst, day_to_sec, Rjup, Rsun, MJup, Msun, HST_second, HST_period])
     # -----------------------------
 
     nexposure = len(x)   # Total number of exposures in the observation
@@ -280,29 +264,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         w_params[s, :] = mpfit_result.params
 
         # Populate parameters with fits results - can delete all of this once array format is in place
-        #rl = mpfit_result.params[0]
-        #flux0 = mpfit_result.params[1]
-        #epoch = mpfit_result.params[2]
-        #inclin = mpfit_result.params[3]
-        #MsMpR = mpfit_result.params[4]
-        #ecc = mpfit_result.params[5]
-        #omega = mpfit_result.params[6]
-        #Per = mpfit_result.params[7]
-        #T0 = mpfit_result.params[8]
-        #c1 = mpfit_result.params[9]
-        #c2 = mpfit_result.params[10]
-        #c3 = mpfit_result.params[11]
-        #c4 = mpfit_result.params[12]
-        #m = mpfit_result.params[13]
-        #hst1 = mpfit_result.params[14]
-        #hst2 = mpfit_result.params[15]
-        #hst3 = mpfit_result.params[16]
-        #hst4 = mpfit_result.params[17]
-        #sh1 = mpfit_result.params[18]
-        #sh2 = mpfit_result.params[19]
-        #sh3 = mpfit_result.params[20]
-        #sh4 = mpfit_result.params[21]
-
         # Stick to array format
         for i in range(p0.size[0]):
             p0[i] = mpfit_result.params[i]
@@ -514,29 +475,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         evidence_AIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * AIC
 
         # Redefine all of the parameters given the MPFIT output
-        #rl = mpfit_result.params[0]
-        #flux0 = mpfit_result.params[1]
-        #epoch = mpfit_result.params[2]
-        #inclin = mpfit_result.params[3]
-        #MsMpR = mpfit_result.params[4]
-        #ecc = mpfit_result.params[5]
-        #omega = mpfit_result.params[6]
-        #Per = mpfit_result.params[7]
-        #T0 = mpfit_result.params[8]
-        #c1 = mpfit_result.params[9]
-        #c2 = mpfit_result.params[10]
-        #c3 = mpfit_result.params[11]
-        #c4 = mpfit_result.params[12]
-        #m = mpfit_result.params[13]
-        #HSTP1 = mpfit_result.params[14]
-        #HSTP2 = mpfit_result.params[15]
-        #HSTP3 = mpfit_result.params[16]
-        #HSTP4 = mpfit_result.params[17]
-        #xshift1 = mpfit_result.params[18]
-        #xshift2 = mpfit_result.params[19]
-        #xshift3 = mpfit_result.params[20]
-        #xshift4 = mpfit_result.params[21]
-
         # Redefine array
         p0 = mpfit_result.params
 
