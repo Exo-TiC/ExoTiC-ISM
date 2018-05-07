@@ -186,7 +186,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     nsys, nparams = grid.shape   # nsys = number of systematic models
 
     #  SET UP THE ARRAYS  ;
-    # sav arrays for the first step throught to get the err inflation
+    # sav arrays for the first step through to get the err inflation
     w_scatter = np.zeros(nsys)
     w_params = np.zeros((nsys, nparams))
     # final sav arrays for each systematic model
@@ -252,19 +252,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
         HSTphase[k] -= 1.0
-        # This is equivalent to the two lines below
-        # if len(k) > 0:
-        #     HSTphase[k] = HSTphase[k] - 1.0
 
         phase = (img_date - epoch) / (Per / day_to_sec)
 
         phase2 = np.floor(phase)
         phase = phase - phase2
-        a = np.where(phase > 0.5)[0]
+        a = np.where(phase > 0.5)[0]   # equivalent: if a[0] != -1:
         phase[a] -= 1.0
-        # same as above
-        # if a[0] != -1:
-        #     phase[a] = phase[a] - 1.0
 
 
         #### MPFIT - ONE ####
@@ -284,9 +278,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         nfree = sum([not p['fixed'] for p in parinfo])
 
         # The python mpfit does not populate the covariance matrix correctly so mpfit_result.perror is not correct
-        # the mpfit_result.covar is filled sequentiall by row with the values of only free parameters, this works if all parameters are free
-        # but not if some are kept fixed.  The code below should work to get the proper error values i.e. what should be the diagonals
-        # of the covariance
+        # the mpfit_result.covar is filled sequentially by row with the values of only free parameters, this works if
+        # all parameters are free but not if some are kept fixed.  The code below should work to get the proper error
+        # values i.e. what should be the diagonals of the covariance.
 
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
         pcerror = np.zeros_like(mpfit_result.perror)
@@ -683,7 +677,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     count_epoch_err = sys_epoch_err[pos]
 
     count_residuals = sys_residuals[pos, :]
-    count_date = sys_date[pos, :]   
+    count_date = sys_date[pos, :]
     count_flux = sys_flux[pos, :]
     count_flux_err = sys_flux_err[pos, :]
     count_phase = sys_phase[pos, :]
