@@ -107,7 +107,7 @@ def occultnl(rl, c1, c2, c3, c4, b0):
     dmumax = 1.0
 
     while (dmumax > fac * 1.e-3) and (nr <= 131072):
-        print(nr)
+        #print(nr)
         mulimbp = mulimb
         nr = nr * 2
         dt = 0.5 * np.pi / nr
@@ -134,7 +134,7 @@ def occultnl(rl, c1, c2, c3, c4, b0):
         if len(ix1) == 0:
             ix1 = -1
 
-        print(ix1)
+        #print(ix1)
         # python cannot index on single values so you need to use atlest_1d for the below to work when mulimb is a single value
         dmumax = np.max(abs(np.atleast_1d(mulimb)[ix1] - np.atleast_1d(mulimbp)[ix1]) / (
                 np.atleast_1d(mulimb)[ix1] + np.atleast_1d(mulimbp)[ix1]))
