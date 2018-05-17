@@ -167,9 +167,9 @@ IF (LD3D eq 'yes') THEN BEGIN
 grating = 'G141'
 wsdata = wavelength
 widek=indgen(n_elements(wavelength))
-M_H = data_params(6)
-Teff = data_params(7)
-logg = data_params(8)
+M_H = data_params(7)
+Teff = data_params(8)
+logg = data_params(9)
 
 limb_fit_3D_choose,grating,widek,wsdata,uLD,c1,c2,c3,c4,cp1,cp2,cp3,cp4,aLD,bLD,header,M_H,Teff,logg
 ENDIF
@@ -251,12 +251,12 @@ HSTphase = ((img_date)-(T0))/(constant(10))
  k = WHERE(HSTphase GT 0.5)
  IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
 
- phase = DBLARR(nexposure) 
-FOR j = 0, nexposure-1 DO phase(j) = ((img_date(j))-(epoch))/(Per/constant(4)) 
- phase2 = FLOOR(phase)
- phase = phase - phase2
- a = WHERE(phase GT 0.5)
- IF (a(0) NE -1) THEN phase(a) = phase(a) - 1.0D0
+ phase_xyz = DBLARR(nexposure) 
+FOR j = 0, nexposure-1 DO phase_xyz(j) = ((img_date(j))-(epoch))/(Per/constant(4)) 
+ phase2 = FLOOR(phase_xyz)
+ phase_xyz = phase_xyz - phase2
+ a = WHERE(phase_xyz GT 0.5)
+ IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
 
 ;      MPFIT - ONE       ;
@@ -342,11 +342,11 @@ PRINT, 'Transit depth = ', rl, ' +/- ', rl_err, '     centered at  ', epoch
 
 ; OUTPUTS
 ; Re-Calculate each of the arrays dependent on the output parameters
-phase = ((x)-(epoch))/(Per/86400D0) 
- phase2 = FLOOR(phase)
- phase = phase - phase2
- a = WHERE(phase GT 0.5)
- IF (a(0) NE -1) THEN phase(a) = phase(a) - 1.0D0
+phase_xyz = ((x)-(epoch))/(Per/86400D0) 
+ phase2 = FLOOR(phase_xyz)
+ phase_xyz = phase_xyz - phase2
+ a = WHERE(phase_xyz GT 0.5)
+ IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
 HSTphase = ((x)-(T0))/(constant(10))                        
  phase2 = FLOOR(HSTphase)
@@ -357,7 +357,7 @@ HSTphase = ((x)-(T0))/(constant(10))
 ;...........................................
 ; TRANSIT MODEL fit to the data
 ;Calculate the impact parameter based on the eccentricity function
-b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase*2*!pi))^2D0 + (cos(inclin)*cos(phase*2*!pi))^(2D0)]^(0.5D0)
+b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase_xyz*2*!pi))^2D0 + (cos(inclin)*cos(phase_xyz*2*!pi))^(2D0)]^(0.5D0)
 
 
                                 ;Use the MANDEL & AGOL (2002) analytic
@@ -368,7 +368,7 @@ occultnl, rl, c1, c2,c3, c4, b0, mulimb01, mulimbf1, plotquery
 b01=b0
 ;...........................................
 
-systematic_model = (phase*m + 1.0) * (HSTphase*hst1 + HSTphase^2.*hst2 + HSTphase^3.*hst3 + HSTphase^4.*hst4 + 1.0) * (sh*sh1 + sh^2.*sh2 + sh^3.*sh3 + sh^4.*sh4 + 1.0)
+systematic_model = (phase_xyz*m + 1.0) * (HSTphase*hst1 + HSTphase^2.*hst2 + HSTphase^3.*hst3 + HSTphase^4.*hst4 + 1.0) * (sh*sh1 + sh^2.*sh2 + sh^3.*sh3 + sh^4.*sh4 + 1.0)
 
 w_model = mulimb01 * flux0 * systematic_model
 
@@ -388,12 +388,12 @@ print, 'Scatter on the residuals = ', w_scatter(s)
 ;..........................................
 
 cut_down = 2.57 ; Play around with this value if you want. 
-; This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard deviation, although this is only a very timy inflation of the uncertainty and I need to find a more statistically riggrous way to do this. 
+; This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically riggrous way to do this. 
 ; Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
 
 IF (plotting EQ 'on') THEN BEGIN
 window,0, title=s
-plot, phase, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]
+plot, phase_xyz, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]
 hline, 0.0+STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
 hline, 0.0
 hline, 0.0-STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
@@ -451,18 +451,18 @@ ENDFOR
 
 IF (plotting EQ 'on') THEN BEGIN
 window,2, title=s
-plot, phase, corrected_data, ystyle=3, xstyle=3, psym=4
-oplot, phase, y, psym=1
-oploterror, phase, corrected_data, err, psym=4, color=321321
-oplot, phase, systematic_model, color=5005005, psym=2
+plot, phase_xyz, corrected_data, ystyle=3, xstyle=3, psym=4
+oplot, phase_xyz, y, psym=1
+oploterror, phase_xyz, corrected_data, err, psym=4, color=321321
+oplot, phase_xyz, systematic_model, color=5005005, psym=2
 ENDIF
 
 
 
 ENDFOR
 
-
-
+print, 'stopped'
+stop
 
 
 ;..........................................
@@ -499,12 +499,12 @@ HSTphase = ((x)-(T0))/(constant(10))
  k = WHERE(HSTphase GT 0.5)
  IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
 
- phase = DBLARR(nexposure) 
-FOR j = 0, nexposure-1 DO phase(j) = ((x(j))-(epoch))/(Per/constant(4)) 
- phase2 = FLOOR(phase)
- phase = phase - phase2
- a = WHERE(phase GT 0.5)
- IF (a(0) NE -1) THEN phase(a) = phase(a) - 1.0D0
+ phase_xyz = DBLARR(nexposure) 
+FOR j = 0, nexposure-1 DO phase_xyz(j) = ((x(j))-(epoch))/(Per/constant(4)) 
+ phase2 = FLOOR(phase_xyz)
+ phase_xyz = phase_xyz - phase2
+ a = WHERE(phase_xyz GT 0.5)
+ IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
  p0 = TRANSPOSE(p0)
 
@@ -596,11 +596,11 @@ PRINT, 'Transit depth = ', rl, ' +/- ', rl_err, '     centered at  ', epoch
 
 ; OUTPUTS
 ; Re-Calculate each of the arrays dependent on the output parameters
-phase = ((x)-(epoch))/(Per/86400D0) 
- phase2 = FLOOR(phase)
- phase = phase - phase2
- a = WHERE(phase GT 0.5)
- IF (a(0) NE -1) THEN phase(a) = phase(a) - 1.0D0
+phase_xyz = ((x)-(epoch))/(Per/86400D0) 
+ phase2 = FLOOR(phase_xyz)
+ phase_xyz = phase_xyz - phase2
+ a = WHERE(phase_xyz GT 0.5)
+ IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
 HSTphase = ((x)-(T0))/(constant(10))                        
  phase2 = FLOOR(HSTphase)
@@ -611,7 +611,7 @@ HSTphase = ((x)-(T0))/(constant(10))
 ;...........................................
 ; TRANSIT MODEL fit to the data
 ;Calculate the impact parameter based on the eccentricity function
-b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase*2*!pi))^2D0 + (cos(inclin)*cos(phase*2*!pi))^(2D0)]^(0.5D0)
+b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase_xyz*2*!pi))^2D0 + (cos(inclin)*cos(phase_xyz*2*!pi))^(2D0)]^(0.5D0)
 
 
                                 ;Use the MANDEL & AGOL (2002) analytic
@@ -639,7 +639,7 @@ occultnl, rl, c1, c2,c3, c4, b0, mulimb02, mulimbf2, plotquery
 b02=b0
 ;...........................................
 
-systematic_model = (phase*m + 1.0) * (HSTphase*hst1 + HSTphase^2.*hst2 + HSTphase^3.*hst3 + HSTphase^4.*hst4 + 1.0) * (sh*sh1 + sh^2.*sh2 + sh^3.*sh3 + sh^4.*sh4 + 1.0)
+systematic_model = (phase_xyz*m + 1.0) * (HSTphase*hst1 + HSTphase^2.*hst2 + HSTphase^3.*hst3 + HSTphase^4.*hst4 + 1.0) * (sh*sh1 + sh^2.*sh2 + sh^3.*sh3 + sh^4.*sh4 + 1.0)
 
 fit_model = mulimb01 * flux0 * systematic_model
 
@@ -651,9 +651,9 @@ fit_err = err ;* (1.0 + resid_scatter)
 
 IF (plotting EQ 'on') THEN BEGIN
 window,2, title=s
-plot, phase, y, ystyle=3, xstyle=3, psym=1
+plot, phase_xyz, y, ystyle=3, xstyle=3, psym=1
 oplot, x2, mulimb02, color=5005005
-oploterror, phase, fit_data, err, psym=4, color=100100100
+oploterror, phase_xyz, fit_data, err, psym=4, color=100100100
 ENDIF
 ;.............................
 ; Arrays to save to file
@@ -663,7 +663,7 @@ sys_stats(s,*) = [AIC, BIC, DOF, CHI, resid_scatter]
 ; img_date
 sys_date(s,*) = x
 ; phase
-sys_phase(s,*) = phase
+sys_phase(s,*) = phase_xyz
 ; raw lightcurve flux
 ;sys_rawflux(s,*) = y
 ;sys_rawflux_err(s,*) = err
@@ -910,12 +910,12 @@ FUNCTION transit_circle, p, X=x, Y=y, ERR=err, SH=sh
     constant1 = (constant(2)*Per*Per/(4*!pi*!pi))^(1D0/3D0) 
     aval = constant1*(msmpr)^0.333D0
     
-  phase = ((X)-epoch)/(Per/86400D0) ;convert to days
-  phase2 = FLOOR(phase)
-  phase = phase - phase2
-    a = WHERE(phase GT 0.5)
-   IF (a(0) NE -1) THEN phase(a) = phase(a)-1.0D0
-  PRINT, 'phase(0) =', phase(0)
+  phase_xyz = ((X)-epoch)/(Per/86400D0) ;convert to days
+  phase2 = FLOOR(phase_xyz)
+  phase_xyz = phase_xyz - phase2
+    a = WHERE(phase_xyz GT 0.5)
+   IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a)-1.0D0
+  PRINT, 'phase(0) =', phase_xyz(0)
 
   HSTphase = ((X)-(T0))/(HSTper) ;convert to days
   phase2 = FLOOR(HSTphase)
@@ -924,21 +924,21 @@ FUNCTION transit_circle, p, X=x, Y=y, ERR=err, SH=sh
     IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
 
 
-      b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase*2*!pi))^2D0 + (cos(inclin)*cos(phase*2*!pi))^(2D0)]^(0.5D0)
+      b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase_xyz*2*!pi))^2D0 + (cos(inclin)*cos(phase_xyz*2*!pi))^(2D0)]^(0.5D0)
 
  plotquery = 0
 
   occultnl,rl,c1,c2,c3,c4,b0,mulimb0,mulimbf,plotquery,_extra=e
 
-systematic_model = (phase*p(13) + 1.0) * (HSTphase*p(14) + HSTphase^2.*p(15) + HSTphase^3.*p(16) + HSTphase^4.*p(17) + 1.0) * (sh*p(18) + sh^2.*p(19) + sh^3.*p(20) + sh^4.*p(21) + 1.0)
+systematic_model = (phase_xyz*p(13) + 1.0) * (HSTphase*p(14) + HSTphase^2.*p(15) + HSTphase^3.*p(16) + HSTphase^4.*p(17) + 1.0) * (sh*p(18) + sh^2.*p(19) + sh^3.*p(20) + sh^4.*p(21) + 1.0)
 
 ;model fit to data = transit model * baseline flux * systematic model
   model = mulimb0 * p(1) * systematic_model 
 
 print, 'Rp/R* = ', p(0)
-;  plot,phase,y,/ystyle,psym=4, yrange=[min(y)-0.0001,max(y)+0.0001]
-;  oplot,phase,model,psym=-2,color=1000
-;  oplot, phase, mulimb0
+;  plot,phase_xyz,y,/ystyle,psym=4, yrange=[min(y)-0.0001,max(y)+0.0001]
+;  oplot,phase_xyz,model,psym=-2,color=1000
+;  oplot, phase_xyz, mulimb0
   
 resids = (y-model)/p(1)
 
