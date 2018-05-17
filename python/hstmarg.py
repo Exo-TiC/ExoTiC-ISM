@@ -83,7 +83,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
 
 
 
-# This is the function that could be replaced by BATMAN - but if it works like this then I don't know that we need to change it. 
+
 def occultnl(rl, c1, c2, c3, c4, b0):
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
