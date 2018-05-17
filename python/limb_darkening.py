@@ -182,8 +182,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
 
         #
         file = 'mmu_t' + Ttxt + 'g' + Gtxt + 'm' + Mtxt + 'v05.flx'
-        model = file  # NOT-REUSED
-        header = file
+        print('Filename:', file)
 
         # Read data from IDL .sav file
         sav = readsav(os.path.join(direc, file))  # readsav reads an IDL .sav file
