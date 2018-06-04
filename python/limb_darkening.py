@@ -388,7 +388,7 @@ if __name__ == '__main__':
     # Chose your parameters
     ld_model = '1D'
     FeH = 0.0
-    Teff = 6500
+    Teff = 5500
     logg = 4.5    # choice of logg depends on Teff in 3D models
     grating = 'G141'
 

@@ -21,6 +21,15 @@ if __name__ == '__main__':
     outDir = os.path.join(mainDir, 'outputs')
     dataDir = os.path.join(mainDir, 'data')
 
+    dtosec = 86400
+    big_G = np.float64(6.67259e-11)
+    Rjup = np.float64(7.15e7)
+    Rsun = np.float64(6.96e8)
+    Mjup = np.float64(1.9e27)
+    Msun = np.float64(1.99e30)
+    HST_second = 5781.6
+    HST_period = 0.06691666
+
 
     # READ in the txt file for the lightcurve data
     x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W6_wlspec_lightcurve_test_data.txt'), skiprows=7, unpack=True)
