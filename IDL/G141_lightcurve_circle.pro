@@ -471,6 +471,7 @@ stop
 ;..........................................
 PRINT,'..........................................'
 PRINT, 'As we seem to have found how shit each of the systematic models are at fitting the data compared to a Mandel&Agol transit model we can now use the scatter on their residuals to inflate the uncertainties for the data. We will then go ahead and refit for each systematic model if that is okay with you. If not control+c is still a valid option.'
+
 FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
 PRINT, '................................'
 PRINT, ' SYSTEMATIC MODEL ', s
@@ -507,6 +508,7 @@ FOR j = 0, nexposure-1 DO phase_xyz(j) = ((x(j))-(epoch))/(Per/constant(4))
  IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
  p0 = TRANSPOSE(p0)
+ x
 
 ;      MPFIT - TWO       ;
 fa = {X:x, Y:y, ERR:err, SH:sh}
