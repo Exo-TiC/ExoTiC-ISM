@@ -76,7 +76,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         - rl: transit depth (Rp/R*)
         - epoch: center of transit time (in MJD)
         - inclin: inclination of the planetary orbit
-        - MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
+        - a/R*: semi-major axis in terms of stellar radii - this is converted to density of the system which is equivelent to (Ms+Mp)/(R*^3D0) this calculated from a/R* following:
                constant1 = (G*Per*Per/(4*!pi*!pi))^(1D0/3D0) -> MsMpR = (a_Rs/constant1)^3D0
         - ecc: eccentricity of the system
         - omega: omega of the system (degrees)
@@ -111,16 +111,17 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     nexposure = len(x)   # Total number of exposures in the observation
 
     # READ IN THE PLANET STARTING PARAMETERS
-    # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]   # Description
+    # data_params = [rl, epoch, inclin, aors, ecc, omega, Per, FeH, Teff, logg]   # Description
     rl = data_params[0]                             # Rp/R* estimate
     epoch = data_params[1]                          # cener of transit time in MJD
     inclin = data_params[2] * ((2 * np.pi) / 360)   # inclination, converting it to radians
-    MsMpR = data_params[3]                          # density of the system
+    aor = data_params[3]                          # density of the system
     ecc = data_params[4]                            # eccentricity
     omega = data_params[5] * ((2 * np.pi) / 360)    # orbital omega, converting it to radians
     Per = data_params[6] * day_to_sec               # period in seconds
+    
     constant1 = ((Gr * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
-    aval = constant1 * (MsMpR) ** (1 / 3)   # NOT-REUSED
+    MsMpR = (aor / (constant1)) ** 3 
 
     flux0 = y[0]   # first flux data point
     T0 = x[0]      # first time data point
