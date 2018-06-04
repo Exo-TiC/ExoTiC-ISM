@@ -327,7 +327,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         #     hline, 0.0+STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
         #     hline, 0.0
         #     hline, 0.0-STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
-
+        """
         # remove
         bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * 3))
         bad_down = np.where(w_residuals < (0.0 - np.std(w_residuals) * 3))
@@ -353,7 +353,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         y[bad_down] = y[bad_down] + np.std(w_residuals) * cut_down
         err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
-
+        """
         # if plotting:
         #     window,2, title=s
         #     plot, phase, corrected_data, ystyle=3, xstyle=3, psym=4
