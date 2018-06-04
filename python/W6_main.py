@@ -6,6 +6,16 @@ if __name__ == '__main__':
     """
     This is a translation of the W17_lightcurve_test.pro
     """
+    # don't need them in the user input part
+    # SET THE CONSTANTS
+    dtosec = 86400
+    big_G = np.float64(6.67259e-11)
+    Rjup = np.float64(7.15e7)
+    Rsun = np.float64(6.96e8)
+    Mjup = np.float64(1.9e27)
+    Msun = np.float64(1.99e30)
+    HST_second = 5781.6
+    HST_period = 0.06691666
 
     mainDir = '..'
     outDir = os.path.join(mainDir, 'outputs')
@@ -39,7 +49,7 @@ if __name__ == '__main__':
     data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
     grat = 'G141'   # Which grating to use
     grid_selection = 'fit_time'
-    run_name = 'wl_time_wm3d'
+    run_name = 'wl_time_1d'
     plotting = True
 
     G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name, plotting)
