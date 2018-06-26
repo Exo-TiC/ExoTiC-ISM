@@ -34,7 +34,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     c2 = p[10]
     c3 = p[11]
     c4 = p[12]
-    pi = np.float32(np.pi)
+    pi = np.pi
 
 # Turn off the print statements if you want this function to be silent - these are here for sanity checks
     print(epoch)
