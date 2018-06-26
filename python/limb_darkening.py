@@ -170,7 +170,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
             optG = (abs(logg - logg_Grid)).argmin()
 
         elif Teff_Grid[optT] == 7000:
-            logg_Grid =  np.array([4.5])
+            logg_Grid = np.array([4.5])
             optG = 0
 
         # ==== Select Teff and Log g. Mtxt, Ttxt and Gtxt are then put together as string to load correct files.
