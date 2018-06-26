@@ -4,33 +4,35 @@ The original IDL scipts used are
 G141_lightcurve_circle.pro - the translation of this code is in the G141_lightcurve_circle() function
 W17_lightcurve_test.pro - the translation of this code is in the main() function
 
-IDL's WHERE function returns -1 if nothing is found vs python returning an empty array.  There are cases where this
-is important and is taken into account in the occulation functions.
+IDL's WHERE function returns -1 if nothing is found vs python returning an empty array. There are cases where this
+is important and is taken into account in the occultation functions.
 
 Running python G141_lightcurve_circle.py from the command line will execute the main() function.
 The code has only been tested significantly up to the first attempt at fitting the transit models, even that may contain
 yet to be discovered bugs. This point is marked in the code.  Everything after that point was a best attempt at
-quick translation from IDL. Running the code end to end does NOT produce consistent results with the IDL code so there are 
-definitely bugs somewhere.
+quick translation from IDL. Running the code end to end does NOT produce consistent results with the IDL code so there
+are definitely bugs somewhere.
 
 The python code uses a python translation of the IDL MPFIT library instead of built LM fitters because for some reason
-neither the scipt least_squares method, the Astropy wrapper, or the lmfit package find the same minimum as the IDL code.
-The python translation of MPFIT is consistent with the IDL code.  In theory, all of these packages use the same method
+neither the script least_squares method, the Astropy wrapper, or the lmfit package find the same minimum as the IDL code.
+The python translation of MPFIT is consistent with the IDL code. In theory, all of these packages use the same method,
 so there may be some tuning parameters that need to be adjusted to agree with MPFIT (error tolerance, etc.).
-The python translation of mpfit (mpfit.py) comes from https://github.com/scottransom/presto/blob/master/lib/python/mpfit.py
+The python translation of mpfit (mpfit.py) comes from;
+https://github.com/scottransom/presto/blob/master/lib/python/mpfit.py
 
-limb_darkening.py contains a python translation of the 3D limb darkening code in the original IDL.  It does use Astropy for
-fitting the models.  Again, the two are not exactly consistent but in this case the difference is small (good to about 3 decimals).
+limb_darkening.py contains a python translation of the 3D limb darkening code in the original IDL. It does use Astropy
+for fitting the models. Again, the two are not exactly consistent but in this case the difference is small (good to
+about 3 decimals).
 
-Inital translation of Python to IDL was done by Matthew Hill mhill92@gmail.
-Continued refinement by Iva Laginja (laginja.iva@gmail.com).
+Inital translation of Python to IDL was done by Matthew Hill (mhill92@gmail).
+Continued by Iva Laginja (laginja.iva@gmail.com).
 """
-
-from HST_python.mpfit import mpfit
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 
 from HST_python.config import CONFIG_INI
+from HST_python.mpfit import mpfit
 from HST_python.limb_darkening import limb_dark_fit
 from HST_python import hstmarg
 
