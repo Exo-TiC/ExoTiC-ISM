@@ -158,7 +158,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
     #  SET UP THE ARRAYS
 
-    # sav arrays for the first step through to get the err inflation
+    # save arrays for the first step through to get the err inflation
     w_scatter = np.zeros(nsys)
     w_params = np.zeros((nsys, nparams))
 
@@ -323,10 +323,17 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         # if plotting:
         #     window,0, title=s
-        #     plot, phase, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]
-        #     hline, 0.0+STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
+        #     plot, phase, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]     # ; psym=4 makes diamonds, xstyle and ystyle format the axes
+        #     hline, 0.0+STDDEV(w_residuals)*cut_down, color=cgcolor('RED')                 # marking different lines connected with choice of good data
         #     hline, 0.0
-        #     hline, 0.0-STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
+        #     hline, 0.0-STDDEV(w_residuals)*cut_down, color=cgcolor('RED')
+
+        # Python:
+        # if plotting:
+        # fig1
+        # plt.plot(phase_xyz, w_residuals)
+        # plt.ylim(-0.01,0.01)
+        # plt.show() or something - interactive mode?
         """
         # remove
         bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * 3))
@@ -356,10 +363,21 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         """
         # if plotting:
         #     window,2, title=s
-        #     plot, phase, corrected_data, ystyle=3, xstyle=3, psym=4
-        #     oplot, phase, y, psym=1
-        #     oploterror, phase, corrected_data, err, psym=4, color=321321
-        #     oplot, phase, systematic_model, color=5005005, psym=2
+        #     plot, phase, corrected_data, ystyle=3, xstyle=3, psym=4       # first plotted data
+        #     oplot, phase, y, psym=1                                       # second plotted data
+        #     oploterror, phase, corrected_data, err, psym=4, color=321321  # error bars for first plotted data
+        #     oplot, phase, systematic_model, color=5005005, psym=2         # third plotted data
+
+        # Python:
+        # if plotting:
+        # fig2
+        # plt.plot(phase_xyz, corrected_data)     # with error bars
+        # plt.plot(phase_xyz, y)
+        # plt.plot(phase_xyz, systematic_model)
+        # plt.title(str(s+1))
+        # plt.ylim(-0.01,0.01)
+        # plt.show() or something - interactive mode?
+
 
 
     #########################################################################################################################
@@ -504,9 +522,16 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         # IF (plotting EQ 'on') THEN BEGIN
         # window,2, title=s
-        # plot, phase, y, ystyle=3, xstyle=3, psym=1
-        # oplot, x2, mulimb02, color=5005005
-        # oploterror, phase, fit_data, err, psym=4, color=100100100
+        # plot, phase_xyz, y, ystyle=3, xstyle=3, psym=1                   # first plotted data
+        # oplot, x2, mulimb02, color=5005005                           # second plotted data, makes a line (the line is the model)
+        # oploterror, phase, fit_data, err, psym=4, color=100100100    # errors of first plotted data
+
+        # Python:
+        # plt.plot(phase_xyz, y) with error bars
+        # plt.plot(x2, mulimb02)
+        # plt.title(str(s+1))
+        # plt.show() or something
+
         # ENDIF
 
         # .............................
@@ -532,22 +557,38 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         sys_evidenceAIC[s] = evidence_AIC                       # evidence AIC
         sys_evidenceBIC[s] = evidence_BIC                       # evidence BIC
 
+        print('Another round done')
+
+
     # SAVE, filename=out_folder+'analysis_circle_G141_'+run_name+'.sav', sys_stats, sys_date, sys_phase, sys_rawflux,
     # sys_rawflux_err, sys_flux, sys_flux_err, sys_residuals, sys_model, sys_model_phase, sys_systematic_model,
     # sys_params, sys_params_err, sys_depth, sys_depth_err, sys_epoch, sys_epoch_err, sys_evidenceAIC, sys_evidenceBIC
-    # .......................................
 
-    # MARGINALISATION
+    # Python:
+    # Saving this will be a bit of a mess, btu we'll manage. Best option is probably to fits file, or txt file (or both).
+    # All of the parameters that are getting saved are a tuple of one or more dimension, and those are not always of
+    # the same size.
+    # Save to output folder.
+
+
+    #####################################
+    #          MARGINALISATION          #
+    #####################################
+
     a = (np.sort(sys_evidenceAIC))[::-1]
-    print('TOP 10 SYSTEMATIC MODELS')
-    print(a[:10])
+    print('\nTOP 10 SYSTEMATIC MODELS')
 
+    # What is getting printed here?
+    print(a[:10])
+    # What is getting printed here?
     print(sys_evidenceAIC)
+
     # REFORMAT all arrays with just positive values
     pos = np.where(sys_evidenceAIC > -500)
     if len(pos) == 0:
         pos = -1
     npos = len(pos[0])   # NOT-REUSED
+    # What is getting printed here?
     print('POS positions = {}'.format(pos))
 
     count_AIC = sys_evidenceAIC[pos]
@@ -622,6 +663,10 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # print(MEDIAN(count_flux_err(best_sys,*)*1d6))
     # ;ENDIF
 
+    # Python:
+    # f
+
+
     # Center of transit time
     epoch_array = count_epoch
     epoch_err_array = count_epoch_err
@@ -689,6 +734,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # SAVE, filename=out_folder+'analysis_circle_G141_marginalised_'+run_name+'.sav', w_q, best_sys, marg_rl,
     # marg_rl_err, marg_epoch, marg_epoch_err, marg_inclin_rad, marg_inclin_rad_err, marg_inclin_deg,
     # marg_inclin_deg_err, marg_msmpr, marg_msmpr_err, marg_aors, marg_aors_err, rl_sdnr, pos
+
+    # Python:
+    # Same like in the previous SAVE
 
 
 if __name__ == '__main__':
