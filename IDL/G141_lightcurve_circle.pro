@@ -235,228 +235,230 @@ sys_evidenceBIC = DBLARR(nsys)
 ;'----------      ------------     ------------'
 PRINT,'..........................................'
 PRINT, 'The first run through of the data for each of the WFC3 stochastic models outlined in Table 2 of Wakeford et al. (2016a) is now being preformed. Using this fit we will scale the uncertainties you input to incorporate the inherent scatter in the data for each model.'
+
 FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
-PRINT, '................................'
-PRINT, ' SYSTEMATIC MODEL ', s
-systematics = [grid(s,*)]
-PRINT, TRANSPOSE(systematics)
-PRINT, '  '
 
-; - -- --- ---- --- -- - ;
-;          PHASE         ;
-HSTphase = DBLARR(nexposure)
-HSTphase = ((img_date)-(T0))/(constant(10))                        
- phase2 = FLOOR(HSTphase)
- HSTphase = HSTphase - phase2
- k = WHERE(HSTphase GT 0.5)
- IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
+  PRINT, '................................'
+  PRINT, ' SYSTEMATIC MODEL ', s+1
+  systematics = [grid(s,*)]
+  PRINT, TRANSPOSE(systematics)
+  PRINT, '  '
 
- phase_xyz = DBLARR(nexposure) 
-FOR j = 0, nexposure-1 DO phase_xyz(j) = ((img_date(j))-(epoch))/(Per/constant(4)) 
- phase2 = FLOOR(phase_xyz)
- phase_xyz = phase_xyz - phase2
- a = WHERE(phase_xyz GT 0.5)
- IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
+  ; - -- --- ---- --- -- - ;
+  ;          PHASE         ;
+  HSTphase = DBLARR(nexposure)
+  HSTphase = ((img_date)-(T0))/(constant(10))                        
+  phase2 = FLOOR(HSTphase)
+  HSTphase = HSTphase - phase2
+  k = WHERE(HSTphase GT 0.5)
+  IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
+
+  phase_xyz = DBLARR(nexposure) 
+  FOR j = 0, nexposure-1 DO phase_xyz(j) = ((img_date(j))-(epoch))/(Per/constant(4)) 
+  phase2 = FLOOR(phase_xyz)
+  phase_xyz = phase_xyz - phase2
+  a = WHERE(phase_xyz GT 0.5)
+  IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
 
-;      MPFIT - ONE       ;
- p0 = [rl,flux0,epoch,inclin,msmpr,ecc,omega,per,T0,c1,c2,c3,c4,m,HSTP1,HSTP2,HSTP3,HSTP4,xshift1,xshift2,xshift3,xshift4]
+  ;      MPFIT - ONE       ;
+  p0 = [rl,flux0,epoch,inclin,msmpr,ecc,omega,per,T0,c1,c2,c3,c4,m,HSTP1,HSTP2,HSTP3,HSTP4,xshift1,xshift2,xshift3,xshift4]
 
-fa = {X:x, Y:y, ERR:err, SH:sh}
-parinfo = REPLICATE({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0]}, N_ELEMENTS(p0))
+  fa = {X:x, Y:y, ERR:err, SH:sh}
+  parinfo = REPLICATE({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0]}, N_ELEMENTS(p0))
 
   parinfo[*].value= p0
   parinfo[*].fixed = 1
   parinfo[*].fixed = TRANSPOSE(systematics) 
-; ==  Comment out the following to fit fot the parameter    == ;
-    ;parinfo[0].fixed = 1          ; Radius Ratio
-    ;parinfo[1].fixed = 1          ; Baseline stellar flux level
-    ;parinfo[2].fixed = 1          ; Center of transit time
-    ;parinfo[3].fixed = 1          ; Inclination
-    ;parinfo[4].fixed = 1          ; MsMpR
-    ;parinfo[5].fixed = 1          ; Eccentricity
-    ;parinfo[6].fixed = 1          ; Omega
-    ;parinfo[7].fixed = 1          ; Orbital preiod
-    ;parinfo[8].fixed = 1          ; HST T0 phase
-    ;parinfo[9].fixed = 1          ; Limb-darkening parameter c1
-    ;parinfo[10].fixed = 1         ; Limb-darkening parameter c2
-    ;parinfo[11].fixed = 1         ; Limb-darkening parameter c3
-    ;parinfo[12].fixed = 1         ; Limb-darkening parameter c4
   
-    ;parinfo[13].fixed = 1         ; Linear slope in time
-    ;parinfo[14].fixed = 1         ; Linear HST phase
-    ;parinfo[15].fixed = 1         ; HST phase^2
-    ;parinfo[16].fixed = 1         ; HST phase^3
-    ;parinfo[17].fixed = 1         ; HST phase^4
-    ;parinfo[18].fixed = 1         ; Linear shift in wavelength
-    ;parinfo[19].fixed = 1         ; Shift in wavelength^2
-    ;parinfo[20].fixed = 1         ; Shift in wavelength^3
-    ;parinfo[21].fixed = 1         ; Shift in wavelength^4
+  ; ==  Comment out the following to fit fot the parameter    == ;
+  ;parinfo[0].fixed = 1          ; Radius Ratio
+  ;parinfo[1].fixed = 1          ; Baseline stellar flux level
+  ;parinfo[2].fixed = 1          ; Center of transit time
+  ;parinfo[3].fixed = 1          ; Inclination
+  ;parinfo[4].fixed = 1          ; MsMpR
+  ;parinfo[5].fixed = 1          ; Eccentricity
+  ;parinfo[6].fixed = 1          ; Omega
+  ;parinfo[7].fixed = 1          ; Orbital preiod
+  ;parinfo[8].fixed = 1          ; HST T0 phase
+  ;parinfo[9].fixed = 1          ; Limb-darkening parameter c1
+  ;parinfo[10].fixed = 1         ; Limb-darkening parameter c2
+  ;parinfo[11].fixed = 1         ; Limb-darkening parameter c3
+  ;parinfo[12].fixed = 1         ; Limb-darkening parameter c4
+  
+  ;parinfo[13].fixed = 1         ; Linear slope in time
+  ;parinfo[14].fixed = 1         ; Linear HST phase
+  ;parinfo[15].fixed = 1         ; HST phase^2
+  ;parinfo[16].fixed = 1         ; HST phase^3
+  ;parinfo[17].fixed = 1         ; HST phase^4
+  ;parinfo[18].fixed = 1         ; Linear shift in wavelength
+  ;parinfo[19].fixed = 1         ; Shift in wavelength^2
+  ;parinfo[20].fixed = 1         ; Shift in wavelength^3
+  ;parinfo[21].fixed = 1         ; Shift in wavelength^4
 
   params_w = MPFIT('transit_circle',functargs=fa,BESTNORM=bestnorm,COVAR=covar,PERROR=perror,PARINFO=parinfo,niter=niter,maxiter=maxiter,status=status,Nfree=nfree)
   pcerror = perror
 
   ;END MPFIT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; FROM MPFIT DEFINE THE DOF, BIC, AIC, & CHI  
-BIC = bestnorm + nfree*ALOG(n_elements(x))
-AIC = bestnorm + nfree
-DOF = n_elements(X) - n_elements(WHERE(parinfo.fixed NE 1)) ;nfree
-CHI = bestnorm
+  ; FROM MPFIT DEFINE THE DOF, BIC, AIC, & CHI  
+  BIC = bestnorm + nfree*ALOG(n_elements(x))
+  AIC = bestnorm + nfree
+  DOF = n_elements(X) - n_elements(WHERE(parinfo.fixed NE 1)) ;nfree
+  CHI = bestnorm
 
-;...........................................
-; Redefine all of the parameters given the MPFIT output
-w_params(s,*) = params_w
+  ;...........................................
+  ; Redefine all of the parameters given the MPFIT output
+  w_params(s,*) = params_w
 
-rl = params_w(0) & rl_err = pcerror(0)
-flux0 = params_w(1) & flux0_err = pcerror(1)
-epoch = params_w(2) & epoch_err = pcerror(2)
-inclin = params_w(3) & inclin_err = pcerror(3)
-msmpr = params_w(4) & msmpr_err = pcerror(4)
-ecc = params_w(5) & ecc_err = pcerror(5)
-omega = params_w(6) & omega_err = pcerror(6)
-per = params_w(7) & per_err = pcerror(7)
-T0 = params_w(8) & t0_err = pcerror(8)
-c1 = params_w(9) & c1_err = pcerror(9)
-c2 = params_w(10) & c2_err = pcerror(10)
-c3 = params_w(11) & c3_err = pcerror(11)
-c4 = params_w(12) & c4_err = pcerror(12)
+  rl = params_w(0) & rl_err = pcerror(0)
+  flux0 = params_w(1) & flux0_err = pcerror(1)
+  epoch = params_w(2) & epoch_err = pcerror(2)
+  inclin = params_w(3) & inclin_err = pcerror(3)
+  msmpr = params_w(4) & msmpr_err = pcerror(4)
+  ecc = params_w(5) & ecc_err = pcerror(5)
+  omega = params_w(6) & omega_err = pcerror(6)
+  per = params_w(7) & per_err = pcerror(7)
+  T0 = params_w(8) & t0_err = pcerror(8)
+  c1 = params_w(9) & c1_err = pcerror(9)
+  c2 = params_w(10) & c2_err = pcerror(10)
+  c3 = params_w(11) & c3_err = pcerror(11)
+  c4 = params_w(12) & c4_err = pcerror(12)
 
-m = params_w(13) & m_err = pcerror(13)
-hst1 = params_w(14) & hst1_err = pcerror(14)
-hst2 = params_w(15) & hst2_err = pcerror(15)
-hst3 = params_w(16) & hst3_err = pcerror(16)
-hst4 = params_w(17) & hst4_err = pcerror(17)
-sh1 = params_w(18) & sh1_err = pcerror(18)
-sh2 = params_w(19) & sh2_err = pcerror(19)
-sh3 = params_w(20) & sh3_err = pcerror(20)
-sh4 = params_w(21) & sh4_err = pcerror(21)
+  m = params_w(13) & m_err = pcerror(13)
+  hst1 = params_w(14) & hst1_err = pcerror(14)
+  hst2 = params_w(15) & hst2_err = pcerror(15)
+  hst3 = params_w(16) & hst3_err = pcerror(16)
+  hst4 = params_w(17) & hst4_err = pcerror(17)
+  sh1 = params_w(18) & sh1_err = pcerror(18)
+  sh2 = params_w(19) & sh2_err = pcerror(19)
+  sh3 = params_w(20) & sh3_err = pcerror(20)
+  sh4 = params_w(21) & sh4_err = pcerror(21)
 
-;Recalculate a/R*
-constant1 = (constant(2)*Per*Per/(4*!pi*!pi))^(1D0/3D0)
-aval = constant1*(MsMpR)^0.33333D0
+  ;Recalculate a/R*
+  constant1 = (constant(2)*Per*Per/(4*!pi*!pi))^(1D0/3D0)
+  aval = constant1*(MsMpR)^0.33333D0
 
-;.......................................
-PRINT, 'Transit depth = ', rl, ' +/- ', rl_err, '     centered at  ', epoch
-;.......................................
+  ;.......................................
+  PRINT, 'Transit depth of model ' + string(s+1) + ' of' + string(n_elements(grid(*,0)) )+ ' = ', rl, ' +/- ', rl_err, '     centered at  ', epoch
+  ;.......................................
 
-; OUTPUTS
-; Re-Calculate each of the arrays dependent on the output parameters
-phase_xyz = ((x)-(epoch))/(Per/86400D0) 
- phase2 = FLOOR(phase_xyz)
- phase_xyz = phase_xyz - phase2
- a = WHERE(phase_xyz GT 0.5)
- IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
+  ; OUTPUTS
+  ; Re-Calculate each of the arrays dependent on the output parameters
+  phase_xyz = ((x)-(epoch))/(Per/86400D0) 
+  phase2 = FLOOR(phase_xyz)
+  phase_xyz = phase_xyz - phase2
+  a = WHERE(phase_xyz GT 0.5)
+  IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
-HSTphase = ((x)-(T0))/(constant(10))                        
- phase2 = FLOOR(HSTphase)
- HSTphase = HSTphase - phase2
- k = WHERE(HSTphase GT 0.5)
- IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
+  HSTphase = ((x)-(T0))/(constant(10))                        
+  phase2 = FLOOR(HSTphase)
+  HSTphase = HSTphase - phase2
+  k = WHERE(HSTphase GT 0.5)
+  IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
 
-;...........................................
-; TRANSIT MODEL fit to the data
-;Calculate the impact parameter based on the eccentricity function
-b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase_xyz*2*!pi))^2D0 + (cos(inclin)*cos(phase_xyz*2*!pi))^(2D0)]^(0.5D0)
+  ;...........................................
+  ; TRANSIT MODEL fit to the data
+  ;Calculate the impact parameter based on the eccentricity function
+  b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase_xyz*2*!pi))^2D0 + (cos(inclin)*cos(phase_xyz*2*!pi))^(2D0)]^(0.5D0)
 
 
                                 ;Use the MANDEL & AGOL (2002) analytic
                                 ;transit function to get the model
                                 ;lightcurve
-plotquery = 0
-occultnl, rl, c1, c2,c3, c4, b0, mulimb01, mulimbf1, plotquery
-b01=b0
-;...........................................
+  plotquery = 0
+  occultnl, rl, c1, c2,c3, c4, b0, mulimb01, mulimbf1, plotquery
+  b01=b0
+  ;...........................................
 
-systematic_model = (phase_xyz*m + 1.0) * (HSTphase*hst1 + HSTphase^2.*hst2 + HSTphase^3.*hst3 + HSTphase^4.*hst4 + 1.0) * (sh*sh1 + sh^2.*sh2 + sh^3.*sh3 + sh^4.*sh4 + 1.0)
+  systematic_model = (phase_xyz*m + 1.0) * (HSTphase*hst1 + HSTphase^2.*hst2 + HSTphase^3.*hst3 + HSTphase^4.*hst4 + 1.0) * (sh*sh1 + sh^2.*sh2 + sh^3.*sh3 + sh^4.*sh4 + 1.0)
 
-w_model = mulimb01 * flux0 * systematic_model
+  w_model = mulimb01 * flux0 * systematic_model
 
-w_residuals = (y - w_model)/flux0
+  w_residuals = (y - w_model)/flux0
 
-corrected_data = y / (flux0 * systematic_model)
+  corrected_data = y / (flux0 * systematic_model)
 
-w_scatter(s) = (STDDEV(w_residuals))
-print, 'Scatter on the residuals = ', w_scatter(s)
-
-
-
-
-;..........................................
-;..........................................
-; CHOPPING OUT THE BAD PARTS
-;..........................................
-
-cut_down = 2.57 ; Play around with this value if you want. 
-; This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically riggrous way to do this. 
-; Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
-
-IF (plotting EQ 'on') THEN BEGIN
-window,0, title=s
-plot, phase_xyz, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]
-hline, 0.0+STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
-hline, 0.0
-hline, 0.0-STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
-ENDIF
-
-
-;remove
-bad_up = where(w_residuals GT (0.0+STDDEV(w_residuals)*3) )
-bad_down = where(w_residuals LT (0.0-STDDEV(w_residuals)*3) )
-
-print, 'up', bad_up
-print, 'down', bad_down
-
-lon = n_elements(bad_up)
-FOR i = 0, lon-1 DO BEGIN
-IF (bad_up(i) GT -1) THEN BEGIN
- y(bad_up(i)) = y(bad_up(i))-STDDEV(w_residuals)*cut_down
- err(bad_up(i)) = err(bad_up(i))*(1+STDDEV(w_residuals))
-ENDIF
-ENDFOR
-
-lon = n_elements(bad_down)
-FOR i = 0, lon-1 DO BEGIN
-IF (bad_down(i) GT -1) THEN BEGIN
- y(bad_down(i)) = y(bad_down(i))+STDDEV(w_residuals)*cut_down
- err(bad_down(i)) = err(bad_down(i))*(1+STDDEV(w_residuals))
-ENDIF
-ENDFOR
+  w_scatter(s) = (STDDEV(w_residuals))
+  print, 'Scatter on the residuals = ', w_scatter(s)
 
 
 
-;remove
-bad_up = where(w_residuals GT (0.0+STDDEV(w_residuals)*cut_down) )
-bad_down = where(w_residuals LT (0.0-STDDEV(w_residuals)*cut_down) )
 
-print, 'up', bad_up
-print, 'down', bad_down
+  ;..........................................
+  ;..........................................
+  ; CHOPPING OUT THE BAD PARTS
+  ;..........................................
 
-lon = n_elements(bad_up)
-FOR i = 0, lon-1 DO BEGIN
-IF (bad_up(i) GT -1) THEN BEGIN
- y(bad_up(i)) = y(bad_up(i))-STDDEV(w_residuals)*cut_down
- err(bad_up(i)) = err(bad_up(i))*(1+STDDEV(w_residuals))
-ENDIF
-ENDFOR
+  cut_down = 2.57 ; Play around with this value if you want. 
+  ; This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically riggrous way to do this. 
+  ; Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
 
-lon = n_elements(bad_down)
-FOR i = 0, lon-1 DO BEGIN
-IF (bad_down(i) GT -1) THEN BEGIN
- y(bad_down(i)) = y(bad_down(i))+STDDEV(w_residuals)*cut_down
- err(bad_down(i)) = err(bad_down(i))*(1+STDDEV(w_residuals))
-ENDIF
-ENDFOR
+  IF (plotting EQ 'on') THEN BEGIN
+    window,0, title=s
+    plot, phase_xyz, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]   ; psym=4 makes diamonds, xstyle and ystyle format the axes
+    hline, 0.0+STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
+    hline, 0.0
+    hline, 0.0-STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
+  ENDIF
 
 
-IF (plotting EQ 'on') THEN BEGIN
-window,2, title=s
-plot, phase_xyz, corrected_data, ystyle=3, xstyle=3, psym=4
-oplot, phase_xyz, y, psym=1
-oploterror, phase_xyz, corrected_data, err, psym=4, color=321321
-oplot, phase_xyz, systematic_model, color=5005005, psym=2
-ENDIF
+  ;remove
+  bad_up = where(w_residuals GT (0.0+STDDEV(w_residuals)*3) )
+  bad_down = where(w_residuals LT (0.0-STDDEV(w_residuals)*3) )
 
+  print, 'up', bad_up
+  print, 'down', bad_down
+
+  lon = n_elements(bad_up)
+  FOR i = 0, lon-1 DO BEGIN
+    IF (bad_up(i) GT -1) THEN BEGIN
+      y(bad_up(i)) = y(bad_up(i))-STDDEV(w_residuals)*cut_down
+      err(bad_up(i)) = err(bad_up(i))*(1+STDDEV(w_residuals))
+    ENDIF
+  ENDFOR
+
+  lon = n_elements(bad_down)
+  FOR i = 0, lon-1 DO BEGIN
+    IF (bad_down(i) GT -1) THEN BEGIN
+      y(bad_down(i)) = y(bad_down(i))+STDDEV(w_residuals)*cut_down
+      err(bad_down(i)) = err(bad_down(i))*(1+STDDEV(w_residuals))
+    ENDIF
+  ENDFOR
+
+
+
+  ;remove
+  bad_up = where(w_residuals GT (0.0+STDDEV(w_residuals)*cut_down) )
+  bad_down = where(w_residuals LT (0.0-STDDEV(w_residuals)*cut_down) )
+
+  print, 'up', bad_up
+  print, 'down', bad_down
+
+  lon = n_elements(bad_up)
+  FOR i = 0, lon-1 DO BEGIN
+    IF (bad_up(i) GT -1) THEN BEGIN
+      y(bad_up(i)) = y(bad_up(i))-STDDEV(w_residuals)*cut_down
+      err(bad_up(i)) = err(bad_up(i))*(1+STDDEV(w_residuals))
+    ENDIF
+  ENDFOR
+
+  lon = n_elements(bad_down)
+  FOR i = 0, lon-1 DO BEGIN
+    IF (bad_down(i) GT -1) THEN BEGIN
+      y(bad_down(i)) = y(bad_down(i))+STDDEV(w_residuals)*cut_down
+      err(bad_down(i)) = err(bad_down(i))*(1+STDDEV(w_residuals))
+    ENDIF 
+  ENDFOR
+
+
+  IF (plotting EQ 'on') THEN BEGIN
+    window,2, title=s
+    plot, phase_xyz, corrected_data, ystyle=3, xstyle=3, psym=4
+    oplot, phase_xyz, y, psym=1
+    oploterror, phase_xyz, corrected_data, err, psym=4, color=321321
+    oplot, phase_xyz, systematic_model, color=5005005, psym=2
+  ENDIF
 
 
 ENDFOR
@@ -473,229 +475,228 @@ PRINT,'..........................................'
 PRINT, 'As we seem to have found how shit each of the systematic models are at fitting the data compared to a Mandel&Agol transit model we can now use the scatter on their residuals to inflate the uncertainties for the data. We will then go ahead and refit for each systematic model if that is okay with you. If not control+c is still a valid option.'
 
 FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
-PRINT, '................................'
-PRINT, ' SYSTEMATIC MODEL ', s
-systematics = [grid(s,*)]
-PRINT, TRANSPOSE(systematics)
-PRINT, '  '
+  
+  PRINT, '................................'
+  PRINT, ' SYSTEMATIC MODEL ', s+1
+  systematics = [grid(s,*)]
+  PRINT, TRANSPOSE(systematics)
+  PRINT, '  '
 
-x = x
-y = y
-err = err*(1.0 - (w_scatter(s)))
+  x = x
+  y = y
+  err = err*(1.0 - (w_scatter(s)))
 
-
-p0 = w_params(s,*)
+  p0 = w_params(s,*)
                                 ;[rl,flux0,epoch,inclin,msmpr,ecc,omega,per,T0,c1,c2,c3,c4,m,HSTP1,HSTP2,HSTP3,HSTP4,xshift1,xshift2,xshift3,xshift4]
+  T0 = p0(8)
+  epoch = p0(2)
+  Per = p0(7)
 
-T0 = p0(8)
-epoch = p0(2)
-Per = p0(7)
+  ; - -- --- ---- --- -- - ;
+  ;          PHASE         ;
+  HSTphase = DBLARR(nexposure)
+  HSTphase = ((x)-(T0))/(constant(10))                        
+  phase2 = FLOOR(HSTphase)
+  HSTphase = HSTphase - phase2
+  k = WHERE(HSTphase GT 0.5)
+  IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
 
-; - -- --- ---- --- -- - ;
-;          PHASE         ;
-HSTphase = DBLARR(nexposure)
-HSTphase = ((x)-(T0))/(constant(10))                        
- phase2 = FLOOR(HSTphase)
- HSTphase = HSTphase - phase2
- k = WHERE(HSTphase GT 0.5)
- IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
+  phase_xyz = DBLARR(nexposure) 
+  FOR j = 0, nexposure-1 DO phase_xyz(j) = ((x(j))-(epoch))/(Per/constant(4)) 
+  phase2 = FLOOR(phase_xyz)
+  phase_xyz = phase_xyz - phase2
+  a = WHERE(phase_xyz GT 0.5)
+  IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
- phase_xyz = DBLARR(nexposure) 
-FOR j = 0, nexposure-1 DO phase_xyz(j) = ((x(j))-(epoch))/(Per/constant(4)) 
- phase2 = FLOOR(phase_xyz)
- phase_xyz = phase_xyz - phase2
- a = WHERE(phase_xyz GT 0.5)
- IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
+  p0 = TRANSPOSE(p0)
+  
 
- p0 = TRANSPOSE(p0)
- x
-
-;      MPFIT - TWO       ;
-fa = {X:x, Y:y, ERR:err, SH:sh}
-parinfo = REPLICATE({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0]}, N_ELEMENTS(p0))
+  ;      MPFIT - TWO       ;
+  fa = {X:x, Y:y, ERR:err, SH:sh}
+  parinfo = REPLICATE({value:0.D, fixed:0, limited:[0,0], limits:[0.D,0]}, N_ELEMENTS(p0))
 
   parinfo[*].value= p0
   parinfo[*].fixed = 1
   parinfo[*].fixed = TRANSPOSE(systematics) 
-; ==  Comment out the following to fit fot the parameter    == ;
-    ;parinfo[0].fixed = 1          ; Radius Ratio
-    ;parinfo[1].fixed = 1          ; Baseline stellar flux level
-    ;parinfo[2].fixed = 1          ; Center of transit time
-    ;parinfo[3].fixed = 1          ; Inclination
-    ;parinfo[4].fixed = 1          ; MsMpR
-    ;parinfo[5].fixed = 1          ; Eccentricity
-    ;parinfo[6].fixed = 1          ; Omega
-    ;parinfo[7].fixed = 1          ; Orbital preiod
-    ;parinfo[8].fixed = 1          ; HST T0 phase
-    ;parinfo[9].fixed = 1          ; Limb-darkening parameter c1
-    ;parinfo[10].fixed = 1         ; Limb-darkening parameter c2
-    ;parinfo[11].fixed = 1         ; Limb-darkening parameter c3
-    ;parinfo[12].fixed = 1         ; Limb-darkening parameter c4
+  ; ==  Comment out the following to fit fot the parameter    == ;
+  ;parinfo[0].fixed = 1          ; Radius Ratio
+  ;parinfo[1].fixed = 1          ; Baseline stellar flux level
+  ;parinfo[2].fixed = 1          ; Center of transit time
+  ;parinfo[3].fixed = 1          ; Inclination
+  ;parinfo[4].fixed = 1          ; MsMpR
+  ;parinfo[5].fixed = 1          ; Eccentricity
+  ;parinfo[6].fixed = 1          ; Omega
+  ;parinfo[7].fixed = 1          ; Orbital preiod
+  ;parinfo[8].fixed = 1          ; HST T0 phase
+  ;parinfo[9].fixed = 1          ; Limb-darkening parameter c1
+  ;parinfo[10].fixed = 1         ; Limb-darkening parameter c2
+  ;parinfo[11].fixed = 1         ; Limb-darkening parameter c3
+  ;parinfo[12].fixed = 1         ; Limb-darkening parameter c4
   
-    ;parinfo[13].fixed = 1         ; Linear slope in time
-    ;parinfo[14].fixed = 1         ; Linear HST phase
-    ;parinfo[15].fixed = 1         ; HST phase^2
-    ;parinfo[16].fixed = 1         ; HST phase^3
-    ;parinfo[17].fixed = 1         ; HST phase^4
-    ;parinfo[18].fixed = 1         ; Linear shift in wavelength
-    ;parinfo[19].fixed = 1         ; Shift in wavelength^2
-    ;parinfo[20].fixed = 1         ; Shift in wavelength^3
-    ;parinfo[21].fixed = 1         ; Shift in wavelength^4
+  ;parinfo[13].fixed = 1         ; Linear slope in time
+  ;parinfo[14].fixed = 1         ; Linear HST phase
+  ;parinfo[15].fixed = 1         ; HST phase^2
+  ;parinfo[16].fixed = 1         ; HST phase^3
+  ;parinfo[17].fixed = 1         ; HST phase^4
+  ;parinfo[18].fixed = 1         ; Linear shift in wavelength
+  ;parinfo[19].fixed = 1         ; Shift in wavelength^2
+  ;parinfo[20].fixed = 1         ; Shift in wavelength^3
+  ;parinfo[21].fixed = 1         ; Shift in wavelength^4
 
   params = MPFIT('transit_circle',functargs=fa,BESTNORM=bestnorm,COVAR=covar,PERROR=perror,PARINFO=parinfo,niter=niter,maxiter=maxiter,status=status,Nfree=nfree)
   pcerror = perror
 
   ;END MPFIT ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; FROM MPFIT DEFINE THE DOF, BIC, AIC, & CHI  
-BIC = bestnorm + nfree*ALOG(n_elements(x))
-AIC = bestnorm + nfree
-DOF = n_elements(X) - n_elements(WHERE(parinfo.fixed NE 1)) ;nfree
-CHI = bestnorm
+  ; FROM MPFIT DEFINE THE DOF, BIC, AIC, & CHI  
+  BIC = bestnorm + nfree*ALOG(n_elements(x))
+  AIC = bestnorm + nfree
+  DOF = n_elements(X) - n_elements(WHERE(parinfo.fixed NE 1)) ;nfree
+  CHI = bestnorm
 
-; EVIDENCE BASED on the AIC and BIC
-Mpoint = n_elements(WHERE(parinfo.fixed NE 1))
-Npoint = n_elements(X)
-sigma_points = MEDIAN(err)
+  ; EVIDENCE BASED on the AIC and BIC
+  Mpoint = n_elements(WHERE(parinfo.fixed NE 1))
+  Npoint = n_elements(X)
+  sigma_points = MEDIAN(err)
 
-evidence_BIC = -Npoint*ALOG(sigma_points) -0.5*Npoint*ALOG(2*!pi) -0.5*BIC
-evidence_AIC = -Npoint*ALOG(sigma_points) -0.5*Npoint*ALOG(2*!pi) -0.5*AIC
-;.............................................
+  evidence_BIC = -Npoint*ALOG(sigma_points) -0.5*Npoint*ALOG(2*!pi) -0.5*BIC
+  evidence_AIC = -Npoint*ALOG(sigma_points) -0.5*Npoint*ALOG(2*!pi) -0.5*AIC
+  ;.............................................
 
-;...........................................
-; Redefine all of the parameters given the MPFIT output
-rl = params(0) & rl_err = pcerror(0)/2.
-flux0 = params(1) & flux0_err = pcerror(1)
-epoch = params(2) & epoch_err = pcerror(2)
-inclin = params(3) & inclin_err = pcerror(3)
-msmpr = params(4) & msmpr_err = pcerror(4)
-ecc = params(5) & ecc_err = pcerror(5)
-omega = params(6) & omega_err = pcerror(6)
-per = params(7) & per_err = pcerror(7)
-T0 = params(8) & t0_err = pcerror(8)
-c1 = params(9) & c1_err = pcerror(9)
-c2 = params(10) & c2_err = pcerror(10)
-c3 = params(11) & c3_err = pcerror(11)
-c4 = params(12) & c4_err = pcerror(12)
+  ;...........................................
+  ; Redefine all of the parameters given the MPFIT output
+  rl = params(0) & rl_err = pcerror(0)/2.
+  flux0 = params(1) & flux0_err = pcerror(1)
+  epoch = params(2) & epoch_err = pcerror(2)
+  inclin = params(3) & inclin_err = pcerror(3)
+  msmpr = params(4) & msmpr_err = pcerror(4)
+  ecc = params(5) & ecc_err = pcerror(5)
+  omega = params(6) & omega_err = pcerror(6)
+  per = params(7) & per_err = pcerror(7)
+  T0 = params(8) & t0_err = pcerror(8)
+  c1 = params(9) & c1_err = pcerror(9)
+  c2 = params(10) & c2_err = pcerror(10)
+  c3 = params(11) & c3_err = pcerror(11)
+  c4 = params(12) & c4_err = pcerror(12)
 
-m = params(13) & m_err = pcerror(13)
-hst1 = params(14) & hst1_err = pcerror(14)
-hst2 = params(15) & hst2_err = pcerror(15)
-hst3 = params(16) & hst3_err = pcerror(16)
-hst4 = params(17) & hst4_err = pcerror(17)
-sh1 = params(18) & sh1_err = pcerror(18)
-sh2 = params(19) & sh2_err = pcerror(19)
-sh3 = params(20) & sh3_err = pcerror(20)
-sh4 = params(21) & sh4_err = pcerror(21)
+  m = params(13) & m_err = pcerror(13)
+  hst1 = params(14) & hst1_err = pcerror(14)
+  hst2 = params(15) & hst2_err = pcerror(15)
+  hst3 = params(16) & hst3_err = pcerror(16)
+  hst4 = params(17) & hst4_err = pcerror(17)
+  sh1 = params(18) & sh1_err = pcerror(18)
+  sh2 = params(19) & sh2_err = pcerror(19)
+  sh3 = params(20) & sh3_err = pcerror(20)
+  sh4 = params(21) & sh4_err = pcerror(21)
 
-;Recalculate a/R*
-constant1 = (constant(2)*Per*Per/(4*!pi*!pi))^(1D0/3D0)
-aval = constant1*(MsMpR)^0.33333D0
+  ;Recalculate a/R*
+  constant1 = (constant(2)*Per*Per/(4*!pi*!pi))^(1D0/3D0)
+  aval = constant1*(MsMpR)^0.33333D0
 
-;............................................
-PRINT, 'Transit depth = ', rl, ' +/- ', rl_err, '     centered at  ', epoch
-;............................................
+  ;............................................
+  PRINT, 'Transit depth of model ' + string(s+1) + ' of' + string(n_elements(grid(*,0)) )+ ' = ', rl, ' +/- ', rl_err, '     centered at  ', epoch
+  ;............................................
 
-; OUTPUTS
-; Re-Calculate each of the arrays dependent on the output parameters
-phase_xyz = ((x)-(epoch))/(Per/86400D0) 
- phase2 = FLOOR(phase_xyz)
- phase_xyz = phase_xyz - phase2
- a = WHERE(phase_xyz GT 0.5)
- IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
+  ; OUTPUTS
+  ; Re-Calculate each of the arrays dependent on the output parameters
+  phase_xyz = ((x)-(epoch))/(Per/86400D0) 
+  phase2 = FLOOR(phase_xyz)
+  phase_xyz = phase_xyz - phase2
+  a = WHERE(phase_xyz GT 0.5)
+  IF (a(0) NE -1) THEN phase_xyz(a) = phase_xyz(a) - 1.0D0
 
-HSTphase = ((x)-(T0))/(constant(10))                        
- phase2 = FLOOR(HSTphase)
- HSTphase = HSTphase - phase2
- k = WHERE(HSTphase GT 0.5)
- IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
+  HSTphase = ((x)-(T0))/(constant(10))                        
+  phase2 = FLOOR(HSTphase)
+  HSTphase = HSTphase - phase2
+  k = WHERE(HSTphase GT 0.5)
+  IF (k(0) NE -1) THEN HSTphase(k) = HSTphase(k) - 1.0D0
  
-;...........................................
-; TRANSIT MODEL fit to the data
-;Calculate the impact parameter based on the eccentricity function
-b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase_xyz*2*!pi))^2D0 + (cos(inclin)*cos(phase_xyz*2*!pi))^(2D0)]^(0.5D0)
+  ;...........................................
+  ; TRANSIT MODEL fit to the data
+  ;Calculate the impact parameter based on the eccentricity function
+  b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(phase_xyz*2*!pi))^2D0 + (cos(inclin)*cos(phase_xyz*2*!pi))^(2D0)]^(0.5D0)
 
 
                                 ;Use the MANDEL & AGOL (2002) analytic
                                 ;transit function to get the model
                                 ;lightcurve
-plotquery = 0
-occultnl, rl, c1, c2,c3, c4, b0, mulimb01, mulimbf1, plotquery
-b01=b0
-;...........................................
+  plotquery = 0
+  occultnl, rl, c1, c2,c3, c4, b0, mulimb01, mulimbf1, plotquery
+  b01=b0
+  ;...........................................
 
 
-;...........................................
-; SMOOTH TRANSIT MODEL across all phase
-;Calculate the impact parameter based on the eccentricity function
-x2 = FINDGEN(4000)*0.0001-0.2
+  ;...........................................
+  ; SMOOTH TRANSIT MODEL across all phase
+  ;Calculate the impact parameter based on the eccentricity function
+  x2 = FINDGEN(4000)*0.0001-0.2
 
-b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(x2*2*!pi))^2D0 + (cos(inclin)*cos(x2*2*!pi))^(2D0)]^(0.5D0)
+  b0 = (Gr*Per*Per/(4*!pi*!pi))^(1D0/3D0) * (msmpr^(1D0/3D0)) * [(sin(x2*2*!pi))^2D0 + (cos(inclin)*cos(x2*2*!pi))^(2D0)]^(0.5D0)
 
 
                                 ;Use the MANDEL & AGOL (2002) analytic
                                 ;transit function to get the model
                                 ;lightcurve
-plotquery = 0
-occultnl, rl, c1, c2,c3, c4, b0, mulimb02, mulimbf2, plotquery
-b02=b0
-;...........................................
+  plotquery = 0
+  occultnl, rl, c1, c2,c3, c4, b0, mulimb02, mulimbf2, plotquery
+  b02=b0
+  ;...........................................
 
-systematic_model = (phase_xyz*m + 1.0) * (HSTphase*hst1 + HSTphase^2.*hst2 + HSTphase^3.*hst3 + HSTphase^4.*hst4 + 1.0) * (sh*sh1 + sh^2.*sh2 + sh^3.*sh3 + sh^4.*sh4 + 1.0)
+  systematic_model = (phase_xyz*m + 1.0) * (HSTphase*hst1 + HSTphase^2.*hst2 + HSTphase^3.*hst3 + HSTphase^4.*hst4 + 1.0) * (sh*sh1 + sh^2.*sh2 + sh^3.*sh3 + sh^4.*sh4 + 1.0)
 
-fit_model = mulimb01 * flux0 * systematic_model
+  fit_model = mulimb01 * flux0 * systematic_model
 
-residuals = (y - fit_model)/flux0
-resid_scatter = STDDEV(residuals)
+  residuals = (y - fit_model)/flux0
+  resid_scatter = STDDEV(residuals)
 
-fit_data = y / (flux0 * systematic_model)
-fit_err = err ;* (1.0 + resid_scatter)
+  fit_data = y / (flux0 * systematic_model)
+  fit_err = err ;* (1.0 + resid_scatter)
 
-IF (plotting EQ 'on') THEN BEGIN
-window,2, title=s
-plot, phase_xyz, y, ystyle=3, xstyle=3, psym=1
-oplot, x2, mulimb02, color=5005005
-oploterror, phase_xyz, fit_data, err, psym=4, color=100100100
-ENDIF
-;.............................
-; Arrays to save to file
+  IF (plotting EQ 'on') THEN BEGIN
+    window,2, title=s
+    plot, phase_xyz, y, ystyle=3, xstyle=3, psym=1
+    oplot, x2, mulimb02, color=5005005
+    oploterror, phase_xyz, fit_data, err, psym=4, color=100100100
+  ENDIF
+  ;.............................
+  ; Arrays to save to file
 
-; stats
-sys_stats(s,*) = [AIC, BIC, DOF, CHI, resid_scatter] 
-; img_date
-sys_date(s,*) = x
-; phase
-sys_phase(s,*) = phase_xyz
-; raw lightcurve flux
-;sys_rawflux(s,*) = y
-;sys_rawflux_err(s,*) = err
-; corrected lightcurve flux
-sys_flux(s,*) = fit_data
-sys_flux_err(s,*) = fit_err
-; residuals
-sys_residuals(s,*) = residuals
-; smooth model
-sys_model(s,*) = mulimb02
-; smooth phase
-sys_model_phase(s,*) = x2
-; systematic model
-sys_systematic_model(s,*) = systematic_model
-; parameters
-sys_params(s,*) = params
-; parameter errors
-sys_params_err(s,*) = pcerror
-; depth
-sys_depth(s) = rl
-; depth error
-sys_depth_err(s) = rl_err
-; transit time
-sys_epoch(s) = epoch
-; transit time error
-sys_epoch_err(s) = epoch_err
-; evidence AIC
-sys_evidenceAIC(s) = evidence_AIC
-; evidence BIC
-sys_evidenceBIC(s) = evidence_BIC
+  ; stats
+  sys_stats(s,*) = [AIC, BIC, DOF, CHI, resid_scatter] 
+  ; img_date
+  sys_date(s,*) = x
+  ; phase
+  sys_phase(s,*) = phase_xyz
+  ; raw lightcurve flux
+  ;sys_rawflux(s,*) = y
+  ;sys_rawflux_err(s,*) = err
+  ; corrected lightcurve flux
+  sys_flux(s,*) = fit_data
+  sys_flux_err(s,*) = fit_err
+  ; residuals
+  sys_residuals(s,*) = residuals
+  ; smooth model
+  sys_model(s,*) = mulimb02
+  ; smooth phase
+  sys_model_phase(s,*) = x2
+  ; systematic model
+  sys_systematic_model(s,*) = systematic_model
+  ; parameters
+  sys_params(s,*) = params
+  ; parameter errors
+  sys_params_err(s,*) = pcerror
+  ; depth
+  sys_depth(s) = rl
+  ; depth error
+  sys_depth_err(s) = rl_err
+  ; transit time
+  sys_epoch(s) = epoch
+  ; transit time error
+  sys_epoch_err(s) = epoch_err
+  ; evidence AIC
+  sys_evidenceAIC(s) = evidence_AIC
+  ; evidence BIC
+  sys_evidenceBIC(s) = evidence_BIC
 
 ENDFOR
 
