@@ -4,13 +4,7 @@ The original IDL scipts used are
 G141_lightcurve_circle.pro - the translation of this code is in the G141_lightcurve_circle() function
 W17_lightcurve_test.pro - the translation of this code is in the main() function
 
-IDL is weird about double vs. single precision floats.
-Everything in Python is double by default, but I believe single in IDL
-The mixing results in rounding errors that make it hard to verify code
-between the two so there a many instances of explicity declaring float64/float32
-in an attempt to be consistent with the original IDL code.
-
-IDL's WHERE function also returns -1 if nothing is found vs python returning an empty array.  There are cases where this
+IDL's WHERE function returns -1 if nothing is found vs python returning an empty array.  There are cases where this
 is important and is taken into account in the occulation functions.
 
 Running python G141_lightcurve_circle.py from the command line will execute the main() function.
@@ -104,7 +98,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     limbDir = os.path.join(mainDir, 'Limb-darkening')
 
     # SET THE CONSTANTS
-    Gr = np.float64(6.67259e-11)
+    Gr = 6.67259e-11
     day_to_sec = 86400
     HST_period = 0.06691666
 
@@ -715,18 +709,18 @@ if __name__ == '__main__':
     plotting = True
 
     # PLANET PARAMETERS - user input
-    rl = np.float64(0.12169232)           # Rp/R* estimate
-    epoch = np.float64(57957.970153390)   # in MJD
-    inclin = np.float64(87.34635)         # this is converted into radians in the subroutine
+    rl = 0.12169232           # Rp/R* estimate
+    epoch = 57957.970153390   # in MJD
+    inclin = 87.34635         # this is converted into radians in the subroutine
     ecc = 0.0                             # set to zero and not used when circular
     omega = 0.0                           # set to zero and not used when circular
-    Per = np.float64(3.73548535)          # in days, converted to seconds in subroutine
-    aor = np.float64(7.0780354)           # a/r* converted to system density for the subroutine
+    Per = 3.73548535          # in days, converted to seconds in subroutine
+    aor = 7.0780354           # a/r* converted to system density for the subroutine
 
 
     # Setting constants and preparing inputs for claculations
     dtosec = 86400                        # conversion from days to seconds
-    big_G = np.float64(6.67259e-11)       # gravitational constant
+    big_G = 6.67259e-11       # gravitational constant
 
     persec = Per * dtosec
     constant1 = (big_G * persec * persec / np.float32(4. * np.pi * np.pi)) ** (1. / 3.)
