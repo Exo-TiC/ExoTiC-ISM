@@ -3,6 +3,10 @@ from HST_python.config import CONFIG_INI
 
 
 def residuals():
+    """
+    Not entirely sure what this function is doing.
+    :return:
+    """
     model = transit_circle(p, x, sh)
     print('Rp/R* = {}'.format(p[0]))
     resids = (y - model) / p[1]
@@ -15,13 +19,24 @@ def residuals():
 
 
 def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
-  # These are constants that are used in almost all of the routines and I am sure there is a way to make them common parameters rather than having to redefine them in each place - as you can some are redundantly redfined again below and some are just re-typed anyway. 
-  # constant = [GAIN,READNOISE,Gr,JD,DAY_TO_SEC,Rjup,Rsun,MJup,Msun,HST_SECOND,HST_PERIOD]
-  # constant = [2.5, 20.2, 6.67259e-11, 2400000.5, 86400, 7.15e7, 6.96e8, 1.9e27, 1.99e30, 5781.6, 0.06691666]
+    """
+    Documentation missing.
+    :param p:
+    :param fjac:
+    :param x:
+    :param y:
+    :param err:
+    :param sh:
+    :return:
+    """
+
+    # These are constants that are used in almost all of the routines and I am sure there is a way to make them common parameters rather than having to redefine them in each place - as you can some are redundantly redfined again below and some are just re-typed anyway.
+    # constant = [GAIN,READNOISE,Gr,JD,DAY_TO_SEC,Rjup,Rsun,MJup,Msun,HST_SECOND,HST_PERIOD]
+    # constant = [2.5, 20.2, 6.67259e-11, 2400000.5, 86400, 7.15e7, 6.96e8, 1.9e27, 1.99e30, 5781.6, 0.06691666]
     Gr = CONFIG_INI.getfloat('constants', 'big_G')
     HSTper = CONFIG_INI.getfloat('constants', 'HST_period')
 
-# Define each of the parameters that are read into the fitting routine
+    # Define each of the parameters that are read into the fitting routine
     rl = p[0]
     epoch = p[2]
     inclin = p[3]
@@ -36,7 +51,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     c4 = p[12]
     pi = np.pi
 
-# Turn off the print statements if you want this function to be silent - these are here for sanity checks
+    # Turn off the print statements if you want this function to be silent - these are here for sanity checks
     print(epoch)
     phase = (x - epoch) / (Per / 86400)  # convert to days 
     phase2 = np.floor(phase)
@@ -53,7 +68,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     if k.size > 0:
         HSTphase[k] = HSTphase[k] - 1.0
 
-# Calculate the impact parameter as a function of the planetary phase across the star. 
+    # Calculate the impact parameter as a function of the planetary phase across the star.
     b0 = (Gr * Per * Per / (4 * pi * pi)) ** (1 / 3.) * (MsMpR ** (1 / 3.)) * np.sqrt(
         (np.sin(phase * 2 * pi)) ** 2 + (np.cos(inclin) * np.cos(phase * 2 * pi)) ** 2)
     print(b0)
@@ -80,11 +95,17 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     return [0, (y - model) / err]
 
 
-
-
-
-
 def occultnl(rl, c1, c2, c3, c4, b0):
+    """
+    Documentation missing.
+    :param rl:
+    :param c1:
+    :param c2:
+    :param c3:
+    :param c4:
+    :param b0:
+    :return:
+    """
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
     fac = np.max(abs(mulimb0 - 1))
