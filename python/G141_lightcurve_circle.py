@@ -698,44 +698,42 @@ if __name__ == '__main__':
     outDir = os.path.join(mainDir, 'outputs')
     dataDir = os.path.join(mainDir, 'data', 'W17')
 
-    # don't need them in the user input part
-    # SET THE CONSTANTS
-    dtosec = 86400
-    big_G = np.float64(6.67259e-11)
-    Rjup = np.float64(7.15e7)
-    Rsun = np.float64(6.96e8)
-    Mjup = np.float64(1.9e27)
-    Msun = np.float64(1.99e30)
-    HST_second = 5781.6
-    HST_period = 0.06691666
-
     # READ in the txt file for the lightcurve data
     x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'), skiprows=7, unpack=True)
     wavelength = np.loadtxt(os.path.join(dataDir, 'W17_wavelength_test_data.txt'), skiprows=3)
 
-    # PLANET PARAMETERS - this is user input indeed, but put them in needed format later
+    # Limb darkening parameters - user input
+    ld_model = '3D'   # Which limb darkening models to use, '1D' or '3D'
+    FeH = -2.5
+    Teff = 6550
+    logg = 4.2
+
+    # More user input
+    grat = 'G141'   # Which grating to use
+    grid_selection = 'fit_time'
+    run_name = 'wl_time_wm3d'
+    plotting = True
+
+    # PLANET PARAMETERS - user input
     rl = np.float64(0.12169232)           # Rp/R* estimate
     epoch = np.float64(57957.970153390)   # in MJD
     inclin = np.float64(87.34635)         # this is converted into radians in the subroutine
     ecc = 0.0                             # set to zero and not used when circular
     omega = 0.0                           # set to zero and not used when circular
     Per = np.float64(3.73548535)          # in days, converted to seconds in subroutine
-    persec = Per * dtosec
     aor = np.float64(7.0780354)           # a/r* converted to system density for the subroutine
 
-    # these two lines - hide them in function, not visible to user
-    constant1 = (big_G * persec * persec / np.float32(4 * 3.1415927 * 3.1415927)) ** (1 / 3.)
-    MsMpR = (aor / (constant1)) ** 3
 
-    ld_model = '3D'   # Which limb darkening models to use, '1D' or '3D'
-    FeH = -2.5
-    Teff = 6550
-    logg = 4.2
+    # Setting constants and preparing inputs for claculations
+    dtosec = 86400                        # conversion from days to seconds
+    big_G = np.float64(6.67259e-11)       # gravitational constant
 
+    persec = Per * dtosec
+    constant1 = (big_G * persec * persec / np.float32(4. * np.pi * np.pi)) ** (1. / 3.)
+    MsMpR = (aor / (constant1)) ** 3.
+
+    # Put data parameters in list
     data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
-    grat = 'G141'   # Which grating to use
-    grid_selection = 'fit_time'
-    run_name = 'wl_time_wm3d'
-    plotting = True
 
+    # Start the calculations
     G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name, plotting)
