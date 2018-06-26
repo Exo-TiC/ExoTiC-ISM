@@ -1,12 +1,15 @@
 import numpy as np
 import os
+
+from HST_python.config import CONFIG_INI
 from HST_python.G141_lightcurve_circle import G141_lightcurve_circle
 
 if __name__ == '__main__':
 
     mainDir = '..'
     outDir = os.path.join(mainDir, 'outputs')
-    dataDir = os.path.join(mainDir, 'data')
+    curr_model = CONFIG_INI.get('data_paths', 'current_model')
+    dataDir = os.path.join(mainDir, 'data', curr_model)
 
     dtosec = 86400
     big_G = 6.67259e-11
@@ -19,6 +22,7 @@ if __name__ == '__main__':
 
 
     # READ in the txt file for the lightcurve data
+
     x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W6_wlspec_lightcurve_test_data.txt'), skiprows=7, unpack=True)
     wavelength = np.loadtxt(os.path.join(dataDir, 'W6_wlspec_wavelength_test_data.txt'), skiprows=3)
 
