@@ -327,7 +327,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
 
     print('\nLimb darkening parameters:')
     print("4param \t{:0.8f}\t{:0.8f}\t{:0.8f}\t{:0.8f}".format(c1, c2, c3, c4))
-    print("3param \t{:0.8f}\t{:0.8f}\t{:0.8f}".format(cp2, cp3, c4))
+    print("3param \t{:0.8f}\t{:0.8f}\t{:0.8f}".format(cp2, cp3, cp4))
     print("Quad \t{:0.8f}\t{:0.8f}".format(aLD, bLD))
     print("Linear \t{:0.8f}".format(uLD))
 
