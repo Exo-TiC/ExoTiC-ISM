@@ -196,10 +196,10 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
     # Loop over all systems (= parameter combinations)
     for s in range(0, nsys):
-        print('................................')
-        print(' SYSTEMATIC MODEL {}'.format(s))
+        print('\n################################')
+        print('SYSTEMATIC MODEL {} of {}'.format(s+1, nsys))
         systematics = grid[s, :]
-        print('systematics:')
+        print('Systematics - parameters:')
         print(systematics)
         print('  ')
 
@@ -231,7 +231,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             parinfo.append(info)
 
         fa = {'x': x, 'y': y, 'err': err, 'sh': sh}
+        print('\nSTART MPFIT\n')
         mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
+        print('\nTHIS ROUND OF MPFIT IS DONE\n')
 
         # Count free parameters by figuring out how many zeros we have in the current system
         nfree = sum([not p['fixed'] for p in parinfo])
@@ -270,7 +272,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         constant1 = (Gr * p0[7] * p0[7] / (4 * np.pi * np.pi)) ** (1 / 3.)
         aval = constant1 * (p0[4]) ** (1 / 3.)   # NOT-REUSED
 
-        print('TRANSIT DEPTH = {} +/- {}, centered at  {}'.format(p0[0], rl_err, p0[2]))
+        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at  {}'.format(s+1, nsys, p0[0], rl_err, p0[2]))
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters
@@ -304,10 +306,10 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
                            (sh * p0[18] + sh ** 2. * p0[19] + sh ** 3. * p0[20] + sh ** 4. * p0[21] + 1.0)
 
         w_model = mulimb01 * p0[1] * systematic_model
-        w_residuals = (y - w_model) / p0[1]             # these are very different from waht IDL gives
+        w_residuals = (y - w_model) / p0[1]
         corrected_data = y / (p0[1] * systematic_model)
         w_scatter[s] = (np.std(w_residuals))
-        print('Scatter on the residuals = {}'.format(w_scatter[s]))   # very different to IDL
+        print('Scatter on the residuals = {}'.format(w_scatter[s]))   # rather different to IDL
 
         # ..........................................
         # ..........................................
@@ -374,8 +376,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     print('Each systematic model will now be re-fit with the previously determined parameters serving as the new starting points.')
 
     for s in range(0, nsys):
-        print('................................')
-        print(' SYSTEMATIC MODEL {}'.format(s))
+        print('\n################################')
+        print('SYSTEMATIC MODEL {} of {}'.format(s+1, nsys))
         systematics = grid[s, :]
         print(systematics)
         print('  ')
@@ -412,7 +414,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         ###############
 
         parinfo = []
-        print(p0.shape[0])
+
         for i, value in enumerate(p0):
             info = {'value': 0., 'fixed': 0, 'limited': [0, 0], 'limits': [0., 0.]}
             info['value'] = value
@@ -456,7 +458,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         constant1 = (Gr * p0[7] * p0[7] / (4 * np.pi * np.pi)) ** (1 / 3.)
         aval = constant1 * (p0[4]) ** (1 / 3.)   # NOT-REUSED
 
-        print('Transit depth = {} +/- {}     centered at  {}'.format(p0[0], rl_err, p0[2]))
+        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}     centered at  {}'.format(s+1, nsys, p0[0], rl_err, p0[2]))
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
@@ -568,7 +570,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))
 
     n01 = np.where(w_q >= 0.05)
-    print('{} models have a weight over 0.1. Models:'.format(len(n01), n01, w_q[n01]))
+    print('{} models have a weight over 0.1. -> Models:'.format(len(n01), n01, w_q[n01]))
     print('Most likely model is number {} at w_q={}'.format(np.argmax(w_q), np.max(w_q)))
 
     best_sys = np.max(w_q)
@@ -646,6 +648,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
     marg_inclin_rad = mean_inc
     marg_inclin_rad_err = variance_theta_inc
+    # What is getting printed here?
     print(marg_inclin_rad, marg_inclin_rad_err)
 
     inclin_arrayd = sys_params[:, 3] / (2 * np.pi / 360)
@@ -659,6 +662,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
     marg_inclin_deg = mean_incd
     marg_inclin_deg_err = variance_theta_incd
+    # What is getting printed here?
     print(marg_inclin_deg, marg_inclin_rad_err)
 
     # MsMpR
