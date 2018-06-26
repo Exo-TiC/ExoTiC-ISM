@@ -26,11 +26,13 @@ Inital translation of Python to IDL was done by Matthew Hill mhill92@gmail.
 Continued refinement by Iva Laginja (laginja.iva@gmail.com).
 """
 
-from mpfit import mpfit
+from HST_python.mpfit import mpfit
 import numpy as np
 import os
-from limb_darkening import limb_dark_fit
-import hstmarg
+
+from HST_python.config import CONFIG_INI
+from HST_python.limb_darkening import limb_dark_fit
+from HST_python import hstmarg
 
 
 def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
@@ -97,17 +99,17 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     mainDir = '..'
     limbDir = os.path.join(mainDir, 'Limb-darkening')
 
-    # SET THE CONSTANTS
-    Gr = 6.67259e-11
-    day_to_sec = 86400
-    HST_period = 0.06691666
+    # READ THE CONSTANTS
+    Gr = CONFIG_INI.getfloat('constants', 'big_G')
+    day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
+    HST_period = CONFIG_INI.getfloat('constants', 'HST_period')
 
     nexposure = len(x)   # Total number of exposures in the observation
 
     # READ IN THE PLANET STARTING PARAMETERS
     # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]   # Description
     rl = data_params[0]                             # Rp/R* estimate
-    epoch = data_params[1]                          # cener of transit time in MJD
+    epoch = data_params[1]                          # center of transit time in MJD
     inclin = data_params[2] * ((2 * np.pi) / 360)   # inclination, converting it to radians
     MsMpR = data_params[3]                          # density of the system
     ecc = data_params[4]                            # eccentricity
@@ -690,37 +692,38 @@ if __name__ == '__main__':
 
     mainDir = '..'
     outDir = os.path.join(mainDir, 'outputs')
-    dataDir = os.path.join(mainDir, 'data', 'W17')
+    curr_model = CONFIG_INI.get('data_paths', 'current_model')
+    dataDir = os.path.join(mainDir, 'data', curr_model)
 
     # READ in the txt file for the lightcurve data
     x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'), skiprows=7, unpack=True)
     wavelength = np.loadtxt(os.path.join(dataDir, 'W17_wavelength_test_data.txt'), skiprows=3)
 
     # Limb darkening parameters - user input
-    ld_model = '3D'   # Which limb darkening models to use, '1D' or '3D'
-    FeH = -2.5
-    Teff = 6550
-    logg = 4.2
+    ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
+    FeH = CONFIG_INI.getfloat('limb_darkening', 'metallicity')
+    Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')
+    logg = CONFIG_INI.getfloat('limb_darkening', 'logg')
 
     # More user input
-    grat = 'G141'   # Which grating to use
-    grid_selection = 'fit_time'
-    run_name = 'wl_time_wm3d'
-    plotting = True
+    grat = CONFIG_INI.get('technical_parameters', 'grating')
+    grid_selection = CONFIG_INI.get('technical_parameters', 'grid_selection')
+    run_name = CONFIG_INI.get('technical_parameters', 'run_name')
+    plotting = CONFIG_INI.get('technical_parameters', 'plotting')
 
     # PLANET PARAMETERS - user input
-    rl = 0.12169232           # Rp/R* estimate
-    epoch = 57957.970153390   # in MJD
-    inclin = 87.34635         # this is converted into radians in the subroutine
-    ecc = 0.0                             # set to zero and not used when circular
-    omega = 0.0                           # set to zero and not used when circular
-    Per = 3.73548535          # in days, converted to seconds in subroutine
-    aor = 7.0780354           # a/r* converted to system density for the subroutine
+    rl = CONFIG_INI.getfloat('planet_parameters', 'rl')             # Rp/R* estimate
+    epoch = CONFIG_INI.getfloat('planet_parameters', 'epoch')       # in MJD
+    inclin = CONFIG_INI.getfloat('planet_parameters', 'inclin')     # this is converted into radians in the subroutine
+    ecc = CONFIG_INI.getfloat('planet_parameters', 'ecc')           # set to zero and not used when circular
+    omega = CONFIG_INI.getfloat('planet_parameters', 'omega')       # set to zero and not used when circular
+    Per = CONFIG_INI.getfloat('planet_parameters', 'Per')           # in days, converted to seconds in subroutine
+    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')           # a/r* converted to system density for the subroutine
 
 
     # Setting constants and preparing inputs for claculations
-    dtosec = 86400                        # conversion from days to seconds
-    big_G = 6.67259e-11       # gravitational constant
+    dtosec = CONFIG_INI.getfloat('constants', 'dtosec')     # conversion from days to seconds
+    big_G = CONFIG_INI.getfloat('constants', 'big_G')       # gravitational constant
 
     persec = Per * dtosec
     constant1 = (big_G * persec * persec / np.float32(4. * np.pi * np.pi)) ** (1. / 3.)

@@ -1,21 +1,8 @@
 import numpy as np
 import os
-from G141_lightcurve_circle import G141_lightcurve_circle
+from HST_python.G141_lightcurve_circle import G141_lightcurve_circle
 
 if __name__ == '__main__':
-    """
-    This is a translation of the W17_lightcurve_test.pro
-    """
-    # don't need them in the user input part
-    # SET THE CONSTANTS
-    dtosec = 86400
-    big_G = 6.67259e-11
-    Rjup = 7.15e7
-    Rsun = 6.96e8
-    Mjup = 1.9e27
-    Msun = 1.99e30
-    HST_second = 5781.6
-    HST_period = 0.06691666
 
     mainDir = '..'
     outDir = os.path.join(mainDir, 'outputs')
