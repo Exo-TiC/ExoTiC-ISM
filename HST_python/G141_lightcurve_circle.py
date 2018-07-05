@@ -30,6 +30,7 @@ Continued by Iva Laginja (laginja.iva@gmail.com).
 import numpy as np
 import os
 import matplotlib.pyplot as plt
+import pandas as pd
 
 from HST_python.config import CONFIG_INI
 from HST_python.mpfit import mpfit
@@ -540,8 +541,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         sys_stats[s, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats
         sys_date[s, :] = x                                      # img_date
         sys_phase[s, :] = phase                                 # phase
-        # sys_rawflux(s,*) = y                                  # raw lightcurve flux
-        # sys_rawflux_err(s,*) = err
+        #sys_rawflux[s, :] = y                                    # raw lightcurve flux
+        #sys_rawflux_err[s, :] = err
         sys_flux[s, :] = fit_data                               # corrected lightcurve flux
         sys_flux_err[s, :] = fit_err
         sys_residuals[s, :] = residuals                         # residuals
@@ -559,16 +560,14 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         print('Another round done')
 
-
-    # SAVE, filename=out_folder+'analysis_circle_G141_'+run_name+'.sav', sys_stats, sys_date, sys_phase, sys_rawflux,
-    # sys_rawflux_err, sys_flux, sys_flux_err, sys_residuals, sys_model, sys_model_phase, sys_systematic_model,
-    # sys_params, sys_params_err, sys_depth, sys_depth_err, sys_epoch, sys_epoch_err, sys_evidenceAIC, sys_evidenceBIC
-
-    # Python:
-    # Saving this will be a bit of a mess, btu we'll manage. Best option is probably to fits file, or txt file (or both).
-    # All of the parameters that are getting saved are a tuple of one or more dimension, and those are not always of
-    # the same size.
-    # Save to output folder.
+    # Save to file
+    # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
+    np.savez(os.path.join(outDir, 'analysis_circle_G141_'+run_name), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
+             sys_rawflux=sys_rawflux, sys_rawflux_err=sys_rawflux_err, sys_flux=sys_flux, sys_flux_err=sys_flux_err,
+             sys_residuals=sys_residuals, sys_model=sys_model, sys_model_phase=sys_model_phase,
+             sys_systematic_model=sys_systematic_model, sys_params=sys_params, sys_params_err=sys_params_err,
+             sys_depth=sys_depth, sys_depth_err=sys_depth_err, sys_epoch=sys_epoch, sys_epoch_err=sys_epoch_err,
+             sys_evidenceAIC=sys_evidenceAIC, sys_evidenceBIC=sys_evidenceBIC)
 
 
     #####################################
@@ -664,7 +663,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # ;ENDIF
 
     # Python:
-    # f
+    # fig3
+
+    # fig4
 
 
     # Center of transit time
@@ -731,12 +732,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     marg_aors_err = variance_theta_aor
     print(marg_aors, marg_aors_err)
 
-    # SAVE, filename=out_folder+'analysis_circle_G141_marginalised_'+run_name+'.sav', w_q, best_sys, marg_rl,
-    # marg_rl_err, marg_epoch, marg_epoch_err, marg_inclin_rad, marg_inclin_rad_err, marg_inclin_deg,
-    # marg_inclin_deg_err, marg_msmpr, marg_msmpr_err, marg_aors, marg_aors_err, rl_sdnr, pos
-
-    # Python:
-    # Same like in the previous SAVE
+    # Save to file
+    # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
+    np.savez(os.path.join(outDir, 'analysis_circle_G141_marginalised_'+run_name), w_q=w_q, best_sys=best_sys,
+             marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
+             marg_inclin_rad=marg_inclin_rad, marg_inclin_rad_err=marg_inclin_rad_err, marg_inclin_deg=marg_inclin_deg,
+             marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
+             marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, pos=pos)
 
 
 if __name__ == '__main__':
