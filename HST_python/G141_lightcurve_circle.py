@@ -39,7 +39,7 @@ from HST_python import hstmarg
 
 
 def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
-                           plotting):
+                           plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
 
@@ -88,7 +88,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     :param grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
     :param out_folder: string of folder path to save the data to, e.g. '/Volumes/DATA1/user/HST/Planet/sav_file/'
     :param run_name: string of the individual run name, e.g. 'whitelight', or 'bin1', or '115-120micron'
-    :param plotting:
+    :param plotting: bool, default=True; whether or not interactive plots should be shown
     :return:
     """
 
@@ -767,7 +767,7 @@ if __name__ == '__main__':
     run_name = CONFIG_INI.get('technical_parameters', 'run_name')
     plotting = CONFIG_INI.get('technical_parameters', 'plotting')
 
-    # PLANET PARAMETERS - user input
+    # Planet parameters
     rl = CONFIG_INI.getfloat('planet_parameters', 'rl')             # Rp/R* estimate
     epoch = CONFIG_INI.getfloat('planet_parameters', 'epoch')       # in MJD
     inclin = CONFIG_INI.getfloat('planet_parameters', 'inclin')     # this is converted into radians in the subroutine
@@ -776,14 +776,13 @@ if __name__ == '__main__':
     Per = CONFIG_INI.getfloat('planet_parameters', 'Per')           # in days, converted to seconds in subroutine
     aor = CONFIG_INI.getfloat('planet_parameters', 'aor')           # a/r* converted to system density for the subroutine
 
-
     # Setting constants and preparing inputs for claculations
     dtosec = CONFIG_INI.getfloat('constants', 'dtosec')     # conversion from days to seconds
     big_G = CONFIG_INI.getfloat('constants', 'big_G')       # gravitational constant
 
     persec = Per * dtosec
     constant1 = (big_G * persec * persec / np.float32(4. * np.pi * np.pi)) ** (1. / 3.)
-    MsMpR = (aor / (constant1)) ** 3.
+    MsMpR = (aor / constant1) ** 3.
 
     # Put data parameters in list
     data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
