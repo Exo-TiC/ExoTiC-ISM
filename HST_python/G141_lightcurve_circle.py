@@ -30,7 +30,6 @@ Continued by Iva Laginja (laginja.iva@gmail.com).
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-import pandas as pd
 
 from HST_python.config import CONFIG_INI
 from HST_python.mpfit import mpfit
@@ -322,19 +321,23 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # deviation, although this is only a very timy inflation of the uncertainty and I need to find a more statistically riggrous way to do this.
         # Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
 
-        # if plotting:
-        #     window,0, title=s
-        #     plot, phase, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]     # ; psym=4 makes diamonds, xstyle and ystyle format the axes
-        #     hline, 0.0+STDDEV(w_residuals)*cut_down, color=cgcolor('RED')                 # marking different lines connected with choice of good data
-        #     hline, 0.0
-        #     hline, 0.0-STDDEV(w_residuals)*cut_down, color=cgcolor('RED')
 
-        # Python:
-        # if plotting:
-        # fig1
-        # plt.plot(phase_xyz, w_residuals)
-        # plt.ylim(-0.01,0.01)
-        # plt.show() or something - interactive mode?
+        if plotting:
+            plt.figure(1)
+            plt.clf()
+            plt.scatter(phase, w_residuals, s=5)
+            plt.title('Model ' + str(s+1) + '/' + str(nsys))
+            plt.xlabel('Phase')
+            plt.ylabel('w_residuals')
+            plt.ylim(-0.01, 0.01)
+
+            # hline, 0.0 + STDDEV(w_residuals) * cut_down, color = cgcolor('RED')
+            # hline, 0.0
+            # hline, 0.0 - STDDEV(w_residuals) * cut_down, color = cgcolor('RED')
+
+            plt.draw()
+            plt.pause(0.05)
+
         """
         # remove
         bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * 3))
@@ -362,23 +365,18 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         y[bad_down] = y[bad_down] + np.std(w_residuals) * cut_down
         err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
         """
-        # if plotting:
-        #     window,2, title=s
-        #     plot, phase, corrected_data, ystyle=3, xstyle=3, psym=4       # first plotted data
-        #     oplot, phase, y, psym=1                                       # second plotted data
-        #     oploterror, phase, corrected_data, err, psym=4, color=321321  # error bars for first plotted data
-        #     oplot, phase, systematic_model, color=5005005, psym=2         # third plotted data
 
-        # Python:
-        # if plotting:
-        # fig2
-        # plt.plot(phase_xyz, corrected_data)     # with error bars
-        # plt.plot(phase_xyz, y)
-        # plt.plot(phase_xyz, systematic_model)
-        # plt.title(str(s+1))
-        # plt.ylim(-0.01,0.01)
-        # plt.show() or something - interactive mode?
-
+        if plotting:
+            plt.figure(2)
+            plt.clf()
+            plt.errorbar(phase, corrected_data, yerr=err, fmt='m.')
+            plt.scatter(phase, y, s=5)
+            plt.scatter(phase, systematic_model, s=5)
+            plt.xlabel('Phase')
+            plt.ylabel('Data')
+            plt.title('Model ' + str(s+1) + '/' + str(nsys))
+            plt.draw()
+            plt.pause(0.05)
 
 
     #########################################################################################################################
@@ -521,19 +519,19 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         fit_data = y / (p0[1] * systematic_model)
         fit_err = np.copy(err)  # * (1.0 + resid_scatter)
 
-        # IF (plotting EQ 'on') THEN BEGIN
-        # window,2, title=s
-        # plot, phase_xyz, y, ystyle=3, xstyle=3, psym=1                   # first plotted data
-        # oplot, x2, mulimb02, color=5005005                           # second plotted data, makes a line (the line is the model)
-        # oploterror, phase, fit_data, err, psym=4, color=100100100    # errors of first plotted data
+        if plotting:
+            plt.figure(2)
+            plt.clf()
+            plt.scatter(phase, y, s=5)
+            plt.plot(x2, mulimb02, 'k')
+            plt.errorbar(phase, fit_data, yerr=err, fmt='m.')
+            plt.xlim(-0.03, 0.03)
+            plt.title('Model ' + str(s+1) + '/' + str(nsys))
+            plt.xlabel('Phase')
+            plt.ylabel('Data')
+            plt.draw()
+            plt.pause(0.05)
 
-        # Python:
-        # plt.plot(phase_xyz, y) with error bars
-        # plt.plot(x2, mulimb02)
-        # plt.title(str(s+1))
-        # plt.show() or something
-
-        # ENDIF
 
         # .............................
         # Arrays to save to file
@@ -598,13 +596,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     count_epoch = sys_epoch[pos]
     count_epoch_err = sys_epoch_err[pos]
 
-    count_residuals = sys_residuals[pos, :]
-    count_date = sys_date[pos, :]
-    count_flux = sys_flux[pos, :]
-    count_flux_err = sys_flux_err[pos, :]
-    count_phase = sys_phase[pos, :]
-    count_model_y = sys_model[pos, :]
-    count_model_x = sys_model_phase[pos, :]
+    count_residuals = sys_residuals[pos]
+    count_date = sys_date[pos]
+    count_flux = sys_flux[pos]
+    count_flux_err = sys_flux_err[pos]
+    count_phase = sys_phase[pos]
+    count_model_y = sys_model[pos]
+    count_model_x = sys_model_phase[pos]
 
     beta = np.min(count_AIC)
     w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))
@@ -638,35 +636,46 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
     print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), np.argmin(rl_sdnr)))
 
-    # ;IF (plotting EQ 'on') THEN BEGIN
-    #    window,4
-    # !p.multi=[0,1,3]
-    #    plot, w_q
-    #    plot, rl_sdnr
-    #    ploterror, rl_array, rl_err_array
-    # !p.multi=[0,1,1]   
+    if plotting:
+        plt.figure(3)
+        plt.subplot(3,1,1)
+        plt.plot(w_q)
+        plt.title('w_q')
+        plt.subplot(3,1,2)
+        plt.plot(rl_sdnr)
+        plt.title('rl_sdnr')
+        plt.subplot(3,1,3)
+        plt.errorbar(np.arange(1, len(rl_array)+1), rl_array, yerr=rl_err_array, fmt='.')
+        plt.title('rl_array')
+        plt.draw()
+        plt.pause(0.05)
 
-    # window,6
-    # !p.multi=[0,1,3]
-    # plot, sys_phase(0,*), sys_flux(0,*), psym=4, ystyle=3, yrange=[min(sys_flux(0,*))-0.001,max(sys_flux(0,*))+0.001], background=cgcolor('white'), color=cgcolor('black')
+        plt.figure(4)
+        plt.subplot(3, 1, 1)
+        plt.scatter(sys_phase[0,:], sys_flux[0,:])
+        plt.ylim(np.min(sys_flux[0,:]) - 0.001, np.max(sys_flux[0,:]) + 0.001)
+        plt.xlabel('sys_phase')
+        plt.ylabel('sys_flux')
 
-    # plot, count_phase(best_sys,*), count_flux(best_sys,*), psym=4, ystyle=3, yrange=[min(count_flux(0,*))-0.001,max(count_flux(0,*))+0.001], background=cgcolor('white'), color=cgcolor('black')
-    # oplot, count_model_x(best_sys,*), count_model_y(best_sys,*), color=cgcolor('red')
+        plt.subplot(3,1,2)
+        plt.scatter(count_phase[best_sys,:], count_flux[best_sys,:])
+        plt.plot(count_model_x[best_sys,:], count_model_y[best_sys,:])
+        plt.ylim(np.min(count_flux[0,:]) - 0.001, np.max(count_flux[0,:]) + 0.001)
+        plt.xlabel('count_phase')
+        plt.ylabel('count_flux')
 
-    # ploterror, count_phase(best_sys,*), count_residuals(best_sys,*)*1d6, count_flux_err(best_sys,*)*1d6, psym=4, ystyle=3, yrange=[-1000,1000], background=cgcolor('white'), color=cgcolor('black')
-    # hline, 0.0, linestyle=2, color=cgcolor('red')
-    # hline, 0.0-(rl_sdnr(best_sys)*2.57), linestyle=1, color=cgcolor('red')
-    # hline, 0.0+(rl_sdnr(best_sys)*2.57), linestyle=1, color=cgcolor('red')
-    # !p.multi=[0,1,1]   
+        plt.subplot(3,1,3)
+        plt.errorbar(count_phase[best_sys,:], count_residuals[best_sys,:], yerr=count_flux_err[best_sys,:], fmt='.')
+        plt.ylim(-1000, 1000)
+        plt.xlabel('count_phase')
+        plt.ylabel('count_residuals')
 
-    # print(MEDIAN(count_flux_err(best_sys,*)*1d6))
-    # ;ENDIF
+        # hline, 0.0, linestyle=2, color=cgcolor('red')
+        # hline, 0.0-(rl_sdnr(best_sys)*2.57), linestyle=1, color=cgcolor('red')
+        # hline, 0.0+(rl_sdnr(best_sys)*2.57), linestyle=1, color=cgcolor('red')
 
-    # Python:
-    # fig3
-
-    # fig4
-
+        plt.draw()
+        plt.pause(0.05)
 
     # Center of transit time
     epoch_array = count_epoch
