@@ -395,13 +395,12 @@ FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
   ; Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
 
   IF (plotting EQ 'on') THEN BEGIN
-    window,0, title=s
+    window,0, title=s + ' Fig 1'
     plot, phase_xyz, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]   ; psym=4 makes diamonds, xstyle and ystyle format the axes
     hline, 0.0+STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
     hline, 0.0
     hline, 0.0-STDDEV(w_residuals)*cut_down, color=cgcolor('RED') 
   ENDIF
-
 
   ;remove
   bad_up = where(w_residuals GT (0.0+STDDEV(w_residuals)*3) )
@@ -453,7 +452,7 @@ FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
 
 
   IF (plotting EQ 'on') THEN BEGIN
-    window,2, title=s
+    window,2, title=s + ' Fig 2'
     plot, phase_xyz, corrected_data, ystyle=3, xstyle=3, psym=4
     oplot, phase_xyz, y, psym=1
     oploterror, phase_xyz, corrected_data, err, psym=4, color=321321
@@ -462,9 +461,6 @@ FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
 
 
 ENDFOR
-
-print, 'stopped'
-stop
 
 
 ;..........................................
@@ -653,7 +649,7 @@ FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
   fit_err = err ;* (1.0 + resid_scatter)
 
   IF (plotting EQ 'on') THEN BEGIN
-    window,2, title=s
+    window,2, title=s + ' Fig 2?'
     plot, phase_xyz, y, ystyle=3, xstyle=3, psym=1
     oplot, x2, mulimb02, color=5005005
     oploterror, phase_xyz, fit_data, err, psym=4, color=100100100
@@ -703,8 +699,6 @@ ENDFOR
 SAVE, filename=out_folder+'analysis_circle_G141_'+run_name+'.sav', sys_stats, sys_date, sys_phase, sys_rawflux, sys_rawflux_err, sys_flux, sys_flux_err, sys_residuals, sys_model, sys_model_phase, sys_systematic_model, sys_params, sys_params_err, sys_depth, sys_depth_err, sys_epoch, sys_epoch_err, sys_evidenceAIC, sys_evidenceBIC
 
 
-
-
 ;.......................................
 ; MARGINALISATION
 a = REVERSE(SORT(sys_evidenceAIC))
@@ -732,6 +726,8 @@ count_flux_err = sys_flux_err(pos,*)
 count_phase = sys_phase(pos,*)
 count_model_y = sys_model(pos,*)
 count_model_x = sys_model_phase(pos,*)
+
+stop
 
 beta = MIN(count_AIC)
 w_q = (EXP(count_AIC - beta))/TOTAL(EXP(count_AIC - beta))
@@ -766,14 +762,15 @@ print, 'SDNR best model = ', (STDDEV(count_residuals(best_sys,*))/SQRT(2))*1D6
 print, 'SDNR best = ', min(rl_sdnr), ' for model ', WHERE(rl_sdnr EQ min(rl_sdnr))
 
 ;IF (plotting EQ 'on') THEN BEGIN
-   window,4
+   window,4, title=s + ' Fig 3'
 !p.multi=[0,1,3]
    plot, w_q
    plot, rl_sdnr
    ploterror, rl_array, rl_err_array
 !p.multi=[0,1,1]   
 
-window,6
+
+window,6, title=s + ' Fig 4'
 !p.multi=[0,1,3]
 plot, sys_phase(0,*), sys_flux(0,*), psym=4, ystyle=3, yrange=[min(sys_flux(0,*))-0.001,max(sys_flux(0,*))+0.001], background=cgcolor('white'), color=cgcolor('black')
 
