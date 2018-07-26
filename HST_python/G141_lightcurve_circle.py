@@ -24,7 +24,7 @@ limb_darkening.py contains a python translation of the 3D limb darkening code in
 for fitting the models. Again, the two are not exactly consistent but in this case the difference is small (good to
 about 3 decimals).
 
-Inital translation of Python to IDL was done by Matthew Hill (mhill92@gmail).
+Initial translation of Python to IDL was done by Matthew Hill (mhill92@gmail).
 Continued by Iva Laginja (laginja.iva@gmail.com).
 """
 import numpy as np
@@ -69,7 +69,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     :param y: array of normalised flux values equal to the length of the x array
     :param err: array of error values corresponding to the flux values in y
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err)
-    :param data_params: priors for each parameter used in the fit passed in an array in the form
+    :param data_params: priors for each parameter used in the fit passed in an array of the form
         data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
         - rl: transit depth (Rp/R*)
         - epoch: center of transit time (in MJD)
@@ -154,7 +154,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
     grid = hstmarg.wfc3_systematic_model_grid_selection(grid_selection)
-    nsys, nparams = grid.shape   # nsys = number of systematic models
+    nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
 
     #  SET UP THE ARRAYS
 
