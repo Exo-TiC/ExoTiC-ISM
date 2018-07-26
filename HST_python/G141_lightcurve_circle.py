@@ -96,10 +96,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes'
         'Please hold.')
 
-    # DEFINE DIRECTORIES
-    # NEW We need to work out a universal format that we want people to put into this routine. 
-    mainDir = '..'
-    limbDir = os.path.join(mainDir, 'Limb-darkening')
+    # DEFINE LIMB DARKENING DIRECTORY, WHICH IS INSIDE THIS PACKAGE
+    limbDir = os.path.join('..', 'Limb-darkening')
 
     # READ THE CONSTANTS
     Gr = CONFIG_INI.getfloat('constants', 'big_G')
@@ -755,10 +753,10 @@ if __name__ == '__main__':
     This is a translation of the W17_lightcurve_test.pro
     """
 
-    mainDir = '..'
-    outDir = os.path.join(mainDir, 'outputs')
+    localDir = CONFIG_INI.get('data_paths', 'local_path')
+    outDir = os.path.join(localDir, 'outputs')
     curr_model = CONFIG_INI.get('data_paths', 'current_model')
-    dataDir = os.path.join(mainDir, 'data', curr_model)
+    dataDir = os.path.join(localDir, os.path.join(localDir, 'data_path'), curr_model)
 
     # READ in the txt file for the lightcurve data
     x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'), skiprows=7, unpack=True)

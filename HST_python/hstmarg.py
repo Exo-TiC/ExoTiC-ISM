@@ -219,7 +219,7 @@ def wfc3_systematic_model_grid_selection(selection):
     p0 =          [0,    1,     2,      3,     4,    5,    6,    7,  8,  9,  10, 11, 12,  13,    14,    15,    16,    17,     18,      19,      20,      21   ]
     p0 = np.array([rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m_fac, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4])
 
-    :param selection: string; which model grid to use, must be 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
+    :param selection: string; which model grid to use, must be 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr', 'fit_ecc' or 'fit_all'
     :return: wfc3_grid: array; grid containing which systematics to model
     """
 
