@@ -149,6 +149,10 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # p0 =        [0,    1,     2,      3,     4,    5,    6,    7,  8,  9,  10, 11, 12,  13,    14,    15,    16,    17,     18,      19,      20,      21   ]
     p0 = np.array([rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m_fac, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4])
 
+    # Create an array with the names of the priors
+    p0_names = np.array(['rl', 'flux0', 'epoch', 'inclin', 'MsMpR', 'ecc', 'omega', 'Per', 'T0', 'c1', 'c2', 'c3', 'c4',
+                         'm_fac', 'HSTP1', 'HSTP2', 'HSTP3', 'HSTP4', 'xshift1', 'xshift2', 'xshift3', 'xshift4'])
+
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
     grid = hstmarg.wfc3_systematic_model_grid_selection(grid_selection)
@@ -160,8 +164,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     w_scatter = np.zeros(nsys)
     w_params = np.zeros((nsys, nparams))
 
-    # final sav arrays for each systematic model
-    sys_stats = np.zeros((nsys, 5))                 # stats
+    # Initializing arrays for each systematic model, which we will save once we got thourgh all systems with two fits.
+    sys_stats = np.zeros((nsys, 5))                 # stats       # NEW: why 5? (trying to get rid of hard coded things)
     sys_date = np.zeros((nsys, nexposure))          # img_date
     sys_phase = np.zeros((nsys, nexposure))         # phase
     sys_rawflux = np.zeros((nsys, nexposure))       # raw lightcurve flux
@@ -169,21 +173,21 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     sys_flux = np.zeros((nsys, nexposure))          # corrected lightcurve flux
     sys_flux_err = np.zeros((nsys, nexposure))      # corrected lightcurve flux error
     sys_residuals = np.zeros((nsys, nexposure))     # residuals
-    sys_model = np.zeros((nsys, 4000))              # smooth model
-    sys_model_phase = np.zeros((nsys, 4000))        # smooth phase
+    sys_model = np.zeros((nsys, 4000))              # smooth model       # NEW: why 4000?
+    sys_model_phase = np.zeros((nsys, 4000))        # smooth phase       # NEW: why 4000?
     sys_systematic_model = np.zeros((nsys, nexposure))  # systematic model
     sys_params = np.zeros((nsys, nparams))          # parameters
     sys_params_err = np.zeros((nsys, nparams))      # parameter errors
-    sys_depth = np.zeros((nsys))                    # depth
-    sys_depth_err = np.zeros((nsys))                # depth error
-    sys_epoch = np.zeros((nsys))                    # transit time
-    sys_epoch_err = np.zeros((nsys))                # transit time error
-    sys_evidenceAIC = np.zeros((nsys))              # evidence AIC
-    sys_evidenceBIC = np.zeros((nsys))              # evidence BIC
+    sys_depth = np.zeros(nsys)                      # depth
+    sys_depth_err = np.zeros(nsys)                  # depth error
+    sys_epoch = np.zeros(nsys)                      # transit time
+    sys_epoch_err = np.zeros(nsys)                  # transit time error
+    sys_evidenceAIC = np.zeros(nsys)                # evidence AIC
+    sys_evidenceBIC = np.zeros(nsys)                # evidence BIC
 
 
     #################################
-    #            1ST FIT            #
+    #           FIRST FIT           #
     #################################
 
     print('\n 1ST FIT \n')
@@ -197,7 +201,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         print('\n################################')
         print('SYSTEMATIC MODEL {} of {}'.format(s+1, nsys))
         systematics = grid[s, :]
-        print('Systematics - parameters:')
+        print('Systematics - fixed and free parameters:')
+        print_dict = {name: fix for name, fix in zip(p0_names, systematics)}
+        print(print_dict)
         print(systematics)
         print('  ')
 
@@ -220,7 +226,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         ###############
 
         # Create two dictionaries in which each parameter in p0 gets some extra parameters assigned, which we then feed
-        # info mpfit.
+        # info mpfit. This dictionary has the sole purpose of preparing the input data for mpfit in such a way that
+        # it works.
         parinfo = []
         for i, value in enumerate(p0):
             info = {'value': 0., 'fixed': 0, 'limited': [0, 0], 'limits': [0., 0.]}
@@ -388,6 +395,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     ################################
 
     print('..........................................')
+    print('\n 2ND FIT \n')
     print('Each systematic model will now be re-fit with the previously determined parameters serving as the new starting points.')
 
     for s in range(0, nsys):
@@ -532,13 +540,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
 
         # .............................
-        # Arrays to save to file
+        # Fill info into arrays to save to file once we iterated through all systems with both fits.
 
         sys_stats[s, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats
         sys_date[s, :] = x                                      # img_date
         sys_phase[s, :] = phase                                 # phase
-        #sys_rawflux[s, :] = y                                    # raw lightcurve flux
-        #sys_rawflux_err[s, :] = err
+        sys_rawflux[s, :] = y                                    # raw lightcurve flux
+        sys_rawflux_err[s, :] = err
         sys_flux[s, :] = fit_data                               # corrected lightcurve flux
         sys_flux_err[s, :] = fit_err
         sys_residuals[s, :] = residuals                         # residuals
@@ -754,9 +762,9 @@ if __name__ == '__main__':
     """
 
     localDir = CONFIG_INI.get('data_paths', 'local_path')
-    outDir = os.path.join(localDir, 'outputs')
+    outDir = os.path.join(localDir, CONFIG_INI.get('data_paths', 'output_path'))
     curr_model = CONFIG_INI.get('data_paths', 'current_model')
-    dataDir = os.path.join(localDir, os.path.join(localDir, 'data_path'), curr_model)
+    dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), curr_model)
 
     # READ in the txt file for the lightcurve data
     x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'), skiprows=7, unpack=True)
