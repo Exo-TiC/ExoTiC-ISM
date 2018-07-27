@@ -97,13 +97,13 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
 
 def occultnl(rl, c1, c2, c3, c4, b0):
     """
-    Documentation missing.
-    :param rl:
-    :param c1:
-    :param c2:
-    :param c3:
-    :param c4:
-    :param b0:
+    MANDEL & AGOL (2002) transit model.
+    :param rl: transit depths (Rp/R*)
+    :param c1: limb darkening parameter 1
+    :param c2: limb darkening parameter 2
+    :param c3: limb darkening parameter 3
+    :param c4: limb darkening parameter 4
+    :param b0: impact parameter
     :return:
     """
     mulimb0 = occultuniform(b0, rl)
