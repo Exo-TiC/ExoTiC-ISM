@@ -29,6 +29,7 @@ Continued by Iva Laginja (laginja.iva@gmail.com).
 """
 import numpy as np
 import os
+import time
 import matplotlib.pyplot as plt
 
 from HST_python.config import CONFIG_INI
@@ -54,15 +55,15 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     stochastic grid of models. The program makes use of the analytic transit model in Mandel & Agol (2002, ApJ Letters,
     580, L171-175) and Lavenberg-Markwardt least squares minimisation using the IDL routine MPFIT (Markwardt, 2009,
     Book:Astronomical Data Analysis Software and Systems XVIII, 411, 251, Astronomical Society of the Pacific
-    Conference Series)
-    Here a 4-parameter limb darkening law is used as outlined in Claret, 2010 and Sing et al. 2010.
+    Conference Series).
+    Here, a 4-parameter limb darkening law is used as outlined in Claret, 2010 and Sing et al. 2010.
 
     MAJOR PROGRAMS INCLUDED IN THIS ROUTINE:
     - LIMB-DARKENING (from limb_darkening.py)
         This requires the G141.WFC3.sensitivity.sav file, template.sav, kuruczlist.sav, and the kurucz folder with all
         models, as well as the 3D models in the folder 3DGrid.
-    - MANDEL & AGOL (2002) transit model (occultnl.pro)
-    - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (wfc3_systematic_model_grid_selection.pro)
+    - MANDEL & AGOL (2002) transit model (occultnl.pro/.py)
+    - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (hstmarg.wfc3_systematic_model_grid_selection() )
     - IMPACT PARAMETER calculated if given an eccentricity (tap_transite2.pro)
 
     :param x: time array
@@ -766,6 +767,9 @@ if __name__ == '__main__':
     This is a translation of the W17_lightcurve_test.pro
     """
 
+    # Figure out how much time it takes to run this code.
+    start_time = time.time()
+
     localDir = CONFIG_INI.get('data_paths', 'local_path')
     outDir = os.path.join(localDir, CONFIG_INI.get('data_paths', 'output_path'))
     curr_model = CONFIG_INI.get('data_paths', 'current_model')
@@ -809,5 +813,8 @@ if __name__ == '__main__':
 
     # Start the calculations
     G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name, plotting)
+
+    end_time = time.time()
+    print('\nTime it took to run the code:', (end_time-start_time)/60, 'min' )
 
     print("\n--- ALL IS DONE, LET'S GO HOME AND HAVE A BEER! ---\n")
