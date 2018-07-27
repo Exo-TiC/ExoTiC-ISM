@@ -20,7 +20,7 @@ so there may be some tuning parameters that need to be adjusted to agree with MP
 The python translation of mpfit (mpfit.py) comes from;
 https://github.com/scottransom/presto/blob/master/lib/python/mpfit.py
 
-limb_darkening.py contains a python translation of the 3D limb darkening code in the original IDL. It does use Astropy
+limb_darkening.py contains a python translation of the 3D limb darkening code in the original IDL. It uses Astropy
 for fitting the models. Again, the two are not exactly consistent but in this case the difference is small (good to
 about 3 decimals).
 
@@ -306,9 +306,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         mulimb01, mulimbf1 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
 
-        systematic_model = (phase * p0_dict['mfac']+ 1.0) * \
+        systematic_model = (phase * p0_dict['m_fac']+ 1.0) * \
                            (HSTphase * p0_dict['HSTP1'] + HSTphase ** 2. * p0_dict['HSTP2'] + HSTphase ** 3. * p0_dict['HSTP3'] + HSTphase ** 4. * p0_dict['HSTP4'] + 1.0) * \
-                           (sh * p0_dict['xshift1'] + sh ** 2. * p0_dict['xshift2'] + sh ** 3. * p0_dict['xshift3'] + sh ** 4. * p0_dict['shift4'] + 1.0)
+                           (sh * p0_dict['xshift1'] + sh ** 2. * p0_dict['xshift2'] + sh ** 3. * p0_dict['xshift3'] + sh ** 4. * p0_dict['xshift4'] + 1.0)
 
         w_model = mulimb01 * p0_dict['flux0'] * systematic_model
         w_residuals = (y - w_model) / p0_dict['flux0']
