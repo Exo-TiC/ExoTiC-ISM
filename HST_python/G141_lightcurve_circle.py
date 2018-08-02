@@ -167,7 +167,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
     w_scatter = np.zeros(nsys)
     w_params = np.zeros((nsys, nparams))   # p0 parameters, but for all the systems in one single array, so that we can acces each one of the individually during the second fit
 
-    # Initializing arrays for each systematic model, which we will save once we got thourgh all systems with two fits.
+    # Initializing arrays for each systematic model, which we will save once we got through all systems with two fits.
     sys_stats = np.zeros((nsys, 5))                 # stats       # NEW: why 5? (trying to get rid of hard coded things)
     sys_date = np.zeros((nsys, nexposure))          # img_date
     sys_phase = np.zeros((nsys, nexposure))         # phase
@@ -264,7 +264,6 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
 
         # Redefine all of the parameters given the MPFIT output
         w_params[s, :] = mpfit_result.params
-
         # Populate parameters with fits results
         p0 = w_params[s, :]
         # Recreate the dictionary
@@ -309,13 +308,15 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
                            (HSTphase * p0_dict['HSTP1'] + HSTphase ** 2. * p0_dict['HSTP2'] + HSTphase ** 3. * p0_dict['HSTP3'] + HSTphase ** 4. * p0_dict['HSTP4'] + 1.0) * \
                            (sh * p0_dict['xshift1'] + sh ** 2. * p0_dict['xshift2'] + sh ** 3. * p0_dict['xshift3'] + sh ** 4. * p0_dict['xshift4'] + 1.0)
 
-        w_model = mulimb01 * p0_dict['flux0'] * systematic_model
+        # Calculate final form of the model fit
+        w_model = mulimb01 * p0_dict['flux0'] * systematic_model   # see Wakeford et al. 2016, Eq. 1
+        # Calculate the residuals
         w_residuals = (y - w_model) / p0_dict['flux0']
+        # Calculate more stuff
         corrected_data = y / (p0_dict['flux0'] * systematic_model)
-        w_scatter[s] = (np.std(w_residuals))
+        w_scatter[s] = np.std(w_residuals)
         print('Scatter on the residuals = {}'.format(w_scatter[s]))   # this result is rather different to IDL result
 
-        # ..........................................
         # ..........................................
         # CHOPPING OUT THE BAD PARTS
         # ..........................................
@@ -404,13 +405,13 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
         print('  ')
 
         # Rescale the err array by the standard deviation of the residuals from the fit.
-        err *= (1.0 - w_scatter[s])
+        err *= (1.0 - w_scatter[s])   # w_scatter are residuals
         # Reset the arrays and start again. This is to ensure that we reached a minimum in the chi-squared space.
         p0 = w_params[s, :]   # populate with results from first run FOR THE SYSTEM nsys WE'RE CURRENTLY IN
         # Recreate the dictionary
         p0_dict = {key: val for key, val in zip(p0_names, p0)}
 
-        # Phase
+        # HST Phase
         HSTphase = np.zeros(nexposure)
         HSTphase = (img_date - p0_dict['T0']) / HST_period
         phase2 = np.floor(HSTphase)
@@ -433,7 +434,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
             phase[a] = phase[a] - 1.0
 
         ###############
-        # MPFIT - ONE #
+        # MPFIT - TWO #
         ###############
 
         parinfo = []
