@@ -38,7 +38,7 @@ from HST_python.limb_darkening import limb_dark_fit
 from HST_python import hstmarg
 
 
-def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
+def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
                            plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
@@ -66,7 +66,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (hstmarg.wfc3_systematic_model_grid_selection() )
     - IMPACT PARAMETER calculated if given an eccentricity (tap_transite2.pro)
 
-    :param x: time array
+    :param img_date: time array
     :param y: array of normalised flux values equal to the length of the x array
     :param err: array of error values corresponding to the flux values in y
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err)
@@ -105,7 +105,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period')
 
-    nexposure = len(x)   # Total number of exposures in the observation
+    nexposure = len(img_date)   # Total number of exposures in the observation
 
     # READ IN THE PLANET STARTING PARAMETERS
     # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]   # Description
@@ -120,8 +120,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     aval = constant1 * (MsMpR) ** (1 / 3)   # NOT-REUSED
 
     flux0 = y[0]   # first flux data point
-    T0 = x[0]      # first time data point
-    img_date = x   # time array
+    T0 = img_date[0]      # first time data point
 
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATIC MODELS
     m_fac = 0.0  # Linear Slope
@@ -238,7 +237,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             info['value'] = value
             info['fixed'] = systematics[i]
             parinfo.append(info)
-        fa = {'x': x, 'y': y, 'err': err, 'sh': sh}
+        fa = {'x': img_date, 'y': y, 'err': err, 'sh': sh}
 
         print('\nSTART MPFIT\n')
         mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
@@ -258,9 +257,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
 
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
-        BIC = bestnorm + nfree * np.log(len(x))
+        BIC = bestnorm + nfree * np.log(len(img_date))
         AIC = bestnorm + nfree
-        DOF = len(x) - sum([p['fixed'] != 1 for p in parinfo])  # nfree
+        DOF = len(img_date) - sum([p['fixed'] != 1 for p in parinfo])  # nfree
         CHI = bestnorm
 
         # Redefine all of the parameters given the MPFIT output
@@ -286,13 +285,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters
-        phase = (x - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
+        phase = (img_date - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
         phase2 = np.floor(phase)
         phase = phase - phase2
         a = np.where(phase > 0.5)[0]
         phase[a] = phase[a] - 1.0
 
-        HSTphase = (x - p0_dict['T0']) / HST_period
+        HSTphase = (img_date - p0_dict['T0']) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
@@ -324,7 +323,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         cut_down = 2.57  # Play around with this value if you want.
         # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
         # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
-        # Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
+        # Ultimately, I would like it to remove the point completely and reformat the img_date (x), y, err and sh arrays to account for the new shape of the array.
 
 
         if plotting:
@@ -416,7 +415,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         # Phase
         HSTphase = np.zeros(nexposure)
-        HSTphase = (x - p0_dict['T0']) / HST_period
+        HSTphase = (img_date - p0_dict['T0']) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
@@ -427,7 +426,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         phase = np.zeros(nexposure)
         for j in range(nexposure):
-            phase[j] = (x[j] - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
+            phase[j] = (img_date[j] - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
 
         phase2 = np.floor(phase)
         phase = phase - phase2
@@ -448,7 +447,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             info['fixed'] = systematics[i]
             parinfo.append(info)
 
-        fa = {'x': x, 'y': y, 'err': err, 'sh': sh}
+        fa = {'x': img_date, 'y': y, 'err': err, 'sh': sh}
         mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
         nfree = sum([not p['fixed'] for p in parinfo])
         # The python mpfit does not populate the covariance matrix correctly so m.perror is not correct
@@ -459,14 +458,14 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         # From mpfit define the DOF, BIC, AIC & CHI
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
-        BIC = bestnorm + nfree * np.log(len(x))
+        BIC = bestnorm + nfree * np.log(len(img_date))
         AIC = bestnorm + nfree
-        DOF = len(x) - sum([p['fixed'] != 1 for p in parinfo])  # nfree
+        DOF = len(img_date) - sum([p['fixed'] != 1 for p in parinfo])  # nfree
         CHI = bestnorm
 
         # EVIDENCE BASED on the AIC and BIC
         Mpoint = nfree
-        Npoint = len(x)
+        Npoint = len(img_date)
         sigma_points = np.median(err)
 
         evidence_BIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * BIC
@@ -491,14 +490,14 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
-        phase = (x - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
+        phase = (img_date - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
         phase2 = np.floor(phase)
         phase = phase - phase2
         a = np.where(phase > 0.5)[0]
         if len(a) > 0:
             phase[a] = phase[a] - 1.0
 
-        HSTphase = (x - p0_dict['T0']) / HST_period
+        HSTphase = (img_date - p0_dict['T0']) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
@@ -549,9 +548,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # Fill info into arrays to save to file once we iterated through all systems with both fittings.
 
         sys_stats[s, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats
-        sys_date[s, :] = x                                      # img_date
+        sys_date[s, :] = img_date                               # input time data (x, date)
         sys_phase[s, :] = phase                                 # phase
-        sys_rawflux[s, :] = y                                    # raw lightcurve flux
+        sys_rawflux[s, :] = y                                   # raw lightcurve flux
         sys_rawflux_err[s, :] = err
         sys_flux[s, :] = fit_data                               # corrected lightcurve flux
         sys_flux_err[s, :] = fit_err
