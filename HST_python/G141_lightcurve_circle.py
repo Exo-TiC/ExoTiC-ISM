@@ -167,28 +167,6 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
     w_scatter = np.zeros(nsys)
     w_params = np.zeros((nsys, nparams))   # p0 parameters, but for all the systems in one single array, so that we can acces each one of the individually during the second fit
 
-    # Initializing arrays for each systematic model, which we will save once we got through all systems with two fits.
-    sys_stats = np.zeros((nsys, 5))                 # stats       # NEW: why 5? (trying to get rid of hard coded things)
-    sys_date = np.zeros((nsys, nexposure))          # img_date
-    sys_phase = np.zeros((nsys, nexposure))         # phase
-    sys_rawflux = np.zeros((nsys, nexposure))       # raw lightcurve flux
-    sys_rawflux_err = np.zeros((nsys, nexposure))   # raw lightcurve flux error
-    sys_flux = np.zeros((nsys, nexposure))          # corrected lightcurve flux
-    sys_flux_err = np.zeros((nsys, nexposure))      # corrected lightcurve flux error
-    sys_residuals = np.zeros((nsys, nexposure))     # residuals
-    sys_model = np.zeros((nsys, 4000))              # smooth model       # NEW: why 4000?
-    sys_model_phase = np.zeros((nsys, 4000))        # smooth phase       # NEW: why 4000?
-    sys_systematic_model = np.zeros((nsys, nexposure))  # systematic model
-    sys_params = np.zeros((nsys, nparams))          # parameters
-    sys_params_err = np.zeros((nsys, nparams))      # parameter errors
-    sys_depth = np.zeros(nsys)                      # depth
-    sys_depth_err = np.zeros(nsys)                  # depth error
-    sys_epoch = np.zeros(nsys)                      # transit time
-    sys_epoch_err = np.zeros(nsys)                  # transit time error
-    sys_evidenceAIC = np.zeros(nsys)                # evidence AIC
-    sys_evidenceBIC = np.zeros(nsys)                # evidence BIC
-
-
     #################################
     #           FIRST FIT           #
     #################################
@@ -395,6 +373,27 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
     print('\n 2ND FIT \n')
     print('Each systematic model will now be re-fit with the previously determined parameters serving as the new starting points.')
 
+    # Initializing arrays for each systematic model, which we will save once we got through all systems with two fits.
+    sys_stats = np.zeros((nsys, 5))                 # stats       # NEW: why 5? (trying to get rid of hard coded things)
+    sys_date = np.zeros((nsys, nexposure))          # img_date
+    sys_phase = np.zeros((nsys, nexposure))         # phase
+    sys_rawflux = np.zeros((nsys, nexposure))       # raw lightcurve flux
+    sys_rawflux_err = np.zeros((nsys, nexposure))   # raw lightcurve flux error
+    sys_flux = np.zeros((nsys, nexposure))          # corrected lightcurve flux
+    sys_flux_err = np.zeros((nsys, nexposure))      # corrected lightcurve flux error
+    sys_residuals = np.zeros((nsys, nexposure))     # residuals
+    sys_model = np.zeros((nsys, 4000))              # smooth model       # NEW: why 4000?
+    sys_model_phase = np.zeros((nsys, 4000))        # smooth phase       # NEW: why 4000?
+    sys_systematic_model = np.zeros((nsys, nexposure))  # systematic model
+    sys_params = np.zeros((nsys, nparams))          # parameters
+    sys_params_err = np.zeros((nsys, nparams))      # parameter errors
+    sys_depth = np.zeros(nsys)                      # depth
+    sys_depth_err = np.zeros(nsys)                  # depth error
+    sys_epoch = np.zeros(nsys)                      # transit time
+    sys_epoch_err = np.zeros(nsys)                  # transit time error
+    sys_evidenceAIC = np.zeros(nsys)                # evidence AIC
+    sys_evidenceBIC = np.zeros(nsys)                # evidence BIC
+
     for s in range(nsys):
         print('\n################################')
         print('SYSTEMATIC MODEL {} of {}'.format(s+1, nsys))
@@ -540,7 +539,6 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
             plt.ylabel('Data')
             plt.draw()
             plt.pause(0.05)
-
 
         # .............................
         # Fill info into arrays to save to file once we iterated through all systems with both fittings.
