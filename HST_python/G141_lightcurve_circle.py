@@ -211,19 +211,19 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         print(systematics)
         print('  ')
 
-        # Displaying img_date phase on an interval between -0.5 and 0.5
-        HSTphase = (img_date - p0_dict['T0']) / HST_period
-        phase2 = np.floor(HSTphase)       # identify where phase is bigger than 1
+        # Displaying img_date in terms of HST PHASE, on an interval between -0.5 and 0.5
+        HSTphase = (img_date - p0_dict['T0']) / HST_period   # make phase (~time) array start at 0 by subtracting first observation time, convert in units of HST phase by dividing through one HST period
+        phase2 = np.floor(HSTphase)       # identify where phase is between 0-1, between 1-2, between 2-3 and over 3
         HSTphase = HSTphase - phase2      # make phase be in interval from 0 to 1
         k = np.where(HSTphase > 0.5)[0]   # figure out where phase is bigger than 0.5
         HSTphase[k] -= 1.0                # and where it is bigger than 0.5 indeed, subtract on to get to interval [-0.5, 0.5]
 
-        # Displaying phase on interval between -0.5 and 0.5
-        phase = (img_date - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
-        phase2 = np.floor(phase)
-        phase = phase - phase2
-        a = np.where(phase > 0.5)[0]
-        phase[a] -= 1.0
+        # Displaying img_date in terms of PLANET PHASE, on interval between -0.5 and 0.5
+        phase = (img_date - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)   # make center of transit time by subtracting 'epoch' from img_date, convert in units of planet phase by dividing py planet period, convert to seconds
+        phase2 = np.floor(phase)          # identify integer intervals of phase (like above)
+        phase = phase - phase2            # make phase be in interval from 0 to 1
+        a = np.where(phase > 0.5)[0]      # figure out where phase is bigger than 0.5
+        phase[a] -= 1.0                   # and where it is bigger than 0.5 indeed, subtract on to get to interval [-0.5, 0.5]
 
         ###############
         # MPFIT - ONE #
