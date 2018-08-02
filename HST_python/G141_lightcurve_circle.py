@@ -325,20 +325,17 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
         # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
         # Ultimately, I would like it to remove the point completely and reformat the img_date (x), y, err and sh arrays to account for the new shape of the array.
 
-
         if plotting:
             plt.figure(1)
             plt.clf()
             plt.scatter(phase, w_residuals, s=5)
             plt.title('Model ' + str(s+1) + '/' + str(nsys))
-            plt.xlabel('Phase')
+            plt.xlabel('Planet Phase')
             plt.ylabel('w_residuals')
             plt.ylim(-0.01, 0.01)
-
-            # hline, 0.0 + STDDEV(w_residuals) * cut_down, color = cgcolor('RED')
-            # hline, 0.0
-            # hline, 0.0 - STDDEV(w_residuals) * cut_down, color = cgcolor('RED')
-
+            plt.hlines(0.0 + np.std(w_residuals) * cut_down, xmin=np.min(phase), xmax=np.max(phase), colors='r')
+            plt.hlines(0.0, xmin=np.min(phase), xmax=np.max(phase))
+            plt.hlines(0.0 - np.std(w_residuals) * cut_down, xmin=np.min(phase), xmax=np.max(phase), colors='r')
             plt.draw()
             plt.pause(0.05)
 
@@ -376,7 +373,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
             plt.errorbar(phase, corrected_data, yerr=err, fmt='m.')
             plt.scatter(phase, y, s=5)
             plt.scatter(phase, systematic_model, s=5)
-            plt.xlabel('Phase')
+            plt.xlabel('Planet Phase')
             plt.ylabel('Data')
             plt.title('Model ' + str(s+1) + '/' + str(nsys))
             plt.draw()
@@ -538,7 +535,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
             plt.errorbar(phase, fit_data, yerr=err, fmt='m.')
             plt.xlim(-0.03, 0.03)
             plt.title('Model ' + str(s+1) + '/' + str(nsys))
-            plt.xlabel('Phase')
+            plt.xlabel('Planet Phase')
             plt.ylabel('Data')
             plt.draw()
             plt.pause(0.05)
@@ -680,11 +677,9 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
         plt.ylim(-1000, 1000)
         plt.xlabel('count_phase')
         plt.ylabel('count_residuals')
-
-        # hline, 0.0, linestyle=2, color=cgcolor('red')
-        # hline, 0.0-(rl_sdnr(best_sys)*2.57), linestyle=1, color=cgcolor('red')
-        # hline, 0.0+(rl_sdnr(best_sys)*2.57), linestyle=1, color=cgcolor('red')
-
+        plt.hlines(0.0, xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dashed')
+        plt.hlines(0.0 - (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
+        plt.hlines(0.0 + (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
         plt.draw()
         plt.pause(0.05)
 
