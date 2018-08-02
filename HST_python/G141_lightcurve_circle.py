@@ -235,7 +235,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         parinfo = []
         for i, value in enumerate(p0):
             info = {'value': 0., 'fixed': 0, 'limited': [0, 0], 'limits': [0., 0.]}
-            info['value'] = np.float32(value)
+            info['value'] = value
             info['fixed'] = systematics[i]
             parinfo.append(info)
         fa = {'x': x, 'y': y, 'err': err, 'sh': sh}
