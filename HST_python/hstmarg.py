@@ -4,7 +4,7 @@ from HST_python.config import CONFIG_INI
 
 def residuals():
     """
-    Not entirely sure what this function is doing.
+    Not entirely sure what this function is (supposed to be) doing.
     :return:
     """
     model = transit_circle(p, x, sh)
@@ -75,7 +75,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
-    # b0 is the impact parameter funtion and I am not sure how this is handled in BATMAN - I will also look into this.
+    # b0 is the impact parameter function and I am not sure how this is handled in BATMAN - I will also look into this.
     mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
     systematic_model = (p[13] * phase + 1.0) * (
             p[14] * HSTphase + p[15] * HSTphase ** 2 + p[16] * HSTphase ** 3 + p[17] * HSTphase ** 4 + 1.0) * (
@@ -98,18 +98,18 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
 def occultnl(rl, c1, c2, c3, c4, b0):
     """
     MANDEL & AGOL (2002) transit model.
-    :param rl: transit depths (Rp/R*)
+    :param rl: transit depth (Rp/R*)
     :param c1: limb darkening parameter 1
     :param c2: limb darkening parameter 2
     :param c3: limb darkening parameter 3
     :param c4: limb darkening parameter 4
     :param b0: impact parameter
-    :return:
+    :return:mulimb0?, mulimbf?
     """
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
     fac = np.max(abs(mulimb0 - 1))
-    if (fac == 0):
+    if fac == 0:
         fac = 1e-6  # DKS edit
 
     omega = 4 * ((1 - c1 - c2 - c3 - c4) / 4 + c1 / 5 + c2 / 6 + c3 / 7 + c4 / 8)
@@ -173,14 +173,14 @@ def occultnl(rl, c1, c2, c3, c4, b0):
 
 def occultuniform(b0, w):
     """
-    Compute the lightcurve for occultation of a uniform source without microlensing  (Mandel & Agol 2002).
+    Compute the lightcurve for occultation of a uniform source without microlensing (Mandel & Agol 2002).
 
     :param b0: array; impact parameter in units of rs
     :param w: array; occulting star size in units of rs
     :return: muo1: float; fraction of flux at each b0 for a uniform source
     """
 
-    if (abs(w - 0.5) < 1.0e-3):
+    if abs(w - 0.5) < 1.0e-3:
         w = 0.5
 
     nb = len(np.atleast_1d(b0))
