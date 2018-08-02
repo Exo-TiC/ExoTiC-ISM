@@ -215,7 +215,8 @@ def wfc3_systematic_model_grid_selection(selection):
     """
     Model grid up to the 4th order for HST (HSTP1-HSTP4) and delta_lambda (xshit1-xshift4), with linear T.
 
-    1 in the grid means the parameter is fixed, 0 means it is free.
+    1 in the grid means the parameter is fixed, 0 means it is free. Why some parameters are free and some are fixed
+    is explained in Wakefort et al. 2016, Section 2.
     p0 =          [0,    1,     2,      3,     4,    5,    6,    7,  8,  9,  10, 11, 12,  13,    14,    15,    16,    17,     18,      19,      20,      21   ]
     p0 = np.array([rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m_fac, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4])
 
@@ -225,6 +226,7 @@ def wfc3_systematic_model_grid_selection(selection):
 
     #-# Fixed arrays:
     # Parametrized Systematic Models - m_fac, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4
+    # Described in Wakeford et al. 2016, Sec. 2 and Table 2.
     systematic_models = np.array([[1, 1, 1, 1, 1, 1, 1, 1, 1],
                                   [1, 1, 1, 1, 1, 0, 1, 1, 1],
                                   [1, 1, 1, 1, 1, 0, 0, 1, 1],
