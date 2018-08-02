@@ -76,7 +76,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         - epoch: center of transit time (in MJD)
         - inclin: inclination of the planetary orbit
         - MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
-               constant1 = (G*Per*Per/(4*!pi*!pi))^(1D0/3D0) -> MsMpR = (a_Rs/constant1)^3D0
+               constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
         - ecc: eccentricity of the system
         - omega: omega of the system (degrees)
         - Per: Period of the planet in days
@@ -278,7 +278,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         rl_err = pcerror[0]
         epoch_err = pcerror[2]
 
-        # Recalculate a/R*
+        # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
         constant1 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
         aval = constant1 * (p0_dict['MsMpR']) ** (1 / 3.)   # NOT-REUSED
 
@@ -323,7 +323,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets.
         cut_down = 2.57  # Play around with this value if you want.
         # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
-        # deviation, although this is only a very timy inflation of the uncertainty and I need to find a more statistically riggrous way to do this.
+        # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
         # Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
 
 
@@ -483,7 +483,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         rl_err = pcerror[0]
         epoch_err = pcerror[2]
 
-        # Recalculate a/R* based on the new MsMpR value which may have been fit in the routine.
+        # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
         constant1 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
         aval = constant1 * (p0_dict['MsMpR']) ** (1 / 3.)   # NOT-REUSED
 
@@ -798,7 +798,7 @@ if __name__ == '__main__':
     ecc = CONFIG_INI.getfloat('planet_parameters', 'ecc')           # set to zero and not used when circular
     omega = CONFIG_INI.getfloat('planet_parameters', 'omega')       # set to zero and not used when circular
     Per = CONFIG_INI.getfloat('planet_parameters', 'Per')           # in days, converted to seconds in subroutine
-    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')           # a/r* converted to system density for the subroutine
+    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')           # a/R* converted to system density for the subroutine
 
     # Setting constants and preparing inputs for claculations
     dtosec = CONFIG_INI.getfloat('constants', 'dtosec')     # conversion from days to seconds
