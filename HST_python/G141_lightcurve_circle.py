@@ -38,7 +38,7 @@ from HST_python.limb_darkening import limb_dark_fit
 from HST_python import hstmarg
 
 
-def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
+def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
                            plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
@@ -105,6 +105,11 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
     day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period')
 
+    # We want to keep the raw data as is, so we generate helper arrays that will get changed from model to model
+    img_date = x    # time array
+    img_flux = y    # flux array
+    img_err = err   # error array
+    img_sh = sh     # shift in position array
     nexposure = len(img_date)   # Total number of exposures in the observation
 
     # READ IN THE PLANET STARTING PARAMETERS
@@ -119,7 +124,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
     constant1 = ((Gr * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
     aval = constant1 * (MsMpR) ** (1 / 3)   # NOT-REUSED
 
-    flux0 = y[0]   # first flux data point
+    flux0 = img_flux[0]   # first flux data point
     T0 = img_date[0]      # first time data point
 
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATIC MODELS
@@ -215,7 +220,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
             info['value'] = value
             info['fixed'] = systematics[i]
             parinfo.append(info)
-        fa = {'x': img_date, 'y': y, 'err': err, 'sh': sh}
+        fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
 
         print('\nSTART MPFIT\n')
         mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
@@ -289,9 +294,9 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
         # Calculate final form of the model fit
         w_model = mulimb01 * p0_dict['flux0'] * systematic_model   # see Wakeford et al. 2016, Eq. 1
         # Calculate the residuals
-        w_residuals = (y - w_model) / p0_dict['flux0']
+        w_residuals = (img_flux - w_model) / p0_dict['flux0']
         # Calculate more stuff
-        corrected_data = y / (p0_dict['flux0'] * systematic_model)
+        corrected_data = img_flux / (p0_dict['flux0'] * systematic_model)
         w_scatter[s] = np.std(w_residuals)
         print('Scatter on the residuals = {}'.format(w_scatter[s]))   # this result is rather different to IDL result
 
@@ -302,7 +307,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
         cut_down = 2.57  # Play around with this value if you want.
         # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
         # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
-        # Ultimately, I would like it to remove the point completely and reformat the img_date (x), y, err and sh arrays to account for the new shape of the array.
+        # Ultimately, I would like it to remove the point completely and reformat the img_date (x), img_flux (y), err and sh arrays to account for the new shape of the array.
 
         if plotting:
             plt.figure(1)
@@ -318,6 +323,19 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
             plt.draw()
             plt.pause(0.05)
 
+        # I moved this plotting routine up here *before* getting rid of outliers, because the array sizes will change.
+        if plotting:
+            plt.figure(2)
+            plt.clf()
+            plt.errorbar(phase, corrected_data, yerr=err, fmt='m.')
+            plt.scatter(phase, img_flux, s=5)
+            plt.scatter(phase, systematic_model, s=5)
+            plt.xlabel('Planet Phase')
+            plt.ylabel('Data')
+            plt.title('Model ' + str(s+1) + '/' + str(nsys))
+            plt.draw()
+            plt.pause(0.05)
+
         """
         # remove
         bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * 3))
@@ -326,10 +344,10 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
         print('up {}'.format(bad_up))
         print('down {}'.format(bad_down))
 
-        y[bad_up] = y[bad_up] - np.std(w_residuals) * cut_down
+        img_flux[bad_up] = img_flux[bad_up] - np.std(w_residuals) * cut_down
         err[bad_up] = err[bad_up] * (1 + np.std(w_residuals))
 
-        y[bad_down] = y[bad_down] + np.std(w_residuals) * cut_down
+        img_flux[bad_down] = img_flux[bad_down] + np.std(w_residuals) * cut_down
         err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
 
         # remove
@@ -339,24 +357,15 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
         print('up {}'.format(bad_up))
         print('down {}'.format(bad_down))
 
-        y[bad_up] = y[bad_up] - np.std(w_residuals) * cut_down
+        img_flux[bad_up] = img_flux[bad_up] - np.std(w_residuals) * cut_down
         err[bad_up] = err[bad_up] * (1 + np.std(w_residuals))
 
-        y[bad_down] = y[bad_down] + np.std(w_residuals) * cut_down
+        img_flux[bad_down] = img_flux[bad_down] + np.std(w_residuals) * cut_down
         err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
+        
+        # Iva making the version with removing the bad points completely
+        # Nothing here yet...
         """
-
-        if plotting:
-            plt.figure(2)
-            plt.clf()
-            plt.errorbar(phase, corrected_data, yerr=err, fmt='m.')
-            plt.scatter(phase, y, s=5)
-            plt.scatter(phase, systematic_model, s=5)
-            plt.xlabel('Planet Phase')
-            plt.ylabel('Data')
-            plt.title('Model ' + str(s+1) + '/' + str(nsys))
-            plt.draw()
-            plt.pause(0.05)
 
 
     #########################################################################################################################
@@ -444,7 +453,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
             info['fixed'] = systematics[i]
             parinfo.append(info)
 
-        fa = {'x': img_date, 'y': y, 'err': err, 'sh': sh}
+        fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
         mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
         nfree = sum([not p['fixed'] for p in parinfo])
         # The python mpfit does not populate the covariance matrix correctly so m.perror is not correct
@@ -522,15 +531,15 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
                            (sh * p0_dict['xshift1'] + sh ** 2. * p0_dict['xshift2'] + sh ** 3. * p0_dict['xshift3'] + sh ** 4. * p0_dict['xshift4'] + 1.0)
 
         fit_model = mulimb01 * p0_dict['flux0'] * systematic_model
-        residuals = (y - fit_model) / p0_dict['flux0']
+        residuals = (img_flux - fit_model) / p0_dict['flux0']
         resid_scatter = np.std(w_residuals)
-        fit_data = y / (p0_dict['flux0'] * systematic_model)
+        fit_data = img_flux / (p0_dict['flux0'] * systematic_model)
         fit_err = np.copy(err)  # * (1.0 + resid_scatter)
 
         if plotting:
             plt.figure(2)
             plt.clf()
-            plt.scatter(phase, y, s=5)
+            plt.scatter(phase, img_flux, s=5)
             plt.plot(x2, mulimb02, 'k')
             plt.errorbar(phase, fit_data, yerr=err, fmt='m.')
             plt.xlim(-0.03, 0.03)
@@ -546,7 +555,7 @@ def G141_lightcurve_circle(img_date, y, err, sh, data_params, ld_model, waveleng
         sys_stats[s, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats
         sys_date[s, :] = img_date                               # input time data (x, date)
         sys_phase[s, :] = phase                                 # phase
-        sys_rawflux[s, :] = y                                   # raw lightcurve flux
+        sys_rawflux[s, :] = img_flux                                   # raw lightcurve flux
         sys_rawflux_err[s, :] = err
         sys_flux[s, :] = fit_data                               # corrected lightcurve flux
         sys_flux_err[s, :] = fit_err
