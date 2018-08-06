@@ -31,6 +31,7 @@ import numpy as np
 import os
 import time
 import matplotlib.pyplot as plt
+from astropy import stats
 
 from HST_python.config import CONFIG_INI
 from HST_python.mpfit import mpfit
@@ -323,19 +324,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             plt.draw()
             plt.pause(0.05)
 
-        # I moved this plotting routine up here *before* getting rid of outliers, because the array sizes will change.
-        if plotting:
-            plt.figure(2)
-            plt.clf()
-            plt.errorbar(phase, corrected_data, yerr=err, fmt='m.')
-            plt.scatter(phase, img_flux, s=5)
-            plt.scatter(phase, systematic_model, s=5)
-            plt.xlabel('Planet Phase')
-            plt.ylabel('Data')
-            plt.title('Model ' + str(s+1) + '/' + str(nsys))
-            plt.draw()
-            plt.pause(0.05)
-
         """
         # remove
         bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * 3))
@@ -362,11 +350,24 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         img_flux[bad_down] = img_flux[bad_down] + np.std(w_residuals) * cut_down
         err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
-        
-        # Iva making the version with removing the bad points completely
-        # Nothing here yet...
         """
 
+        ### Iva making the version with removing the bad points completely
+        out_lim = CONFIG_INI.getfloat('technical_parameters', 'outlier_limit_std')   # Outside of how many std do we take data as outliers?
+        img_flux = stats.sigma_clip(img_flux, sigma=out_lim)   # Mask the data entries that are outside of the defined std range.
+        err = np.ma.array(err, mask=img_flux.mask)             # Apply the same mask to the err array.
+
+        if plotting:
+            plt.figure(2)
+            plt.clf()
+            plt.errorbar(phase, corrected_data, yerr=err, fmt='m.')
+            plt.scatter(phase, img_flux, s=5)
+            plt.scatter(phase, systematic_model, s=5)
+            plt.xlabel('Planet Phase')
+            plt.ylabel('Data')
+            plt.title('Model ' + str(s+1) + '/' + str(nsys))
+            plt.draw()
+            plt.pause(0.05)
 
     #########################################################################################################################
     #        NOT SURE OF THE VALIDITY OF THE CODE AFTER THIS POINT.  IT'S JUST A QUICK TRANSLATION OF IDL. NOT TESTED.      #
