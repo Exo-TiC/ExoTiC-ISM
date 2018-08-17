@@ -1,3 +1,8 @@
+"""
+This is a self-standing module that calculates limb darkening parameters for either 1D or 3D stellar models. It
+returns the parameteres for 4D, 3D, 2D and 1D limb darkening models.
+"""
+
 import os
 import numpy as np
 import pandas as pd
@@ -170,7 +175,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
             optG = (abs(logg - logg_Grid)).argmin()
 
         elif Teff_Grid[optT] == 7000:
-            logg_Grid =  np.array([4.5])
+            logg_Grid = np.array([4.5])
             optG = 0
 
         # ==== Select Teff and Log g. Mtxt, Ttxt and Gtxt are then put together as string to load correct files.
@@ -327,7 +332,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
 
     print('\nLimb darkening parameters:')
     print("4param \t{:0.8f}\t{:0.8f}\t{:0.8f}\t{:0.8f}".format(c1, c2, c3, c4))
-    print("3param \t{:0.8f}\t{:0.8f}\t{:0.8f}".format(cp2, cp3, c4))
+    print("3param \t{:0.8f}\t{:0.8f}\t{:0.8f}".format(cp2, cp3, cp4))
     print("Quad \t{:0.8f}\t{:0.8f}".format(aLD, bLD))
     print("Linear \t{:0.8f}".format(uLD))
 
@@ -382,14 +387,16 @@ def quadratic_limb_darkening(x, aLD=0.0, bLD=0.0):
 
 if __name__ == '__main__':
 
+    datapath = 'W17'
+
     dirsen = os.path.join('..', 'Limb-darkening')   # Directory for sensitivity files
-    wavelength = np.loadtxt(os.path.join('..', 'data', 'W17_wavelength_test_data.txt'), skiprows=3)
+    wavelength = np.loadtxt(os.path.join('..', 'data', datapath, 'W17_wavelength_test_data.txt'), skiprows=3)
 
     # Chose your parameters
-    ld_model = '1D'
+    ld_model = '3D'
     FeH = 0.0
-    Teff = 5500
-    logg = 4.5    # choice of logg depends on Teff in 3D models
+    Teff = 5000
+    logg = 4.2    # choice of logg depends on Teff in 3D models
     grating = 'G141'
 
     result = limb_dark_fit(grating, wavelength, FeH, Teff, logg, dirsen, ld_model)
