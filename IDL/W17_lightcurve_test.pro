@@ -27,8 +27,8 @@ HST_period = 0.06691666
 ; READ in the txt file for the lightcurve data
 ; the double precision seems important here as the x array is very specific
 dataDir = structure.INPUTDATA
-data = ddread(dataDir + 'W17_white_lightcurve_test_data.txt', offset=7, /countall, /double)
-wavelength = ddread(dataDir + 'W17_wavelength_test_data.txt', offset=3, /countall, /double)
+data = ddread(dataDir + 'W17/' + 'W17_white_lightcurve_test_data.txt', offset=7, /countall, /double)
+wavelength = ddread(dataDir + 'W17/' + 'W17_wavelength_test_data.txt', offset=3, /countall, /double)
 
 x = REFORM(data(0,*))
 y = REFORM(data(1,*))
@@ -65,9 +65,9 @@ endif
 
 IF (LD3D EQ 'yes') THEN BEGIN
 ; These numbers are the real values and the grid selection will take place in the sub-routine.
-FeH = -0.25
+FeH = -1.0
 Teff = 6550
-logg = 4.2
+logg = 4.5
 endif
 
 data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
