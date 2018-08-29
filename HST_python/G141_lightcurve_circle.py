@@ -224,7 +224,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
 
         print('\nSTART MPFIT\n')
-        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
+        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
         print('\nTHIS ROUND OF MPFIT IS DONE\n')
 
         # Count free parameters by figuring out how many zeros we have in the current systematics
@@ -455,7 +455,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             parinfo.append(info)
 
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
-        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
+        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
         nfree = sum([not p['fixed'] for p in parinfo])
         # The python mpfit does not populate the covariance matrix correctly so m.perror is not correct
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
