@@ -1,6 +1,8 @@
 import numpy as np
 from config import CONFIG_INI
 
+Gr = CONFIG_INI.getfloat('constants', 'big_G')
+
 
 def residuals():
     """
@@ -77,9 +79,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     # The c1-c4 are the non-linear limb-darkening parameters
     # b0 is the impact parameter function and I am not sure how this is handled in BATMAN - I will also look into this.
     mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
-    systematic_model = (p[13] * phase + 1.0) * (
-            p[14] * HSTphase + p[15] * HSTphase ** 2 + p[16] * HSTphase ** 3 + p[17] * HSTphase ** 4 + 1.0) * (
-                               p[18] * sh + p[19] * sh ** 2 + p[20] * sh ** 3 + p[21] * sh ** 4 + 1.0)
+    systematic_model = sys_model(phase, HSTphase, sh, p[13], p[14], p[15], p[16], p[17], p[18], p[19], p[20], p[21])
 
     # model fit to data = transit model * baseline flux (flux0) * systematic model
     model = mulimb0 * p[1] * systematic_model
@@ -333,3 +333,44 @@ def marginalization(array, error, weight):
     variance_param = np.sqrt(np.sum(weight * ((array - mean_param) ** 2 + error ** 2)))
 
     return mean_param, variance_param
+
+
+def impact_param(per, msmpr, phase, incl):
+    """
+    Calculate impact parameter
+    :param per: period
+    :param msmpr: MsMpR
+    :param phase: phase
+    :param incl: inclination
+    :return:
+    """
+
+    b0 = (Gr * per * per / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
+        (np.sin(phase * 2 * np.pi)) ** 2 + (np.cos(incl) * np.cos(phase * 2 * np.pi)) ** 2)
+
+    return b0
+
+
+def sys_model(phase, hst_phase, sh, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4):
+    """
+    Systematic model for WFC3 data
+    :param phase:
+    :param hst_phase:
+    :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit
+    :param m_fac:
+    :param hstp1:
+    :param hstp2:
+    :param hstp3:
+    :param hstp4:
+    :param xshift1:
+    :param xshift2:
+    :param xshift3:
+    :param xshift4:
+    :return:
+    """
+
+    sys_m = (phase * m_fac + 1.0) * (
+            hst_phase * hstp1 + hst_phase ** 2. * hstp2 + hst_phase ** 3. * hstp3 + hst_phase ** 4. * hstp4 + 1.0) * (
+                    sh * xshift1 + sh ** 2. * xshift2 + sh ** 3. * xshift3 + sh ** 4. * xshift4 + 1.0)
+
+    return sys_m

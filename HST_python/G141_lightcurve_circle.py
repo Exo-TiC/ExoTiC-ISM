@@ -159,8 +159,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # p0 =        [0,    1,     2,      3,     4,    5,    6,    7,  8,  9,  10, 11, 12,  13,    14,    15,    16,    17,     18,      19,      20,      21   ]
     p0 = np.array([rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m_fac, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4])
 
-
-
     # Create an array with the names of the priors
     p0_names = np.array(['rl', 'flux0', 'epoch', 'inclin', 'MsMpR', 'ecc', 'omega', 'Per', 'T0', 'c1', 'c2', 'c3', 'c4',
                          'm_fac', 'HSTP1', 'HSTP2', 'HSTP3', 'HSTP4', 'xshift1', 'xshift2', 'xshift3', 'xshift4'])
@@ -289,14 +287,13 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
-        b0 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.) * (p0_dict['MsMpR'] ** (1 / 3.)) * np.sqrt(
-            (np.sin(phase * 2 * np.pi)) ** 2 + (np.cos(p0_dict['inclin']) * np.cos(phase * 2 * np.pi)) ** 2)
+        b0 = hstmarg.impact_param(p0_dict['Per'], p0_dict['MsMpR'], phase, p0_dict['inclin'])
 
         mulimb01, mulimbf1 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
 
-        systematic_model = (phase * p0_dict['m_fac']+ 1.0) * \
-                           (HSTphase * p0_dict['HSTP1'] + HSTphase ** 2. * p0_dict['HSTP2'] + HSTphase ** 3. * p0_dict['HSTP3'] + HSTphase ** 4. * p0_dict['HSTP4'] + 1.0) * \
-                           (sh * p0_dict['xshift1'] + sh ** 2. * p0_dict['xshift2'] + sh ** 3. * p0_dict['xshift3'] + sh ** 4. * p0_dict['xshift4'] + 1.0)
+        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_dict['HSTP1'], p0_dict['HSTP2'], p0_dict['HSTP3'],
+                                             p0_dict['HSTP4'], p0_dict['xshift1'], p0_dict['xshift2'],
+                                             p0_dict['xshift3'], p0_dict['xshift4'])
 
         # Calculate final form of the model fit
         w_model = mulimb01 * p0_dict['flux0'] * systematic_model   # see Wakeford et al. 2016, Eq. 1
@@ -311,8 +308,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # CHOPPING OUT THE BAD PARTS
         # ..........................................
         # NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets.
-        cut_down =  CONFIG_INI.getfloat('technical_parameters', 'outlier_limit_std')
-  # Play around with this value if you want.
+        cut_down = CONFIG_INI.getfloat('technical_parameters', 'outlier_limit_std')
+        # Play around with this value if you want.
         # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
         # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
         # Ultimately, I would like it to remove the point completely and reformat the img_date (x), img_flux (y), err and sh arrays to account for the new shape of the array.
@@ -523,22 +520,21 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
-        b0 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.) * (p0_dict['MsMpR'] ** (1 / 3.)) * np.sqrt(
-            (np.sin(phase * 2 * np.pi)) ** 2 + (np.cos(p0_dict['inclin']) * np.cos(phase * 2 * np.pi)) ** 2)
+        b0 = hstmarg.impact_param(p0_dict['Per'], p0_dict['MsMpR'], phase, p0_dict['inclin'])
+
         mulimb01, mulimbf1 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
-        b01 = np.copy(b0)   # NOT-REUSED
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
         # Calculate the impact parameter based on the eccentricity function
         x2 = np.arange(4000) * 0.0001 - 0.2
-        b0 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.) * (p0_dict['MsMpR'] ** (1 / 3.)) * np.sqrt(
-            (np.sin(x2 * 2 * np.pi)) ** 2 + (np.cos(p0_dict['inclin']) * np.cos(x2 * 2 * np.pi)) ** 2)
+        b0 = hstmarg.impact_param(p0_dict['Per'], p0_dict['MsMpR'], x2, p0_dict['inclin'])
+
         mulimb02, mulimbf2 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
 
-        systematic_model = (phase * p0_dict['m_fac'] + 1.0) * \
-                           (HSTphase * p0_dict['HSTP1'] + HSTphase ** 2. * p0_dict['HSTP2'] + HSTphase ** 3. * p0_dict['HSTP3'] + HSTphase ** 4. * p0_dict['HSTP4'] + 1.0) * \
-                           (sh * p0_dict['xshift1'] + sh ** 2. * p0_dict['xshift2'] + sh ** 3. * p0_dict['xshift3'] + sh ** 4. * p0_dict['xshift4'] + 1.0)
+        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_dict['m_fac'], p0_dict['HSTP1'], p0_dict['HSTP2'],
+                                             p0_dict['HSTP3'], p0_dict['HSTP4'], p0_dict['xshift1'], p0_dict['xshift2'],
+                                             p0_dict['xshift3'], p0_dict['xshift4'])
 
         fit_model = mulimb01 * p0_dict['flux0'] * systematic_model
         residuals = (img_flux - fit_model) / p0_dict['flux0']
