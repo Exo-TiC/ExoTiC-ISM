@@ -246,10 +246,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
 
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
-        BIC = bestnorm + nfree * np.log(len(img_date))
-        AIC = bestnorm + nfree
-        DOF = len(img_date) - sum([p['fixed'] != 1 for p in parinfo])  # nfree
-        CHI = bestnorm
 
          # Redefine all of the parameters given the MPFIT output
         w_params[s, :] = mpfit_result.params
@@ -263,11 +259,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         #           c1_err, c2_err, c3_err, c4_err, m_err, hst1_err, hst2_err, hst3_err, hst4_err, sh1_err, sh2_err,
         #           sh3_err, sh4_err]
         rl_err = pcerror[0]
-        epoch_err = pcerror[2]
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
         constant1 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
-        aval = constant1 * (p0_dict['MsMpR']) ** (1 / 3.)   # NOT-REUSED
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at  {}'.format(s+1, nsys, p0_dict['rl'], rl_err, p0_dict['epoch']))
 
@@ -314,7 +308,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
         # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
         # Ultimately, I would like it to remove the point completely and reformat the img_date (x), img_flux (y), err and sh arrays to account for the new shape of the array.
-
 
         if plotting:
             plt.figure(1)
