@@ -36,7 +36,8 @@ from astropy import stats
 from shutil import copy
 
 from config import CONFIG_INI
-from mpfit import mpfit
+#from mpfit import mpfit
+from cap_mpfit import mpfit
 from limb_darkening import limb_dark_fit
 import hstmarg
 
