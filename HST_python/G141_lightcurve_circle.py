@@ -32,6 +32,7 @@ import os
 import time
 import matplotlib.pyplot as plt
 from astropy import stats
+from shutil import copy
 
 from HST_python.config import CONFIG_INI
 from HST_python.mpfit import mpfit
@@ -97,6 +98,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with'
         '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes'
         'Please hold.')
+
+    # Copy the config.ini to the experiment folder.
+    copy(os.path.join('config_local.ini'), outDir)
 
     # DEFINE LIMB DARKENING DIRECTORY, WHICH IS INSIDE THIS PACKAGE
     limbDir = os.path.join('..', 'Limb-darkening')
