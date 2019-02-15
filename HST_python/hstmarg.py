@@ -43,15 +43,12 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     epoch = p[2]
     inclin = p[3]
     MsMpR = p[4]
-    ecc = p[5]
-    omega = p[6]
     Per = p[7]
     T0 = p[8]
     c1 = p[9]
     c2 = p[10]
     c3 = p[11]
     c4 = p[12]
-    pi = np.pi
 
     # Turn off the print statements if you want this function to be silent - these are here for sanity checks
     print(epoch)
@@ -71,8 +68,8 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
         HSTphase[k] = HSTphase[k] - 1.0
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = (Gr * Per * Per / (4 * pi * pi)) ** (1 / 3.) * (MsMpR ** (1 / 3.)) * np.sqrt(
-        (np.sin(phase * 2 * pi)) ** 2 + (np.cos(inclin) * np.cos(phase * 2 * pi)) ** 2)
+    b0 = (Gr * Per * Per / (4 * np.pi * np.pi)) ** (1 / 3.) * (MsMpR ** (1 / 3.)) * np.sqrt(
+        (np.sin(phase * 2 * np.pi)) ** 2 + (np.cos(inclin) * np.cos(phase * 2 * np.pi)) ** 2)
     print(b0)
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
@@ -216,7 +213,7 @@ def wfc3_systematic_model_grid_selection(selection):
     Model grid up to the 4th order for HST (HSTP1-HSTP4) and delta_lambda (xshit1-xshift4), with linear T.
 
     1 in the grid means the parameter is fixed, 0 means it is free. Why some parameters are free and some are fixed
-    is explained in Wakefort et al. 2016, Section 2.
+    is explained in Wakeford et al. 2016, Section 2.
     p0 =          [0,    1,     2,      3,     4,    5,    6,    7,  8,  9,  10, 11, 12,  13,    14,    15,    16,    17,     18,      19,      20,      21   ]
     p0 = np.array([rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m_fac, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4])
 
