@@ -1,0 +1,3 @@
+*.pyc
+config_local.ini
+outputs/
