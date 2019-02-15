@@ -1,5 +1,5 @@
 import numpy as np
-from HST_python.config import CONFIG_INI
+from config import CONFIG_INI
 
 
 def residuals():

@@ -30,14 +30,15 @@ Continued by Iva Laginja (laginja.iva@gmail.com).
 import numpy as np
 import os
 import time
+import sys
 import matplotlib.pyplot as plt
 from astropy import stats
 from shutil import copy
 
-from HST_python.config import CONFIG_INI
-from HST_python.mpfit import mpfit
-from HST_python.limb_darkening import limb_dark_fit
-from HST_python import hstmarg
+from config import CONFIG_INI
+from mpfit import mpfit
+from limb_darkening import limb_dark_fit
+import hstmarg
 
 
 def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
@@ -159,6 +160,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # p0 =        [0,    1,     2,      3,     4,    5,    6,    7,  8,  9,  10, 11, 12,  13,    14,    15,    16,    17,     18,      19,      20,      21   ]
     p0 = np.array([rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m_fac, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4])
 
+
+
     # Create an array with the names of the priors
     p0_names = np.array(['rl', 'flux0', 'epoch', 'inclin', 'MsMpR', 'ecc', 'omega', 'Per', 'T0', 'c1', 'c2', 'c3', 'c4',
                          'm_fac', 'HSTP1', 'HSTP2', 'HSTP3', 'HSTP4', 'xshift1', 'xshift2', 'xshift3', 'xshift4'])
@@ -250,7 +253,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         DOF = len(img_date) - sum([p['fixed'] != 1 for p in parinfo])  # nfree
         CHI = bestnorm
 
-        # Redefine all of the parameters given the MPFIT output
+         # Redefine all of the parameters given the MPFIT output
         w_params[s, :] = mpfit_result.params
         # Populate parameters with fits results
         p0 = w_params[s, :]
@@ -309,10 +312,12 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # CHOPPING OUT THE BAD PARTS
         # ..........................................
         # NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets.
-        cut_down = 2.57  # Play around with this value if you want.
+        cut_down =  CONFIG_INI.getfloat('technical_parameters', 'outlier_limit_std')
+  # Play around with this value if you want.
         # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
         # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
         # Ultimately, I would like it to remove the point completely and reformat the img_date (x), img_flux (y), err and sh arrays to account for the new shape of the array.
+
 
         if plotting:
             plt.figure(1)
@@ -373,10 +378,11 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             plt.draw()
             plt.pause(0.05)
 
+
+
     #########################################################################################################################
     #        NOT SURE OF THE VALIDITY OF THE CODE AFTER THIS POINT.  IT'S JUST A QUICK TRANSLATION OF IDL. NOT TESTED.      #
     #########################################################################################################################
-
 
 
     ################################
@@ -824,4 +830,4 @@ if __name__ == '__main__':
     end_time = time.time()
     print('\nTime it took to run the code:', (end_time-start_time)/60, 'min' )
 
-    print("\n--- ALL IS DONE, LET'S GO HOME AND HAVE A BEER! ---\n")
+    print("\n--- ALL IS DONE, LET'S GO HOME AND HAVE A DRINK! ---\n")
