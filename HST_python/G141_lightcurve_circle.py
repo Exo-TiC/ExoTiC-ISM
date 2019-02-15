@@ -37,7 +37,7 @@ from shutil import copy
 
 from config import CONFIG_INI
 #from mpfit import mpfit
-from cap_mpfit import mpfit
+from mgefit.cap_mpfit import mpfit
 from limb_darkening import limb_dark_fit
 import hstmarg
 
@@ -230,7 +230,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
 
         print('\nSTART MPFIT\n')
+        # mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
         mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
+
         print('\nTHIS ROUND OF MPFIT IS DONE\n')
 
         # Count free parameters by figuring out how many zeros we have in the current systematics
@@ -242,15 +244,19 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # values i.e. what should be the diagonals of the covariance.
 
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
-        pcerror = np.zeros_like(mpfit_result.perror)
-        covar_res = np.zeros(nfree)
-        covar_res[:nfree] = np.sqrt(
-            np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
+        # pcerror = np.zeros_like(mpfit_result.perror)
+        # covar_res = np.zeros(nfree)
+        # covar_res[:nfree] = np.sqrt(
+        #     np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
 
-        ind = np.where(systematics == 0)
-        pcerror[ind] = covar_res
+        # ind = np.where(systematics == 0)
+        # pcerror[ind] = covar_res
         
-        print(np.shape(pcerror[ind]))
+        # print(np.shape(pcerror[ind]))
+        print(type(pcerror))
+        print(pcerror)
+
+        sys.exit()
 
 
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
@@ -399,12 +405,12 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         ind = np.where(systematics == 0)
 
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
-        pcerror = np.zeros_like(mpfit_result.perror)
-        covar_res = np.zeros(nfree)
-        covar_res = np.sqrt(
-            np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
+        # pcerror = np.zeros_like(mpfit_result.perror)
+        # covar_res = np.zeros(nfree)
+        # covar_res = np.sqrt(
+        #     np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
 
-        pcerror[ind] = covar_res
+        # pcerror[ind] = covar_res
 
         # From mpfit define the DOF, BIC, AIC & CHI
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
