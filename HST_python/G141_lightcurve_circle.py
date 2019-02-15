@@ -32,6 +32,7 @@ import os
 import time
 import matplotlib.pyplot as plt
 from astropy import stats
+from shutil import copy
 
 from HST_python.config import CONFIG_INI
 from HST_python.mpfit import mpfit
@@ -97,6 +98,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with'
         '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes'
         'Please hold.')
+
+    # Copy the config.ini to the experiment folder.
+    copy(os.path.join('config_local.ini'), outDir)
 
     # DEFINE LIMB DARKENING DIRECTORY, WHICH IS INSIDE THIS PACKAGE
     limbDir = os.path.join('..', 'Limb-darkening')
@@ -224,7 +228,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
 
         print('\nSTART MPFIT\n')
-        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
+        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
         print('\nTHIS ROUND OF MPFIT IS DONE\n')
 
         # Count free parameters by figuring out how many zeros we have in the current systematics
@@ -455,7 +459,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             parinfo.append(info)
 
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
-        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo)
+        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
         nfree = sum([not p['fixed'] for p in parinfo])
         # The python mpfit does not populate the covariance matrix correctly so m.perror is not correct
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
