@@ -74,7 +74,7 @@ data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
 grid_selection = 'fit_time'
 out_folder = structure.OUTPUTS
 run_name = 'wl_time_wm3d'
-plotting='on'
+plotting='off'
 
 ; CALL THE TRANSIT FITTING ROUTINE
 G141_lightcurve_circle, x, y, err, sh, data_params, LD3D, wavelength, grid_selection, out_folder, run_name, plotting

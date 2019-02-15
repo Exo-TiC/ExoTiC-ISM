@@ -390,10 +390,11 @@ FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
   ; CHOPPING OUT THE BAD PARTS
   ;..........................................
 
-  cut_down = 2.57 ; Play around with this value if you want. 
+  cut_down = 3. ; Play around with this value if you want. 
   ; This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically riggrous way to do this. 
   ; Ultimately, I would like it to remove the point completely and reformat the x, y, err and sh arrays to account for the new shape of the array.
 
+  
   IF (plotting EQ 'on') THEN BEGIN
     window,0, title=s + ' Fig 1'
     plot, phase_xyz, w_residuals, psym=4, ystyle=3, xstyle=3, yrange=[-0.01,0.01]   ; psym=4 makes diamonds, xstyle and ystyle format the axes
@@ -459,7 +460,7 @@ FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
     oplot, phase_xyz, systematic_model, color=5005005, psym=2
   ENDIF
 
-
+STOP
 ENDFOR
 
 
