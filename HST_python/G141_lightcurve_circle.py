@@ -133,6 +133,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     flux0 = img_flux[0]   # first flux data point
     T0 = img_date[0]      # first time data point
 
+
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATIC MODELS
     m_fac = 0.0  # Linear Slope
     HSTP1 = 0.0  # Correct HST orbital phase
@@ -253,6 +254,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # Recreate the dictionary
         p0_not_dict = {key: val for key, val in zip(p0_names, p0_not)}
 
+
         # Populate some errors from pcerror array
         # pcerror = [rl_err, flux0_err, epoch_err, inclin_err, msmpr_err, ecc_err, omega_err, per_err, T0_err,
         #           c1_err, c2_err, c3_err, c4_err, m_err, hst1_err, hst2_err, hst3_err, hst4_err, sh1_err, sh2_err,
@@ -298,153 +300,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         w_scatter[s] = np.std(w_residuals)
         print('Scatter on the residuals = {}'.format(w_scatter[s]))   # this result is rather different to IDL result
 
-        # ..........................................
-        # CHOPPING OUT THE BAD PARTS
-        # ..........................................
-        # NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets.
-        cut_down = CONFIG_INI.getfloat('technical_parameters', 'outlier_limit_std')
-        # Play around with this value if you want.
-        # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
-        # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
-        # Ultimately, I would like it to remove the point completely and reformat the img_date (x), img_flux (y), err and sh arrays to account for the new shape of the array.
-
-        if plotting:
-            plt.figure(1)
-            plt.clf()
-            plt.scatter(phase, w_residuals, s=5)
-            plt.title('Model ' + str(s+1) + '/' + str(nsys))
-            plt.xlabel('Planet Phase')
-            plt.ylabel('w_residuals')
-            plt.ylim(-0.01, 0.01)
-            plt.hlines(0.0 + np.std(w_residuals) * cut_down, xmin=np.min(phase), xmax=np.max(phase), colors='r')
-            plt.hlines(0.0, xmin=np.min(phase), xmax=np.max(phase))
-            plt.hlines(0.0 - np.std(w_residuals) * cut_down, xmin=np.min(phase), xmax=np.max(phase), colors='r')
-            plt.draw()
-            plt.pause(0.05)
-
-        """
-        # remove
-        bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * 3))
-        bad_down = np.where(w_residuals < (0.0 - np.std(w_residuals) * 3))
-
-        print('up {}'.format(bad_up))
-        print('down {}'.format(bad_down))
-
-        img_flux[bad_up] = img_flux[bad_up] - np.std(w_residuals) * cut_down
-        err[bad_up] = err[bad_up] * (1 + np.std(w_residuals))
-
-        img_flux[bad_down] = img_flux[bad_down] + np.std(w_residuals) * cut_down
-        err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
-
-        # remove
-        bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * cut_down))
-        bad_down = np.where(w_residuals < (0.0 - np.std(w_residuals) * cut_down))
-
-        print('up {}'.format(bad_up))
-        print('down {}'.format(bad_down))
-
-        img_flux[bad_up] = img_flux[bad_up] - np.std(w_residuals) * cut_down
-        err[bad_up] = err[bad_up] * (1 + np.std(w_residuals))
-
-        img_flux[bad_down] = img_flux[bad_down] + np.std(w_residuals) * cut_down
-        err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
-        """
-
-        ### Iva making the version with removing the bad points completely
-        out_lim = CONFIG_INI.getfloat('technical_parameters', 'outlier_limit_std')   # Outside of how many std do we take data as outliers?
-        img_flux = stats.sigma_clip(img_flux, sigma=out_lim)   # Mask the data entries that are outside of the defined std range.
-        err = np.ma.array(err, mask=img_flux.mask)             # Apply the same mask to the err array.
-
-        if plotting:
-            plt.figure(2)
-            plt.clf()
-            plt.errorbar(phase, corrected_data, yerr=err, fmt='m.')
-            plt.scatter(phase, img_flux, s=5)
-            plt.scatter(phase, systematic_model, s=5)
-            plt.xlabel('Planet Phase')
-            plt.ylabel('Data')
-            plt.title('Model ' + str(s+1) + '/' + str(nsys))
-            plt.draw()
-            plt.pause(0.05)
+        
 
     np.savez(os.path.join(outDir, 'run1_scatter_'+run_name), w_scatter=w_scatter, w_params=w_params)
-
-        # # ..........................................
-        # # CHOPPING OUT THE BAD PARTS
-        # # ..........................................
-        # # NEW This whole section may be cut out - it still needs testing to make sure it is generic in its application to different datasets.
-        # cut_down = CONFIG_INI.getfloat('technical_parameters', 'outlier_limit_std')
-        # # Play around with this value if you want.
-        # # This currently just takes the data that is not good and replaces it with a null value while inflating the uncertainty using the standard
-        # # deviation, although this is only a very tiny inflation of the uncertainty and I need to find a more statistically rigorous way to do this.
-        # # Ultimately, I would like it to remove the point completely and reformat the img_date (x), img_flux (y), err and sh arrays to account for the new shape of the array.
-
-
-        # if plotting:
-        #     plt.figure(1)
-        #     plt.clf()
-        #     plt.scatter(phase, w_residuals, s=5)
-        #     plt.title('Model ' + str(s+1) + '/' + str(nsys))
-        #     plt.xlabel('Planet Phase')
-        #     plt.ylabel('w_residuals')
-        #     plt.ylim(-0.01, 0.01)
-        #     plt.hlines(0.0 + np.std(w_residuals) * cut_down, xmin=np.min(phase), xmax=np.max(phase), colors='r')
-        #     plt.hlines(0.0, xmin=np.min(phase), xmax=np.max(phase))
-        #     plt.hlines(0.0 - np.std(w_residuals) * cut_down, xmin=np.min(phase), xmax=np.max(phase), colors='r')
-        #     plt.draw()
-        #     plt.pause(0.05)
-
-        # """
-        # # remove
-        # bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * 3))
-        # bad_down = np.where(w_residuals < (0.0 - np.std(w_residuals) * 3))
-
-        # print('up {}'.format(bad_up))
-        # print('down {}'.format(bad_down))
-
-        # img_flux[bad_up] = img_flux[bad_up] - np.std(w_residuals) * cut_down
-        # err[bad_up] = err[bad_up] * (1 + np.std(w_residuals))
-
-        # img_flux[bad_down] = img_flux[bad_down] + np.std(w_residuals) * cut_down
-        # err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
-
-        # # remove
-        # bad_up = np.where(w_residuals > (0.0 + np.std(w_residuals) * cut_down))
-        # bad_down = np.where(w_residuals < (0.0 - np.std(w_residuals) * cut_down))
-
-        # print('up {}'.format(bad_up))
-        # print('down {}'.format(bad_down))
-
-        # img_flux[bad_up] = img_flux[bad_up] - np.std(w_residuals) * cut_down
-        # err[bad_up] = err[bad_up] * (1 + np.std(w_residuals))
-
-        # img_flux[bad_down] = img_flux[bad_down] + np.std(w_residuals) * cut_down
-        # err[bad_down] = err[bad_down] * (1 + np.std(w_residuals))
-        # """
-
-        # ### Iva making the version with removing the bad points completely
-        # out_lim = CONFIG_INI.getfloat('technical_parameters', 'outlier_limit_std')   # Outside of how many std do we take data as outliers?
-        # img_flux = stats.sigma_clip(img_flux, sigma=out_lim)   # Mask the data entries that are outside of the defined std range.
-        # err = np.ma.array(err, mask=img_flux.mask)             # Apply the same mask to the err array.
-
-        # if plotting:
-        #     plt.figure(2)
-        #     plt.clf()
-        #     plt.errorbar(phase, corrected_data, yerr=err, fmt='m.')
-        #     plt.scatter(phase, img_flux, s=5)
-        #     plt.scatter(phase, systematic_model, s=5)
-        #     plt.xlabel('Planet Phase')
-        #     plt.ylabel('Data')
-        #     plt.title('Model ' + str(s+1) + '/' + str(nsys))
-        #     plt.draw()
-        #     plt.pause(0.05)
-
-
-
-
-    #########################################################################################################################
-    #        NOT SURE OF THE VALIDITY OF THE CODE AFTER THIS POINT.  IT'S JUST A QUICK TRANSLATION OF IDL. NOT TESTED.      #
-    #########################################################################################################################
 
 
     ################################
