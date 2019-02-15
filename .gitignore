@@ -1,3 +1,4 @@
 *.pyc
 config_local.ini
 outputs/
+.ipynb_checkpoints/
