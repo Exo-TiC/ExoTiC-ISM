@@ -249,9 +249,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
          # Redefine all of the parameters given the MPFIT output
         w_params[s, :] = mpfit_result.params
         # Populate parameters with fits results
-        p0 = w_params[s, :]
+        p0_not = w_params[s, :]
         # Recreate the dictionary
-        p0_dict = {key: val for key, val in zip(p0_names, p0)}
+        p0_not_dict = {key: val for key, val in zip(p0_names, p0_not)}
 
         # Populate some errors from pcerror array
         # pcerror = [rl_err, flux0_err, epoch_err, inclin_err, msmpr_err, ecc_err, omega_err, per_err, T0_err,
@@ -260,19 +260,19 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         rl_err = pcerror[0]
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
+        constant1 = (Gr * p0_not_dict['Per'] * p0_not_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
 
-        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at  {}'.format(s+1, nsys, p0_dict['rl'], rl_err, p0_dict['epoch']))
+        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at  {}'.format(s+1, nsys, p0_not_dict['rl'], rl_err, p0_not_dict['epoch']))
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters
-        phase = (img_date - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
+        phase = (img_date - p0_not_dict['epoch']) / (p0_not_dict['Per'] / day_to_sec)
         phase2 = np.floor(phase)
         phase = phase - phase2
         a = np.where(phase > 0.5)[0]
         phase[a] = phase[a] - 1.0
 
-        HSTphase = (img_date - p0_dict['T0']) / HST_period
+        HSTphase = (img_date - p0_not_dict['T0']) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
@@ -281,20 +281,20 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
-        b0 = hstmarg.impact_param(p0_dict['Per'], p0_dict['MsMpR'], phase, p0_dict['inclin'])
+        b0 = hstmarg.impact_param(p0_not_dict['Per'], p0_not_dict['MsMpR'], phase, p0_not_dict['inclin'])
 
-        mulimb01, mulimbf1 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
+        mulimb01, mulimbf1 = hstmarg.occultnl(p0_not_dict['rl'], p0_not_dict['c1'], p0_not_dict['c2'], p0_not_dict['c3'], p0_not_dict['c4'], b0)
 
-        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_dict['m_fac'], p0_dict['HSTP1'], p0_dict['HSTP2'], p0_dict['HSTP3'],
-                                             p0_dict['HSTP4'], p0_dict['xshift1'], p0_dict['xshift2'],
-                                             p0_dict['xshift3'], p0_dict['xshift4'])
+        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_not_dict['m_fac'], p0_not_dict['HSTP1'], p0_not_dict['HSTP2'], p0_not_dict['HSTP3'],
+                                             p0_not_dict['HSTP4'], p0_not_dict['xshift1'], p0_not_dict['xshift2'],
+                                             p0_not_dict['xshift3'], p0_not_dict['xshift4'])
 
         # Calculate final form of the model fit
-        w_model = mulimb01 * p0_dict['flux0'] * systematic_model   # see Wakeford et al. 2016, Eq. 1
+        w_model = mulimb01 * p0_not_dict['flux0'] * systematic_model   # see Wakeford et al. 2016, Eq. 1
         # Calculate the residuals
-        w_residuals = (img_flux - w_model) / p0_dict['flux0']
+        w_residuals = (img_flux - w_model) / p0_not_dict['flux0']
         # Calculate more stuff
-        corrected_data = img_flux / (p0_dict['flux0'] * systematic_model)
+        corrected_data = img_flux / (p0_not_dict['flux0'] * systematic_model)
         w_scatter[s] = np.std(w_residuals)
         print('Scatter on the residuals = {}'.format(w_scatter[s]))   # this result is rather different to IDL result
 
@@ -366,8 +366,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
             plt.title('Model ' + str(s+1) + '/' + str(nsys))
             plt.draw()
             plt.pause(0.05)
-=======
-    np.savez(os.path.join(outDir, 'run1_scatter_'+run_name), w_scatter=w_scatter)
+
+    np.savez(os.path.join(outDir, 'run1_scatter_'+run_name), w_scatter=w_scatter, w_params=w_params)
 
         # # ..........................................
         # # CHOPPING OUT THE BAD PARTS
@@ -438,7 +438,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         #     plt.title('Model ' + str(s+1) + '/' + str(nsys))
         #     plt.draw()
         #     plt.pause(0.05)
->>>>>>> ceeae31cb8af7b6c507dc6500c0b1f1bcc6f29bf
+
 
 
 
