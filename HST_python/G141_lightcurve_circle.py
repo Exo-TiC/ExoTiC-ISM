@@ -291,7 +291,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         mulimb01, mulimbf1 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
 
-        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_dict['HSTP1'], p0_dict['HSTP2'], p0_dict['HSTP3'],
+        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_dict['m_fac'], p0_dict['HSTP1'], p0_dict['HSTP2'], p0_dict['HSTP3'],
                                              p0_dict['HSTP4'], p0_dict['xshift1'], p0_dict['xshift2'],
                                              p0_dict['xshift3'], p0_dict['xshift4'])
 
