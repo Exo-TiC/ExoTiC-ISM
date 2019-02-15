@@ -487,7 +487,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         sys_stats[s, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats
         sys_date[s, :] = img_date                               # input time data (x, date)
         sys_phase[s, :] = phase                                 # phase
-        sys_rawflux[s, :] = img_flux                                   # raw lightcurve flux
+        sys_rawflux[s, :] = img_flux                            # raw lightcurve flux
         sys_rawflux_err[s, :] = err
         sys_flux[s, :] = fit_data                               # corrected lightcurve flux
         sys_flux_err[s, :] = fit_err
@@ -497,9 +497,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         sys_systematic_model[s, :] = systematic_model           # systematic model
         sys_params[s, :] = mpfit_result.params                  # parameters
         sys_params_err[s, :] = pcerror                          # parameter errors
-        sys_depth[s] = res_sec_dict['rl']                            # depth
+        sys_depth[s] = res_sec_dict['rl']                       # depth
         sys_depth_err[s] = rl_err                               # depth error
-        sys_epoch[s] = res_sec_dict['epoch']                         # transit time
+        sys_epoch[s] = res_sec_dict['epoch']                    # transit time
         sys_epoch_err[s] = epoch_err                            # transit time error
         sys_evidenceAIC[s] = evidence_AIC                       # evidence AIC
         sys_evidenceBIC[s] = evidence_BIC                       # evidence BIC
