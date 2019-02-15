@@ -521,10 +521,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
-        b0 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.) * (p0_dict['MsMpR'] ** (1 / 3.)) * np.sqrt(
-            (np.sin(phase * 2 * np.pi)) ** 2 + (np.cos(p0_dict['inclin']) * np.cos(phase * 2 * np.pi)) ** 2)
+        b0 = hstmarg.impact_param(p0_dict['Per'], p0_dict['MsMpR'], phase, p0_dict['inclin'])
+
         mulimb01, mulimbf1 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
-        b01 = np.copy(b0)   # NOT-REUSED
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
