@@ -460,7 +460,7 @@ FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
     oplot, phase_xyz, systematic_model, color=5005005, psym=2
   ENDIF
 
-STOP
+
 ENDFOR
 
 
@@ -728,7 +728,7 @@ count_phase = sys_phase(pos,*)
 count_model_y = sys_model(pos,*)
 count_model_x = sys_model_phase(pos,*)
 
-stop
+
 
 beta = MIN(count_AIC)
 w_q = (EXP(count_AIC - beta))/TOTAL(EXP(count_AIC - beta))

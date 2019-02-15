@@ -143,7 +143,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     xshift2 = 0.0  # X-shift in wavelength^2
     xshift3 = 0.0  # X-shift in wavelength^3
     xshift4 = 0.0  # X-shift in wavelength^4
-
     # =======================
     # LIMB DARKENING
     # NEW: Implement a suggestion for the user to use 3D if his parameters match the options available in the 3D models
@@ -692,7 +691,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         plt.pause(0.05)
 
     ### Center of transit time
-    marg_epoch, marg_epoch_err = hstmarg.marginalization(count_epoch, count_epoch_err)
+    marg_epoch, marg_epoch_err = hstmarg.marginalization(count_epoch, count_epoch_err, w_q)
     print('Epoch = {} +/- {}'.format(marg_epoch, marg_epoch_err))
 
     ### Inclination in radians
