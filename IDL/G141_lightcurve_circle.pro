@@ -463,7 +463,7 @@ FOR s = 0, n_elements(grid(*,0))-1 DO BEGIN
 
 ENDFOR
 
-save, filename=out_folder+'run1_scatter_'+run_name+'.sav', w_scatter
+save, filename=out_folder+'run1_scatter_'+run_name+'.sav', w_scatter, w_params
 ;..........................................
 ;..........................................
 ; SECOND RUN THROUGH with MPFIT
