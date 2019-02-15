@@ -242,8 +242,15 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
         pcerror = np.zeros_like(mpfit_result.perror)
-        pcerror[:nfree] = np.sqrt(
+        covar_res = np.zeros(nfree)
+        covar_res[:nfree] = np.sqrt(
             np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
+
+        ind = np.where(systematics == 0)
+        pcerror[ind] = covar_res
+        
+        print(np.shape(pcerror[ind]))
+
 
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
 
@@ -388,10 +395,15 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
         nfree = sum([not p['fixed'] for p in parinfo])
         # The python mpfit does not populate the covariance matrix correctly so m.perror is not correct
+        ind = np.where(systematics == 0)
+
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
         pcerror = np.zeros_like(mpfit_result.perror)
-        pcerror[:nfree] = np.sqrt(
+        covar_res = np.zeros(nfree)
+        covar_res = np.sqrt(
             np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
+
+        pcerror[ind] = covar_res
 
         # From mpfit define the DOF, BIC, AIC & CHI
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
@@ -414,6 +426,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # Recreate the dictionary
         res_sec_dict = {key: val for key, val in zip(p0_names, res_sec)}
        
+
         # pcerror = [rl_err, flux0_err, epoch_err, inclin_err, msmpr_err, ecc_err, omega_err, per_err, T0_err,
         #           c1_err, c2_err, c3_err, c4_err, m_err, HSTP1_err, HSTP2_err, HSTP3_err, HSTP4_err, xshift1_err,
         #           xshift2_err, xshift3_err, xshift4_err]
