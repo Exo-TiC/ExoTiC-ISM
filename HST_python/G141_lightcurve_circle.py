@@ -639,22 +639,11 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         rl_sdnr[i] = (np.std(count_residuals[:, i]) / np.sqrt(2)) * 1e6
     best_sys = np.argmin(rl_sdnr)
 
-    # Radius ratio
-    rl_array = count_depth
-    rl_err_array = count_depth_err
+    ### Radius ratio
+    marg_rl, marg_rl_err = hstmarg.marginalization(count_depth, count_depth_err, w_q)
+    print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
 
-    mean_rl = np.sum(w_q * rl_array)
-    bestfit_theta_rlq = rl_array
-    variance_theta_rlq = rl_err_array
-    variance_theta_rl = np.sqrt(np.sum(w_q * ((bestfit_theta_rlq - mean_rl) ** 2 + (variance_theta_rlq) ** 2)))
-    print('Rp/R* = {} +/- {}'.format(mean_rl, variance_theta_rl))
-
-    marg_rl = mean_rl
-    marg_rl_err = variance_theta_rl
-
-    print(marg_rl, marg_rl_err)
     print('SDNR best model = {}'.format(np.std(count_residuals[:, best_sys]) / np.sqrt(2) * 1e6))
-
     print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), np.argmin(rl_sdnr)))
 
     if plotting:
@@ -666,8 +655,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         plt.plot(rl_sdnr)
         plt.title('rl_sdnr')
         plt.subplot(3,1,3)
-        plt.errorbar(np.arange(1, len(rl_array)+1), rl_array, yerr=rl_err_array, fmt='.')
-        plt.title('rl_array')
+        plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
+        plt.title('count_depth')
         plt.draw()
         plt.pause(0.05)
 
@@ -696,71 +685,29 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         plt.draw()
         plt.pause(0.05)
 
-    # Center of transit time
-    epoch_array = count_epoch
-    epoch_err_array = count_epoch_err
+    ### Center of transit time
+    marg_epoch, marg_epoch_err = hstmarg.marginalization(count_epoch, count_epoch_err)
+    print('Epoch = {} +/- {}'.format(marg_epoch, marg_epoch_err))
 
-    mean_epoch = np.sum(w_q * epoch_array)
-    bestfit_theta_epoch = epoch_array
-    variance_theta_epochq = epoch_err_array
-    variance_theta_epoch = np.sqrt(np.sum(w_q * ((bestfit_theta_epoch - mean_epoch) ** 2 + variance_theta_epochq ** 2)))
-    print('Epoch = {} +/- {}'.format(mean_epoch, variance_theta_epoch))
+    ### Inclination in radians
+    marg_inclin_rad, marg_inclin_rad_err = hstmarg.marginalization(sys_params[:, 3], sys_params_err[:, 3], w_q)
+    print('inc (rads) = {} +/- {}'.format(marg_inclin_rad, marg_inclin_rad_err))
 
-    marg_epoch = mean_epoch
-    marg_epoch_err = variance_theta_epoch
-    print(marg_epoch, marg_epoch_err)
+    ### Inclination in degrees
+    conv1 = sys_params[:, 3] / (2 * np.pi / 360)
+    conv2 = sys_params_err[:, 3] / (2 * np.pi / 360)
+    marg_inclin_deg, marg_inclin_deg_err = hstmarg.marginalization(conv1, conv2, w_q)
+    print('inc (deg) = {} +/- {}'.format(marg_inclin_deg, marg_inclin_deg_err))
 
-    # Inclination
-    inclin_array = sys_params[:, 3]
-    inclin_err_array = sys_params_err[:, 3]
+    ### MsMpR
+    marg_msmpr, marg_msmpr_err = hstmarg.marginalization(sys_params[:, 4], sys_params_err[:, 4], w_q)
+    print('MsMpR = {} +/- {}'.format(marg_msmpr, marg_msmpr_err))
 
-    mean_inc = np.sum(w_q * inclin_array)
-    bestfit_theta_inc = inclin_array
-    variance_theta_incq = inclin_err_array
-    variance_theta_inc = np.sum(w_q * ((bestfit_theta_inc - mean_inc) ** 2 + variance_theta_incq))
-    print('inc (rads) = {} +/- {}'.format(mean_inc, variance_theta_inc))
+    marg_aors = constant1 * (marg_msmpr ** 0.333)
+    marg_aors_err = constant1 * (marg_msmpr_err ** 0.3333) / marg_aors
+    print('a/R* = {} +/- {}'.format(marg_aors, marg_aors_err))
 
-    marg_inclin_rad = mean_inc
-    marg_inclin_rad_err = variance_theta_inc
-    # What is getting printed here?
-    print(marg_inclin_rad, marg_inclin_rad_err)
-
-    inclin_arrayd = sys_params[:, 3] / (2 * np.pi / 360)
-    inclin_err_arrayd = sys_params_err[:, 3] / (2 * np.pi / 360)
-
-    mean_incd = np.sum(w_q * inclin_arrayd)
-    bestfit_theta_incd = inclin_arrayd
-    variance_theta_incdq = inclin_err_arrayd
-    variance_theta_incd = np.sum(w_q * ((bestfit_theta_incd - mean_incd) ** 2 + variance_theta_incdq))
-    print('inc (deg) = {} +/- {}'.format(mean_incd, variance_theta_incd))
-
-    marg_inclin_deg = mean_incd
-    marg_inclin_deg_err = variance_theta_incd
-    # What is getting printed here?
-    print(marg_inclin_deg, marg_inclin_rad_err)
-
-    # MsMpR
-    msmpr_array = sys_params[:, 4]
-    msmpr_err_array = sys_params_err[:, 4]
-
-    mean_msmpr = np.sum(w_q * msmpr_array)
-    bestfit_theta_msmpr = msmpr_array
-    variance_theta_msmprq = msmpr_err_array
-    variance_theta_msmpr = np.sum(w_q * ((bestfit_theta_msmpr - mean_msmpr) ** 2.0 + variance_theta_msmprq))
-    print('MsMpR = {} +/- {}'.format(mean_msmpr, variance_theta_msmpr))
-    mean_aor = constant1 * ((mean_msmpr) ** 0.333)
-    variance_theta_aor = constant1 * (variance_theta_msmpr ** 0.3333) / mean_aor
-    print('a/R* = {} +/- {}'.format(mean_aor, variance_theta_aor))
-
-    marg_msmpr = mean_msmpr
-    marg_msmpr_err = variance_theta_msmpr
-    print(marg_msmpr, marg_msmpr_err)
-
-    marg_aors = mean_aor
-    marg_aors_err = variance_theta_aor
-    print(marg_aors, marg_aors_err)
-
-    # Save to file
+    ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
     np.savez(os.path.join(outDir, 'analysis_circle_G141_marginalised_'+run_name), w_q=w_q, best_sys=best_sys,
              marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
