@@ -552,9 +552,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         # Redefine all of the parameters given the MPFIT output
         # Redefine array
-        p0 = mpfit_result.params
+        res_sec = mpfit_result.params
         # Recreate the dictionary
-        p0_dict = {key: val for key, val in zip(p0_names, p0)}
+        res_sec_dict = {key: val for key, val in zip(p0_names, res_sec)}
        
         # pcerror = [rl_err, flux0_err, epoch_err, inclin_err, msmpr_err, ecc_err, omega_err, per_err, T0_err,
         #           c1_err, c2_err, c3_err, c4_err, m_err, HSTP1_err, HSTP2_err, HSTP3_err, HSTP4_err, xshift1_err,
@@ -563,21 +563,21 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         epoch_err = pcerror[2]
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (Gr * p0_dict['Per'] * p0_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
-        aval = constant1 * (p0_dict['MsMpR']) ** (1 / 3.)   # NOT-REUSED
+        constant1 = (Gr * res_sec_dict['Per'] * res_sec_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
+        aval = constant1 * (res_sec_dict['MsMpR']) ** (1 / 3.)   # NOT-REUSED
 
-        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}     centered at  {}'.format(s+1, nsys, p0_dict['rl'], rl_err, p0_dict['epoch']))
+        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}     centered at  {}'.format(s+1, nsys, res_sec_dict['rl'], rl_err, res_sec_dict['epoch']))
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
-        phase = (img_date - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
+        phase = (img_date - res_sec_dict['epoch']) / (res_sec_dict['Per'] / day_to_sec)
         phase2 = np.floor(phase)
         phase = phase - phase2
         a = np.where(phase > 0.5)[0]
         if len(a) > 0:
             phase[a] = phase[a] - 1.0
 
-        HSTphase = (img_date - p0_dict['T0']) / HST_period
+        HSTphase = (img_date - res_sec_dict['T0']) / HST_period
         phase2 = np.floor(HSTphase)
         HSTphase = HSTphase - phase2
         k = np.where(HSTphase > 0.5)[0]
@@ -587,26 +587,26 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
-        b0 = hstmarg.impact_param(p0_dict['Per'], p0_dict['MsMpR'], phase, p0_dict['inclin'])
+        b0 = hstmarg.impact_param(res_sec_dict['Per'], res_sec_dict['MsMpR'], phase, res_sec_dict['inclin'])
 
-        mulimb01, mulimbf1 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
+        mulimb01, mulimbf1 = hstmarg.occultnl(res_sec_dict['rl'], res_sec_dict['c1'], res_sec_dict['c2'], res_sec_dict['c3'], res_sec_dict['c4'], b0)
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
         # Calculate the impact parameter based on the eccentricity function
         x2 = np.arange(4000) * 0.0001 - 0.2
-        b0 = hstmarg.impact_param(p0_dict['Per'], p0_dict['MsMpR'], x2, p0_dict['inclin'])
+        b0 = hstmarg.impact_param(res_sec_dict['Per'], res_sec_dict['MsMpR'], x2, res_sec_dict['inclin'])
 
-        mulimb02, mulimbf2 = hstmarg.occultnl(p0_dict['rl'], p0_dict['c1'], p0_dict['c2'], p0_dict['c3'], p0_dict['c4'], b0)
+        mulimb02, mulimbf2 = hstmarg.occultnl(res_sec_dict['rl'], res_sec_dict['c1'], res_sec_dict['c2'], res_sec_dict['c3'], res_sec_dict['c4'], b0)
 
-        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_dict['m_fac'], p0_dict['HSTP1'], p0_dict['HSTP2'],
-                                             p0_dict['HSTP3'], p0_dict['HSTP4'], p0_dict['xshift1'], p0_dict['xshift2'],
-                                             p0_dict['xshift3'], p0_dict['xshift4'])
+        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, res_sec_dict['m_fac'], res_sec_dict['HSTP1'], res_sec_dict['HSTP2'],
+                                             res_sec_dict['HSTP3'], res_sec_dict['HSTP4'], res_sec_dict['xshift1'], res_sec_dict['xshift2'],
+                                             res_sec_dict['xshift3'], res_sec_dict['xshift4'])
 
-        fit_model = mulimb01 * p0_dict['flux0'] * systematic_model
-        residuals = (img_flux - fit_model) / p0_dict['flux0']
+        fit_model = mulimb01 * res_sec_dict['flux0'] * systematic_model
+        residuals = (img_flux - fit_model) / res_sec_dict['flux0']
         resid_scatter = np.std(w_residuals)
-        fit_data = img_flux / (p0_dict['flux0'] * systematic_model)
+        fit_data = img_flux / (res_sec_dict['flux0'] * systematic_model)
         fit_err = np.copy(err)  # * (1.0 + resid_scatter)
 
         if plotting:
@@ -638,9 +638,9 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         sys_systematic_model[s, :] = systematic_model           # systematic model
         sys_params[s, :] = mpfit_result.params                  # parameters
         sys_params_err[s, :] = pcerror                          # parameter errors
-        sys_depth[s] = p0_dict['rl']                            # depth
+        sys_depth[s] = res_sec_dict['rl']                            # depth
         sys_depth_err[s] = rl_err                               # depth error
-        sys_epoch[s] = p0_dict['epoch']                         # transit time
+        sys_epoch[s] = res_sec_dict['epoch']                         # transit time
         sys_epoch_err[s] = epoch_err                            # transit time error
         sys_evidenceAIC[s] = evidence_AIC                       # evidence AIC
         sys_evidenceBIC[s] = evidence_BIC                       # evidence BIC
