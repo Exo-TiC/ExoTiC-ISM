@@ -318,3 +318,18 @@ def wfc3_systematic_model_grid_selection(selection):
     wfc3_grid = np.hstack((perm_free, var_param, input_constants, systematic_models))
 
     return wfc3_grid
+
+
+def marginalization(array, error, weight):
+    """
+    Marginalization of the parameter array.
+    :param array:  parameter array
+    :param error:  error array
+    :param weight: weighting
+    :return: marginalization parameter, error on marginalization parameter
+    """
+
+    mean_param = np.sum(weight * array)
+    variance_param = np.sqrt(np.sum(weight * ((array - mean_param) ** 2 + error ** 2)))
+
+    return mean_param, variance_param
