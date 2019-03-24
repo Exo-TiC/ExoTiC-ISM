@@ -37,9 +37,10 @@ from shutil import copy
 
 from config import CONFIG_INI
 #from mpfit import mpfit
-from mgefit.cap_mpfit import mpfit
+#from mgefit.cap_mpfit import mpfit
+from presto_mpfit import mpfit
 from limb_darkening import limb_dark_fit
-import hstmarg
+import hstmarg as hstmarg
 
 
 def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
