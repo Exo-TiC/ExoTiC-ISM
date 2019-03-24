@@ -244,24 +244,19 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         # values i.e. what should be the diagonals of the covariance.
 
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
-        # pcerror = np.zeros_like(mpfit_result.perror)
-        # covar_res = np.zeros(nfree)
-        # covar_res[:nfree] = np.sqrt(
-        #     np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
+        """
+        pcerror = np.zeros_like(mpfit_result.perror)
+        covar_res = np.zeros(nfree)
+        covar_res[:nfree] = np.sqrt(
+            np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
 
-        # ind = np.where(systematics == 0)
-        # pcerror[ind] = covar_res
-        
-        # print(np.shape(pcerror[ind]))
-        print(type(pcerror))
-        print(pcerror)
-
-        sys.exit()
-
+        ind = np.where(systematics == 0)
+        pcerror[ind] = covar_res
+        """
 
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
 
-         # Redefine all of the parameters given the MPFIT output
+        # Redefine all of the parameters given the MPFIT output
         w_params[s, :] = mpfit_result.params
         # Populate parameters with fits results
         p0_not = w_params[s, :]
