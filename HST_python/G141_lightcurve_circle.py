@@ -231,8 +231,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
 
         print('\nSTART MPFIT\n')
-        # mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
-        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
+        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=True)
 
         print('\nTHIS ROUND OF MPFIT IS DONE\n')
 
