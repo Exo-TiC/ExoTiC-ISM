@@ -103,7 +103,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         'Please hold.')
 
     # Copy the config.ini to the experiment folder.
-    copy(os.path.join('config_local.ini'), outDir)
+    #copy(os.path.join('config_local.ini'), outDir)
 
     # DEFINE LIMB DARKENING DIRECTORY, WHICH IS INSIDE THIS PACKAGE
     limbDir = os.path.join('..', 'Limb-darkening')
@@ -626,8 +626,8 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         plt.xlabel('count_phase')
         plt.ylabel('count_residuals')
         plt.hlines(0.0, xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dashed')
-        plt.hlines(0.0 - (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
-        plt.hlines(0.0 + (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
+        #plt.hlines(0.0 - (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
+        #plt.hlines(0.0 + (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
         plt.draw()
         plt.pause(0.05)
 
