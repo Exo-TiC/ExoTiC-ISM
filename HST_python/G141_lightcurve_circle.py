@@ -43,8 +43,7 @@ from limb_darkening import limb_dark_fit
 import hstmarg as hstmarg
 
 
-def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name,
-                           plotting=True):
+def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
 
@@ -88,7 +87,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         - FeH: Stellar metallicity - limited ranges available
         - Teff: Stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
         - logg: stellar gravity - depends on whether 1D or 3D limb darkening models are used
-    :param ld_model:
     :param wavelength: array of wavelengths covered to compute y
     :param grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
     :param out_folder: string of folder path to save the data to, e.g. '/Volumes/DATA1/user/HST/Planet/sav_file/'
@@ -105,9 +103,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # Copy the config.ini to the experiment folder.
     #copy(os.path.join('config_local.ini'), outDir)
 
-    # DEFINE LIMB DARKENING DIRECTORY, WHICH IS INSIDE THIS PACKAGE
-    limbDir = os.path.join('..', 'Limb-darkening')
-
     # READ THE CONSTANTS
     Gr = CONFIG_INI.getfloat('constants', 'big_G')
     day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
@@ -116,25 +111,22 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # We want to keep the raw data as is, so we generate helper arrays that will get changed from model to model
     img_date = x    # time array
     img_flux = y    # flux array
-    img_err = err   # error array
-    img_sh = sh     # shift in position array
     nexposure = len(img_date)   # Total number of exposures in the observation
 
     # READ IN THE PLANET STARTING PARAMETERS
-    # data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]   # Description
-    rl = data_params[0]                             # Rp/R* estimate
-    epoch = data_params[1]                          # center of transit time in MJD
-    inclin = data_params[2] * ((2 * np.pi) / 360)   # inclination, converting it to radians
-    MsMpR = data_params[3]                          # density of the system
-    ecc = data_params[4]                            # eccentricity
-    omega = data_params[5] * ((2 * np.pi) / 360)    # orbital omega, converting it to radians
-    Per = data_params[6] * day_to_sec               # period in seconds
+    rl = CONFIG_INI.getfloat('planet_parameters', 'rl')          # Rp/R* estimate
+    epoch = CONFIG_INI.getfloat('planet_parameters', 'epoch')    # center of transit time in MJD
+    inclin = CONFIG_INI.getfloat('planet_parameters', 'inclin') * ((2 * np.pi) / 360)   # inclination, converting it to radians
+    ecc = CONFIG_INI.getfloat('planet_parameters', 'ecc')                            # eccentricity
+    omega = CONFIG_INI.getfloat('planet_parameters', 'omega') * ((2 * np.pi) / 360)    # orbital omega, converting it to radians
+    Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * day_to_sec               # period in seconds
+
     constant1 = ((Gr * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
-    aval = constant1 * (MsMpR) ** (1 / 3)   # NOT-REUSED
+    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')
+    MsMpR = (aor / constant1) ** 3.                          # density of the system
 
     flux0 = img_flux[0]   # first flux data point
     T0 = img_date[0]      # first time data point
-
 
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATIC MODELS
     m_fac = 0.0  # Linear Slope
@@ -150,10 +142,14 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
     # LIMB DARKENING
     # NEW: Implement a suggestion for the user to use 3D if his parameters match the options available in the 3D models
 
-    M_H = data_params[7]    # metallicity
-    Teff = data_params[8]   # effective temperature
-    logg = data_params[9]   # log(g), gravitation
+    M_H = CONFIG_INI.getfloat('limb_darkening', 'metallicity')    # metallicity
+    Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')   # effective temperature
+    logg = CONFIG_INI.getfloat('limb_darkening', 'logg')   # log(g), gravitation
 
+    # DEFINE LIMB DARKENING DIRECTORY, WHICH IS INSIDE THIS PACKAGE
+    limbDir = os.path.join('..', 'Limb-darkening')
+    ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
+    grat = CONFIG_INI.get('technical_parameters', 'grating')
     uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_dark_fit(grat, wavelength, M_H, Teff,
                                                                            logg, limbDir, ld_model)
     # =======================
@@ -171,6 +167,7 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
+    grid_selection = CONFIG_INI.get('technical_parameters', 'grid_selection')
     grid = hstmarg.wfc3_systematic_model_grid_selection(grid_selection)
     nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
 
@@ -309,8 +306,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
         w_scatter[s] = np.std(w_residuals)
         print('Scatter on the residuals = {}'.format(w_scatter[s]))   # this result is rather different to IDL result
 
-        
-
     np.savez(os.path.join(outDir, 'run1_scatter_'+run_name), w_scatter=w_scatter, w_params=w_params)
 
 
@@ -437,7 +432,6 @@ def G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, gra
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
         constant1 = (Gr * res_sec_dict['Per'] * res_sec_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
-        aval = constant1 * (res_sec_dict['MsMpR']) ** (1 / 3.)   # NOT-REUSED
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}     centered at  {}'.format(s+1, nsys, res_sec_dict['rl'], rl_err, res_sec_dict['epoch']))
 
@@ -670,44 +664,16 @@ if __name__ == '__main__':
     curr_model = CONFIG_INI.get('data_paths', 'current_model')
     dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), curr_model)
 
-    # READ in the txt file for the lightcurve data
+    # Read in the txt file for the lightcurve data
     x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'), skiprows=7, unpack=True)
     wavelength = np.loadtxt(os.path.join(dataDir, 'W17_wavelength_test_data.txt'), skiprows=3)
 
-    # Limb darkening parameters - user input
-    ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
-    FeH = CONFIG_INI.getfloat('limb_darkening', 'metallicity')
-    Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')
-    logg = CONFIG_INI.getfloat('limb_darkening', 'logg')
-
-    # More user input
-    grat = CONFIG_INI.get('technical_parameters', 'grating')
-    grid_selection = CONFIG_INI.get('technical_parameters', 'grid_selection')
+    # What to call the run and whether to turn plotting on
     run_name = CONFIG_INI.get('technical_parameters', 'run_name')
     plotting = CONFIG_INI.getboolean('technical_parameters', 'plotting')
 
-    # Planet parameters
-    rl = CONFIG_INI.getfloat('planet_parameters', 'rl')             # Rp/R* estimate
-    epoch = CONFIG_INI.getfloat('planet_parameters', 'epoch')       # in MJD
-    inclin = CONFIG_INI.getfloat('planet_parameters', 'inclin')     # this is converted into radians in the subroutine
-    ecc = CONFIG_INI.getfloat('planet_parameters', 'ecc')           # set to zero and not used when circular
-    omega = CONFIG_INI.getfloat('planet_parameters', 'omega')       # set to zero and not used when circular
-    Per = CONFIG_INI.getfloat('planet_parameters', 'Per')           # in days, converted to seconds in subroutine
-    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')           # a/R* converted to system density for the subroutine
-
-    # Setting constants and preparing inputs for claculations
-    dtosec = CONFIG_INI.getfloat('constants', 'dtosec')     # conversion from days to seconds
-    big_G = CONFIG_INI.getfloat('constants', 'big_G')       # gravitational constant
-
-    persec = Per * dtosec
-    constant1 = (big_G * persec * persec / np.float32(4. * np.pi * np.pi)) ** (1. / 3.)
-    MsMpR = (aor / constant1) ** 3.
-
-    # Put data parameters in list
-    data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
-
-    # Start the calculations
-    G141_lightcurve_circle(x, y, err, sh, data_params, ld_model, wavelength, grat, grid_selection, outDir, run_name, plotting)
+    # Run the main function
+    G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting)
 
     end_time = time.time()
     print('\nTime it took to run the code:', (end_time-start_time)/60, 'min' )
