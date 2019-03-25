@@ -371,3 +371,21 @@ def sys_model(phase, hst_phase, sh, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, 
                     sh * xshift1 + sh ** 2. * xshift2 + sh ** 3. * xshift3 + sh ** 4. * xshift4 + 1.0)
 
     return sys_m
+
+
+def phase_calc(data, epoch, period):
+    """
+    Convert time array data in terms of phase, with a period, centered on epoch.
+    :param data: time array
+    :param epoch: center of period
+    :param period: phase period
+    :return: phase: array
+    """
+
+    phase1 = (data - epoch) / period     # the data point at time "epoch" will be the zero-point; convert int phase by division through period
+    phase2 = np.floor(phase1)            # identify integer intervals of phase (where phase is between 0-1, between 1-2, between 2-3 and over 3)
+    phase = phase1 - phase2              # make phase be in interval from 0 to 1
+    toobig = np.where(phase > 0.5)[0]    # figure out where phase is bigger than 0.5
+    phase[toobig] -= 1.0                 # and where it is bigger than 0.5 indeed, subtract one to get to interval [-0.5, 0.5]
+
+    return phase

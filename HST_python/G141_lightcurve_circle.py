@@ -193,31 +193,24 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         print('SYSTEMATIC MODEL {} of {}'.format(s+1, nsys))
         systematics = grid[s, :]
         print('Systematics - fixed and free parameters:')
-        print_dict = {name: fix for name, fix in zip(p0_names, systematics)}
+        print_dict = {name: fix for name, fix in zip(p0_names, systematics)}   # this is just for printing purposes
         print(print_dict)
         print(systematics)
         print('  ')
 
         # Displaying img_date in terms of HST PHASE, on an interval between -0.5 and 0.5
-        HSTphase = (img_date - p0_dict['T0']) / HST_period   # make phase (~time) array start at 0 by subtracting first observation time, convert in units of HST phase by dividing through one HST period
-        phase2 = np.floor(HSTphase)       # identify where phase is between 0-1, between 1-2, between 2-3 and over 3
-        HSTphase = HSTphase - phase2      # make phase be in interval from 0 to 1
-        k = np.where(HSTphase > 0.5)[0]   # figure out where phase is bigger than 0.5
-        HSTphase[k] -= 1.0                # and where it is bigger than 0.5 indeed, subtract on to get to interval [-0.5, 0.5]
+        HSTphase = hstmarg.phase_calc(img_date, p0_dict['T0'], HST_period)
 
         # Displaying img_date in terms of PLANET PHASE, on interval between -0.5 and 0.5
-        phase = (img_date - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)   # make center of transit time by subtracting 'epoch' from img_date, convert in units of planet phase by dividing py planet period, convert to seconds
-        phase2 = np.floor(phase)          # identify integer intervals of phase (like above)
-        phase = phase - phase2            # make phase be in interval from 0 to 1
-        a = np.where(phase > 0.5)[0]      # figure out where phase is bigger than 0.5
-        phase[a] -= 1.0                   # and where it is bigger than 0.5 indeed, subtract on to get to interval [-0.5, 0.5]
+        phase = hstmarg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per']/day_to_sec)
+
 
         ###############
         # MPFIT - ONE #
         ###############
 
         # Create two dictionaries in which each parameter in p0 gets some extra parameters assigned, which we then feed
-        # info mpfit. This dictionary has the sole purpose of preparing the input data for mpfit in such a way that
+        # into mpfit. This dictionary has the sole purpose of preparing the input data for mpfit in such a way that
         # it works.
         parinfo = []
         for i, value in enumerate(p0):
@@ -267,43 +260,32 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         #           c1_err, c2_err, c3_err, c4_err, m_err, hst1_err, hst2_err, hst3_err, hst4_err, sh1_err, sh2_err,
         #           sh3_err, sh4_err]
         rl_err = pcerror[0]
+        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at  {}'.format(s+1, nsys, p0_fit_dict['rl'], rl_err, p0_fit_dict['epoch']))
 
-        # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (Gr * p0_not_dict['Per'] * p0_not_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
-
-        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at  {}'.format(s+1, nsys, p0_not_dict['rl'], rl_err, p0_not_dict['epoch']))
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters
-        phase = (img_date - p0_not_dict['epoch']) / (p0_not_dict['Per'] / day_to_sec)
-        phase2 = np.floor(phase)
-        phase = phase - phase2
-        a = np.where(phase > 0.5)[0]
-        phase[a] = phase[a] - 1.0
+        HSTphase = hstmarg.phase_calc(img_date, p0_fit_dict['T0'], HST_period)
+        phase = hstmarg.phase_calc(img_date, p0_fit_dict['epoch'], p0_fit_dict['Per']/day_to_sec)
 
-        HSTphase = (img_date - p0_not_dict['T0']) / HST_period
-        phase2 = np.floor(HSTphase)
-        HSTphase = HSTphase - phase2
-        k = np.where(HSTphase > 0.5)[0]
-        HSTphase[k] = HSTphase[k] - 1.0
 
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
-        b0 = hstmarg.impact_param(p0_not_dict['Per'], p0_not_dict['MsMpR'], phase, p0_not_dict['inclin'])
+        b0 = hstmarg.impact_param(p0_fit_dict['Per'], p0_fit_dict['MsMpR'], phase, p0_fit_dict['inclin'])
 
-        mulimb01, mulimbf1 = hstmarg.occultnl(p0_not_dict['rl'], p0_not_dict['c1'], p0_not_dict['c2'], p0_not_dict['c3'], p0_not_dict['c4'], b0)
+        mulimb01, mulimbf1 = hstmarg.occultnl(p0_fit_dict['rl'], p0_fit_dict['c1'], p0_fit_dict['c2'], p0_fit_dict['c3'], p0_fit_dict['c4'], b0)
 
-        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_not_dict['m_fac'], p0_not_dict['HSTP1'], p0_not_dict['HSTP2'], p0_not_dict['HSTP3'],
-                                             p0_not_dict['HSTP4'], p0_not_dict['xshift1'], p0_not_dict['xshift2'],
-                                             p0_not_dict['xshift3'], p0_not_dict['xshift4'])
+        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_fit_dict['m_fac'], p0_fit_dict['HSTP1'], p0_fit_dict['HSTP2'], p0_fit_dict['HSTP3'],
+                                             p0_fit_dict['HSTP4'], p0_fit_dict['xshift1'], p0_fit_dict['xshift2'],
+                                             p0_fit_dict['xshift3'], p0_fit_dict['xshift4'])
 
         # Calculate final form of the model fit
-        w_model = mulimb01 * p0_not_dict['flux0'] * systematic_model   # see Wakeford et al. 2016, Eq. 1
+        w_model = mulimb01 * p0_fit_dict['flux0'] * systematic_model   # see Wakeford et al. 2016, Eq. 1
         # Calculate the residuals
-        w_residuals = (img_flux - w_model) / p0_not_dict['flux0']
+        w_residuals = (img_flux - w_model) / p0_fit_dict['flux0']
         # Calculate more stuff
-        corrected_data = img_flux / (p0_not_dict['flux0'] * systematic_model)
+        corrected_data = img_flux / (p0_fit_dict['flux0'] * systematic_model)
         w_scatter[s] = np.std(w_residuals)
         print('Scatter on the residuals = {}'.format(w_scatter[s]))   # this result is rather different to IDL result
 
