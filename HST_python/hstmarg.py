@@ -89,7 +89,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     print('-----------------------------------')
     print(' ')
 
-    return [0, (y - model) / err]
+    return (y - model) / err   #[0, (y - model) / err]
 
 
 def occultnl(rl, c1, c2, c3, c4, b0):

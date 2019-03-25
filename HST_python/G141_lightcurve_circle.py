@@ -37,8 +37,8 @@ from shutil import copy
 
 from config import CONFIG_INI
 #from mpfit import mpfit
-#from mgefit.cap_mpfit import mpfit
-from presto_mpfit import mpfit
+from mgefit.cap_mpfit import mpfit
+#from presto_mpfit import mpfit
 from limb_darkening import limb_dark_fit
 import hstmarg as hstmarg
 
