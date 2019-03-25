@@ -32,9 +32,6 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     :return:
     """
 
-    # These are constants that are used in almost all of the routines and I am sure there is a way to make them common parameters rather than having to redefine them in each place - as you can some are redundantly redfined again below and some are just re-typed anyway.
-    # constant = [GAIN,READNOISE,Gr,JD,DAY_TO_SEC,Rjup,Rsun,MJup,Msun,HST_SECOND,HST_PERIOD]
-    # constant = [2.5, 20.2, 6.67259e-11, 2400000.5, 86400, 7.15e7, 6.96e8, 1.9e27, 1.99e30, 5781.6, 0.06691666]
     Gr = CONFIG_INI.getfloat('constants', 'big_G')
     HSTper = CONFIG_INI.getfloat('constants', 'HST_period')
 
