@@ -111,6 +111,8 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     # We want to keep the raw data as is, so we generate helper arrays that will get changed from model to model
     img_date = x    # time array
     img_flux = y    # flux array
+    flux0 = img_flux[0]   # first flux data point
+    T0 = img_date[0]      # first time data point
     nexposure = len(img_date)   # Total number of exposures in the observation
 
     # READ IN THE PLANET STARTING PARAMETERS
@@ -125,9 +127,6 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     aor = CONFIG_INI.getfloat('planet_parameters', 'aor')
     MsMpR = (aor / constant1) ** 3.                          # density of the system
 
-    flux0 = img_flux[0]   # first flux data point
-    T0 = img_date[0]      # first time data point
-
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATIC MODELS
     m_fac = 0.0  # Linear Slope
     HSTP1 = 0.0  # Correct HST orbital phase
@@ -138,6 +137,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     xshift2 = 0.0  # X-shift in wavelength^2
     xshift3 = 0.0  # X-shift in wavelength^3
     xshift4 = 0.0  # X-shift in wavelength^4
+
     # =======================
     # LIMB DARKENING
     # NEW: Implement a suggestion for the user to use 3D if his parameters match the options available in the 3D models
@@ -146,12 +146,12 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')   # effective temperature
     logg = CONFIG_INI.getfloat('limb_darkening', 'logg')   # log(g), gravitation
 
-    # DEFINE LIMB DARKENING DIRECTORY, WHICH IS INSIDE THIS PACKAGE
+    # Defien limb darkening directory, which is inside this package
     limbDir = os.path.join('..', 'Limb-darkening')
     ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
     grat = CONFIG_INI.get('technical_parameters', 'grating')
-    uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_dark_fit(grat, wavelength, M_H, Teff,
-                                                                           logg, limbDir, ld_model)
+    uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
+                                                                      ld_model)
     # =======================
 
     # PLACE ALL THE PRIORS IN AN ARRAY
@@ -250,15 +250,16 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         ind = np.where(systematics == 0)
         pcerror[ind] = covar_res
         """
+        print(pcerror)
+        sys.exit("TESTING")
 
-        bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
 
         # Redefine all of the parameters given the MPFIT output
         w_params[s, :] = mpfit_result.params
         # Populate parameters with fits results
-        p0_not = w_params[s, :]
+        p0_fit = w_params[s, :]
         # Recreate the dictionary
-        p0_not_dict = {key: val for key, val in zip(p0_names, p0_not)}
+        p0_fit_dict = {key: val for key, val in zip(p0_names, p0_fit)}
 
 
         # Populate some errors from pcerror array
@@ -676,6 +677,6 @@ if __name__ == '__main__':
     G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting)
 
     end_time = time.time()
-    print('\nTime it took to run the code:', (end_time-start_time)/60, 'min' )
+    print('\nTime it took to run the code:', (end_time-start_time)/60, 'min')
 
     print("\n--- ALL IS DONE, LET'S GO HOME AND HAVE A DRINK! ---\n")
