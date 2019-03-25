@@ -27,6 +27,7 @@ about 3 decimals).
 Initial translation of Python to IDL was done by Matthew Hill (mhill92@gmail).
 Continued by Iva Laginja (laginja.iva@gmail.com).
 """
+
 import numpy as np
 import os
 import time
@@ -36,8 +37,8 @@ from astropy import stats
 from shutil import copy
 
 from config import CONFIG_INI
-#from mpfit import mpfit
-from mgefit.cap_mpfit import mpfit
+from mpfit import mpfit
+#from mgefit.cap_mpfit import mpfit
 #from presto_mpfit import mpfit
 from limb_darkening import limb_dark_fit
 import hstmarg as hstmarg
@@ -338,26 +339,8 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         p0_dict = {key: val for key, val in zip(p0_names, p0)}
 
         # HST Phase
-        HSTphase = np.zeros(nexposure)
-        HSTphase = (img_date - p0_dict['T0']) / HST_period
-        phase2 = np.floor(HSTphase)
-        HSTphase = HSTphase - phase2
-        k = np.where(HSTphase > 0.5)[0]
-
-        if k[0].shape == 0:
-        #if k[0] != -1:         # in IDL this meant if condition of "where" statement is true nowhere
-            HSTphase[k] = HSTphase[k] - 1.0
-
-        phase = np.zeros(nexposure)
-        for j in range(nexposure):
-            phase[j] = (img_date[j] - p0_dict['epoch']) / (p0_dict['Per'] / day_to_sec)
-
-        phase2 = np.floor(phase)
-        phase = phase - phase2
-        a = np.where(phase > 0.5)[0]
-        if a[0].shape == 0:
-        #if a[0] != -1:
-            phase[a] = phase[a] - 1.0
+        HSTphase = hstmarg.phase_calc(img_date, p0_dict['T0'], HST_period)
+        phase = hstmarg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per']/day_to_sec)
 
         ###############
         # MPFIT - TWO #
@@ -374,16 +357,19 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
         mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
         nfree = sum([not p['fixed'] for p in parinfo])
+
+        pcerror = mpfit_result.perror  # this is how it should be done if it was right
+        """
         # The python mpfit does not populate the covariance matrix correctly so m.perror is not correct
         ind = np.where(systematics == 0)
 
-        pcerror = mpfit_result.perror  # this is how it should be done if it was right
         # pcerror = np.zeros_like(mpfit_result.perror)
         # covar_res = np.zeros(nfree)
         # covar_res = np.sqrt(
         #     np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
 
         # pcerror[ind] = covar_res
+        """
 
         # From mpfit define the DOF, BIC, AIC & CHI
         bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
@@ -393,7 +379,6 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         CHI = bestnorm
 
         # EVIDENCE BASED on the AIC and BIC
-        Mpoint = nfree
         Npoint = len(img_date)
         sigma_points = np.median(err)
 
@@ -405,7 +390,6 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         res_sec = mpfit_result.params
         # Recreate the dictionary
         res_sec_dict = {key: val for key, val in zip(p0_names, res_sec)}
-       
 
         # pcerror = [rl_err, flux0_err, epoch_err, inclin_err, msmpr_err, ecc_err, omega_err, per_err, T0_err,
         #           c1_err, c2_err, c3_err, c4_err, m_err, HSTP1_err, HSTP2_err, HSTP3_err, HSTP4_err, xshift1_err,
@@ -420,19 +404,8 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
-        phase = (img_date - res_sec_dict['epoch']) / (res_sec_dict['Per'] / day_to_sec)
-        phase2 = np.floor(phase)
-        phase = phase - phase2
-        a = np.where(phase > 0.5)[0]
-        if len(a) > 0:
-            phase[a] = phase[a] - 1.0
-
-        HSTphase = (img_date - res_sec_dict['T0']) / HST_period
-        phase2 = np.floor(HSTphase)
-        HSTphase = HSTphase - phase2
-        k = np.where(HSTphase > 0.5)[0]
-        if len(k) > 0:
-            HSTphase[k] = HSTphase[k] - 1.0
+        phase = hstmarg.phase_calc(img_date, res_sec_dict['epoch'], res_sec_dict['Per']/day_to_sec)
+        HSTphase = hstmarg.phase_calc(img_date, res_sec_dict['T0'], HST_period)
 
         # ...........................................
         # TRANSIT MODEL fit to the data
