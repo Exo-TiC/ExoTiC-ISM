@@ -20,7 +20,7 @@ def residuals():
     return [0, (y - model) / err]
 
 
-def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
+def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True):
     """
     Documentation missing.
     :param p:
@@ -48,7 +48,8 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     c4 = p[12]
 
     # Turn off the print statements if you want this function to be silent - these are here for sanity checks
-    print(epoch)
+    if not silent:
+        print(epoch)
     phase = (x - epoch) / (Per / 86400)  # convert to days 
     phase2 = np.floor(phase)
     phase = phase - phase2
@@ -56,7 +57,8 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     if a.size > 0:
         phase[a] = phase[a] - 1.0
 
-    print('phase[0] = {}'.format(phase[0]))
+    if not silent:
+        print('phase[0] = {}'.format(phase[0]))
     HSTphase = (x - T0) / HSTper  # convert to days
     phase2 = np.floor(HSTphase)
     HSTphase = HSTphase - phase2
