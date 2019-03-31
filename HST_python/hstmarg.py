@@ -20,7 +20,7 @@ def residuals():
     return [0, (y - model) / err]
 
 
-def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
+def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True):
     """
     Documentation missing.
     :param p:
@@ -32,11 +32,8 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     :return:
     """
 
-    # These are constants that are used in almost all of the routines and I am sure there is a way to make them common parameters rather than having to redefine them in each place - as you can some are redundantly redfined again below and some are just re-typed anyway.
-    # constant = [GAIN,READNOISE,Gr,JD,DAY_TO_SEC,Rjup,Rsun,MJup,Msun,HST_SECOND,HST_PERIOD]
-    # constant = [2.5, 20.2, 6.67259e-11, 2400000.5, 86400, 7.15e7, 6.96e8, 1.9e27, 1.99e30, 5781.6, 0.06691666]
-    Gr = CONFIG_INI.getfloat('constants', 'big_G')
     HSTper = CONFIG_INI.getfloat('constants', 'HST_period')
+    day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
 
     # Define each of the parameters that are read into the fitting routine
     rl = p[0]
@@ -50,27 +47,18 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None):
     c3 = p[11]
     c4 = p[12]
 
-    # Turn off the print statements if you want this function to be silent - these are here for sanity checks
-    print(epoch)
-    phase = (x - epoch) / (Per / 86400)  # convert to days 
-    phase2 = np.floor(phase)
-    phase = phase - phase2
-    a = np.where(phase > 0.5)[0]
-    if a.size > 0:
-        phase[a] = phase[a] - 1.0
+    if not silent:
+        print(epoch)
+    phase = phase_calc(x, epoch, Per/day_to_sec)
+    HSTphase = phase_calc(x, T0, HSTper)
 
-    print('phase[0] = {}'.format(phase[0]))
-    HSTphase = (x - T0) / HSTper  # convert to days
-    phase2 = np.floor(HSTphase)
-    HSTphase = HSTphase - phase2
-    k = np.where(HSTphase > 0.5)[0]
-    if k.size > 0:
-        HSTphase[k] = HSTphase[k] - 1.0
+    if not silent:
+        print('phase[0] = {}'.format(phase[0]))
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = (Gr * Per * Per / (4 * np.pi * np.pi)) ** (1 / 3.) * (MsMpR ** (1 / 3.)) * np.sqrt(
-        (np.sin(phase * 2 * np.pi)) ** 2 + (np.cos(inclin) * np.cos(phase * 2 * np.pi)) ** 2)
-    print(b0)
+    b0 = impact_param(Per, MsMpR, phase, inclin)
+    if not silent:
+        print(b0)
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
@@ -371,3 +359,22 @@ def sys_model(phase, hst_phase, sh, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, 
                     sh * xshift1 + sh ** 2. * xshift2 + sh ** 3. * xshift3 + sh ** 4. * xshift4 + 1.0)
 
     return sys_m
+
+
+def phase_calc(data, epoch, period):
+    """
+    Convert time array data in terms of phase, with a period, centered on epoch.
+    :param data: time array
+    :param epoch: center of period
+    :param period: phase period
+    :return: phase: array
+    """
+
+    phase1 = (data - epoch) / period     # the data point at time "epoch" will be the zero-point; convert int phase by division through period
+    phase2 = np.floor(phase1)            # identify integer intervals of phase (where phase is between 0-1, between 1-2, between 2-3 and over 3)
+    phase = phase1 - phase2              # make phase be in interval from 0 to 1
+    toobig = np.where(phase > 0.5)[0]    # figure out where phase is bigger than 0.5
+    if toobig.size > 0:
+        phase[toobig] -= 1.0                 # and where it is bigger than 0.5 indeed, subtract one to get to interval [-0.5, 0.5]
+
+    return phase
