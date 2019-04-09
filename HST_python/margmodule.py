@@ -167,8 +167,8 @@ def occultnl(rl, c1, c2, c3, c4, b0):
     :param c2: limb darkening parameter 2
     :param c3: limb darkening parameter 3
     :param c4: limb darkening parameter 4
-    :param b0: impact parameter
-    :return:mulimb0?, mulimbf?
+    :param b0: impact parameter in stellar radii
+    :return: mulimb0?, mulimbf?
     """
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
@@ -239,8 +239,8 @@ def occultuniform(b0, w):
     """
     Compute the lightcurve for occultation of a uniform source without microlensing (Mandel & Agol 2002).
 
-    :param b0: array; impact parameter in units of rs
-    :param w: array; occulting star size in units of rs
+    :param b0: array; impact parameter in units of stellar radius
+    :param w: array; occulting star size in units of stellar radius
     :return: muo1: float; fraction of flux at each b0 for a uniform source
     """
 
@@ -399,6 +399,7 @@ def marginalization(array, error, weight):
     return mean_param, variance_param
 
 
+@u.quantity_input(per=u.s, incl=u.rad)
 def impact_param(per, msmpr, phase, incl):
     """
     Calculate impact parameter
@@ -440,12 +441,13 @@ def sys_model(phase, hst_phase, sh, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, 
     return sys_m
 
 
+@u.quantity_input(period=u.d)
 def phase_calc(data, epoch, period):
     """
     Convert time array data in terms of phase, with a period, centered on epoch.
-    :param data: time array
-    :param epoch: center of period
-    :param period: phase period
+    :param data: time array in days (MJD)
+    :param epoch: center of period, same unit like data array
+    :param period: phase period in days
     :return: phase: array
     """
 
