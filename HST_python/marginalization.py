@@ -36,7 +36,7 @@ from limb_darkening import limb_dark_fit
 import margmodule as marg
 
 
-def marginalization(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
+def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
 
@@ -617,7 +617,7 @@ if __name__ == '__main__':
     plotting = CONFIG_INI.getboolean('technical_parameters', 'plotting')
 
     # Run the main function
-    marginalization(x, y, err, sh, wavelength, outDir, run_name, plotting)
+    total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting)
 
     end_time = time.time()
     print('\nTime it took to run the code:', (end_time-start_time)/60, 'min')
