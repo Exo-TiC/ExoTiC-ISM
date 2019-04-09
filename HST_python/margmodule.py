@@ -1,14 +1,18 @@
 """Helper module for transit marginalization."""
 
+import os
 import numpy as np
-from config import CONFIG_INI
+from astropy.constants import G
+import astropy.units as u
 
-Gr = CONFIG_INI.getfloat('constants', 'big_G')
+from sherpa.models import model
+
+from config import CONFIG_INI
 
 
 def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True):
     """
-    Documentation missing.
+    This function will be deleted once Sherpa is in place
     :param p:
     :param fjac:
     :param x:
@@ -402,11 +406,11 @@ def impact_param(per, msmpr, phase, incl):
     :param msmpr: MsMpR
     :param phase: phase
     :param incl: inclination in radians
-    :return:
+    :return: array; impact parameter b0 in stellar radii
     """
 
-    b0 = (Gr * per * per / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
-        (np.sin(phase * 2 * np.pi)) ** 2 + (np.cos(incl) * np.cos(phase * 2 * np.pi)) ** 2)
+    b0 = (G * per * per / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
+         (np.sin(phase * 2 * np.pi * u.rad)) ** 2 + (np.cos(incl) * np.cos(phase * 2 * np.pi * u.rad)) ** 2)
 
     return b0
 

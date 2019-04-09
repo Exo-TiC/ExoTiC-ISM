@@ -102,7 +102,6 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     #copy(os.path.join('config_local.ini'), outDir)
 
     # READ THE CONSTANTS
-    Gr = CONFIG_INI.getfloat('constants', 'big_G')
     day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period')
 
@@ -121,7 +120,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     omega = CONFIG_INI.getfloat('planet_parameters', 'omega') * ((2 * np.pi) / 360)    # orbital omega, converting it to radians
     Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * day_to_sec               # period in seconds
 
-    constant1 = ((Gr * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
+    constant1 = ((G * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
     aor = CONFIG_INI.getfloat('planet_parameters', 'aor')
     MsMpR = (aor / constant1) ** 3.                          # density of the system
 
@@ -393,7 +392,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         epoch_err = pcerror[2]
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (Gr * res_sec_dict['Per'] * res_sec_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
+        constant1 = (G * res_sec_dict['Per'] * res_sec_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}     centered at  {}'.format(s+1, nsys, res_sec_dict['rl'], rl_err, res_sec_dict['epoch']))
 
