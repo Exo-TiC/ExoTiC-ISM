@@ -1,31 +1,25 @@
 """
-This code is based on Hannah Wakeford's IDL code for lightcurve extraction with marginalization over a set of systematic models.
-The original IDL scipts used are
+This code is based on Hannah Wakeford's IDL code for lightcurve extraction with marginalization over a set of
+systematic models. The original IDL scipts used are:
 G141_lightcurve_circle.pro - the translation of this code is in the G141_lightcurve_circle() function
 W17_lightcurve_test.pro - the translation of this code is in the main() function
 
-IDL's WHERE function returns -1 if nothing is found vs python returning an empty array. There are cases where this
-is important and is taken into account in the occultation functions.
 
-Running python G141_lightcurve_circle.py from the command line will execute the main() function.
-The code has only been tested significantly up to the first attempt at fitting the transit models, even that may contain
-yet to be discovered bugs. This point is marked in the code.  Everything after that point was a best attempt at
-quick translation from IDL. Running the code end to end does NOT produce consistent results with the IDL code so there
-are definitely bugs somewhere.
-
-The python code uses a python translation of the IDL MPFIT library instead of built LM fitters because for some reason
-neither the script least_squares method, the Astropy wrapper, or the lmfit package find the same minimum as the IDL code.
+Initially, the python code used a python translation of the IDL MPFIT library instead of built LM fitters because for
+some reason neither the script least_squares method, the Astropy wrapper, or the lmfit package find the same minimum
+as the IDL code.
 The python translation of MPFIT is consistent with the IDL code. In theory, all of these packages use the same method,
 so there may be some tuning parameters that need to be adjusted to agree with MPFIT (error tolerance, etc.).
 The python translation of mpfit (mpfit.py) comes from;
 https://github.com/scottransom/presto/blob/master/lib/python/mpfit.py
+This showed to be really flaky though, so we ditched all of that and are now using the fitting package Sherpa.
 
 limb_darkening.py contains a python translation of the 3D limb darkening code in the original IDL. It uses Astropy
 for fitting the models. Again, the two are not exactly consistent but in this case the difference is small (good to
 about 3 decimals).
 
 Initial translation of Python to IDL was done by Matthew Hill (mhill92@gmail).
-Continued by Iva Laginja (laginja.iva@gmail.com).
+Continued translation and implementation of Sherpa by Iva Laginja (laginja.iva@gmail.com).
 """
 
 import numpy as np
@@ -34,6 +28,7 @@ import time
 import sys
 import matplotlib.pyplot as plt
 from astropy import stats
+from astropy.constants import G
 from shutil import copy
 
 from config import CONFIG_INI
@@ -41,7 +36,7 @@ from limb_darkening import limb_dark_fit
 import margmodule as marg
 
 
-def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
+def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
 
@@ -55,39 +50,22 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     CITATIONS:
     This procedure follows the method outlined in Wakeford, et al. (2016, ApJ, 819, 1), using marginalisation across a
     stochastic grid of models. The program makes use of the analytic transit model in Mandel & Agol (2002, ApJ Letters,
-    580, L171-175) and Lavenberg-Markwardt least squares minimisation using the IDL routine MPFIT (Markwardt, 2009,
-    Book:Astronomical Data Analysis Software and Systems XVIII, 411, 251, Astronomical Society of the Pacific
-    Conference Series).
+    580, L171-175) and Lavenberg-Markwardt least squares minimisation using the Python package Sherpa.
     Here, a 4-parameter limb darkening law is used as outlined in Claret, 2010 and Sing et al. 2010.
 
     MAJOR PROGRAMS INCLUDED IN THIS ROUTINE:
     - LIMB-DARKENING (from limb_darkening.py)
         This requires the G141.WFC3.sensitivity.sav file, template.sav, kuruczlist.sav, and the kurucz folder with all
         models, as well as the 3D models in the folder 3DGrid.
-    - MANDEL & AGOL (2002) transit model (occultnl.pro/.py)
-    - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (hstmarg.wfc3_systematic_model_grid_selection() )
-    - IMPACT PARAMETER calculated if given an eccentricity (tap_transite2.pro)
+    - MANDEL & AGOL (2002) transit model (occultnl.py)
+    - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (marg.wfc3_systematic_model_grid_selection() )
 
     :param img_date: time array
     :param y: array of normalised flux values equal to the length of the x array
     :param err: array of error values corresponding to the flux values in y
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err)
-    :param data_params: priors for each parameter used in the fit passed in an array of the form
-        data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
-        - rl: transit depth (Rp/R*)
-        - epoch: center of transit time (in MJD)
-        - inclin: inclination of the planetary orbit
-        - MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
-               constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
-        - ecc: eccentricity of the system
-        - omega: omega of the system (degrees)
-        - Per: Period of the planet in days
-        - FeH: Stellar metallicity - limited ranges available
-        - Teff: Stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
-        - logg: stellar gravity - depends on whether 1D or 3D limb darkening models are used
     :param wavelength: array of wavelengths covered to compute y
-    :param grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
-    :param out_folder: string of folder path to save the data to, e.g. '/Volumes/DATA1/user/HST/Planet/sav_file/'
+    :param outDir: string of folder path to save the data to, e.g. '/Volumes/DATA1/user/HST/Planet/sav_file/'
     :param run_name: string of the individual run name, e.g. 'whitelight', or 'bin1', or '115-120micron'
     :param plotting: bool, default=True; whether or not interactive plots should be shown
     :return:
@@ -102,7 +80,6 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     #copy(os.path.join('config_local.ini'), outDir)
 
     # READ THE CONSTANTS
-    Gr = CONFIG_INI.getfloat('constants', 'big_G')
     day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period')
 
@@ -114,6 +91,21 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     nexposure = len(img_date)   # Total number of exposures in the observation
 
     # READ IN THE PLANET STARTING PARAMETERS
+    """
+    data_params: priors for each parameter used in the fit passed in an array of the form
+    data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
+    - rl: transit depth (Rp/R*)
+    - epoch: center of transit time (in MJD)
+    - inclin: inclination of the planetary orbit in degrees
+    - MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
+           constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
+    - ecc: eccentricity of the system
+    - omega: omega of the system (degrees)
+    - Per: Period of the planet in days
+    - FeH: Stellar metallicity - limited ranges available
+    - Teff: Stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
+    - logg: stellar gravity - depends on whether 1D or 3D limb darkening models are used
+    """
     rl = CONFIG_INI.getfloat('planet_parameters', 'rl')          # Rp/R* estimate
     epoch = CONFIG_INI.getfloat('planet_parameters', 'epoch')    # center of transit time in MJD
     inclin = CONFIG_INI.getfloat('planet_parameters', 'inclin') * ((2 * np.pi) / 360)   # inclination, converting it to radians
@@ -121,7 +113,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     omega = CONFIG_INI.getfloat('planet_parameters', 'omega') * ((2 * np.pi) / 360)    # orbital omega, converting it to radians
     Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * day_to_sec               # period in seconds
 
-    constant1 = ((Gr * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
+    constant1 = ((G * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
     aor = CONFIG_INI.getfloat('planet_parameters', 'aor')
     MsMpR = (aor / constant1) ** 3.                          # density of the system
 
@@ -165,6 +157,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
+    # grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
     grid_selection = CONFIG_INI.get('technical_parameters', 'grid_selection')
     grid = marg.wfc3_systematic_model_grid_selection(grid_selection)
     nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
@@ -393,7 +386,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         epoch_err = pcerror[2]
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (Gr * res_sec_dict['Per'] * res_sec_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
+        constant1 = (G * res_sec_dict['Per'] * res_sec_dict['Per'] / (4 * np.pi * np.pi)) ** (1 / 3.)
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}     centered at  {}'.format(s+1, nsys, res_sec_dict['rl'], rl_err, res_sec_dict['epoch']))
 
@@ -624,7 +617,7 @@ if __name__ == '__main__':
     plotting = CONFIG_INI.getboolean('technical_parameters', 'plotting')
 
     # Run the main function
-    G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting)
+    total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting)
 
     end_time = time.time()
     print('\nTime it took to run the code:', (end_time-start_time)/60, 'min')
