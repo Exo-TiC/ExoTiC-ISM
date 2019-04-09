@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from config import CONFIG_INI
-import hstmarg
+import margmodule as marg
 
 from sherpa.models import model
 from sherpa.data import Data1D
@@ -29,17 +29,17 @@ def _transit_circle(pars, x):
     (rl, flux, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4,
      m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4) = pars
 
-    phase = hstmarg.phase_calc(x, epoch, Per/day_to_sec)
-    HSTphase = hstmarg.phase_calc(x, T0, HSTper)
+    phase = marg.phase_calc(x, epoch, Per/day_to_sec)
+    HSTphase = marg.phase_calc(x, T0, HSTper)
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = hstmarg.impact_param(Per, MsMpR, phase, inclin)
+    b0 = marg.impact_param(Per, MsMpR, phase, inclin)
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
     # b0 is the impact parameter function and I am not sure how this is handled in BATMAN - I will also look into this.
-    mulimb0, mulimbf = hstmarg.occultnl(rl, c1, c2, c3, c4, b0)
-    systematic_model = hstmarg.sys_model(phase, HSTphase, sh, m_fac, hstp1,
+    mulimb0, mulimbf = marg.occultnl(rl, c1, c2, c3, c4, b0)
+    systematic_model = marg.sys_model(phase, HSTphase, sh, m_fac, hstp1,
                                          hstp2, hstp3, hstp4, xshift1, xshift2,
                                          xshift3, xshift4)
 

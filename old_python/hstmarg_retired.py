@@ -323,10 +323,10 @@ def marginalization(array, error, weight):
 def impact_param(per, msmpr, phase, incl):
     """
     Calculate impact parameter
-    :param per: period
+    :param per: period in seconds
     :param msmpr: MsMpR
     :param phase: phase
-    :param incl: inclination
+    :param incl: inclination in radians
     :return:
     """
 
