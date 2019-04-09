@@ -6,22 +6,6 @@ from config import CONFIG_INI
 Gr = CONFIG_INI.getfloat('constants', 'big_G')
 
 
-def residuals():
-    """
-    Not entirely sure what this function is (supposed to be) doing.
-    :return:
-    """
-    model = transit_circle(p, x, sh)
-    print('Rp/R* = {}'.format(p[0]))
-    resids = (y - model) / p[1]
-
-    print('Scatter = {}'.format(np.std(resids)))
-    print('-----------------------------------')
-    print(' ')
-
-    return [0, (y - model) / err]
-
-
 def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True):
     """
     Documentation missing.
