@@ -37,11 +37,8 @@ from astropy import stats
 from shutil import copy
 
 from config import CONFIG_INI
-from mpfit import mpfit
-#from mgefit.cap_mpfit import mpfit
-#from presto_mpfit import mpfit
 from limb_darkening import limb_dark_fit
-import hstmarg as hstmarg
+import margmodule as marg
 
 
 def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
@@ -169,7 +166,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
     grid_selection = CONFIG_INI.get('technical_parameters', 'grid_selection')
-    grid = hstmarg.wfc3_systematic_model_grid_selection(grid_selection)
+    grid = marg.wfc3_systematic_model_grid_selection(grid_selection)
     nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
 
     #  SET UP THE ARRAYS
@@ -200,10 +197,10 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         print('  ')
 
         # Displaying img_date in terms of HST PHASE, on an interval between -0.5 and 0.5
-        HSTphase = hstmarg.phase_calc(img_date, p0_dict['T0'], HST_period)
+        HSTphase = marg.phase_calc(img_date, p0_dict['T0'], HST_period)
 
         # Displaying img_date in terms of PLANET PHASE, on interval between -0.5 and 0.5
-        phase = hstmarg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per']/day_to_sec)
+        phase = marg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per']/day_to_sec)
 
 
         ###############
@@ -222,7 +219,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
 
         print('\nSTART MPFIT\n')
-        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=True)
+        mpfit_result = mpfit(marg.transit_circle, functkw=fa, parinfo=parinfo, quiet=True)
 
         print('\nTHIS ROUND OF MPFIT IS DONE\n')
 
@@ -244,8 +241,6 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         ind = np.where(systematics == 0)
         pcerror[ind] = covar_res
         """
-        print(pcerror)
-        sys.exit("TESTING")
 
 
         # Redefine all of the parameters given the MPFIT output
@@ -266,18 +261,18 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters
-        HSTphase = hstmarg.phase_calc(img_date, p0_fit_dict['T0'], HST_period)
-        phase = hstmarg.phase_calc(img_date, p0_fit_dict['epoch'], p0_fit_dict['Per']/day_to_sec)
+        HSTphase = marg.phase_calc(img_date, p0_fit_dict['T0'], HST_period)
+        phase = marg.phase_calc(img_date, p0_fit_dict['epoch'], p0_fit_dict['Per']/day_to_sec)
 
 
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
-        b0 = hstmarg.impact_param(p0_fit_dict['Per'], p0_fit_dict['MsMpR'], phase, p0_fit_dict['inclin'])
+        b0 = marg.impact_param(p0_fit_dict['Per'], p0_fit_dict['MsMpR'], phase, p0_fit_dict['inclin'])
 
-        mulimb01, mulimbf1 = hstmarg.occultnl(p0_fit_dict['rl'], p0_fit_dict['c1'], p0_fit_dict['c2'], p0_fit_dict['c3'], p0_fit_dict['c4'], b0)
+        mulimb01, mulimbf1 = marg.occultnl(p0_fit_dict['rl'], p0_fit_dict['c1'], p0_fit_dict['c2'], p0_fit_dict['c3'], p0_fit_dict['c4'], b0)
 
-        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, p0_fit_dict['m_fac'], p0_fit_dict['HSTP1'], p0_fit_dict['HSTP2'], p0_fit_dict['HSTP3'],
+        systematic_model = marg.sys_model(phase, HSTphase, sh, p0_fit_dict['m_fac'], p0_fit_dict['HSTP1'], p0_fit_dict['HSTP2'], p0_fit_dict['HSTP3'],
                                              p0_fit_dict['HSTP4'], p0_fit_dict['xshift1'], p0_fit_dict['xshift2'],
                                              p0_fit_dict['xshift3'], p0_fit_dict['xshift4'])
 
@@ -339,8 +334,8 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         p0_dict = {key: val for key, val in zip(p0_names, p0)}
 
         # HST Phase
-        HSTphase = hstmarg.phase_calc(img_date, p0_dict['T0'], HST_period)
-        phase = hstmarg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per']/day_to_sec)
+        HSTphase = marg.phase_calc(img_date, p0_dict['T0'], HST_period)
+        phase = marg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per']/day_to_sec)
 
         ###############
         # MPFIT - TWO #
@@ -355,7 +350,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
             parinfo.append(info)
 
         fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
-        mpfit_result = mpfit(hstmarg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
+        mpfit_result = mpfit(marg.transit_circle, functkw=fa, parinfo=parinfo, quiet=1)
         nfree = sum([not p['fixed'] for p in parinfo])
 
         pcerror = mpfit_result.perror  # this is how it should be done if it was right
@@ -404,25 +399,25 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
-        phase = hstmarg.phase_calc(img_date, res_sec_dict['epoch'], res_sec_dict['Per']/day_to_sec)
-        HSTphase = hstmarg.phase_calc(img_date, res_sec_dict['T0'], HST_period)
+        phase = marg.phase_calc(img_date, res_sec_dict['epoch'], res_sec_dict['Per']/day_to_sec)
+        HSTphase = marg.phase_calc(img_date, res_sec_dict['T0'], HST_period)
 
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function
-        b0 = hstmarg.impact_param(res_sec_dict['Per'], res_sec_dict['MsMpR'], phase, res_sec_dict['inclin'])
+        b0 = marg.impact_param(res_sec_dict['Per'], res_sec_dict['MsMpR'], phase, res_sec_dict['inclin'])
 
-        mulimb01, mulimbf1 = hstmarg.occultnl(res_sec_dict['rl'], res_sec_dict['c1'], res_sec_dict['c2'], res_sec_dict['c3'], res_sec_dict['c4'], b0)
+        mulimb01, mulimbf1 = marg.occultnl(res_sec_dict['rl'], res_sec_dict['c1'], res_sec_dict['c2'], res_sec_dict['c3'], res_sec_dict['c4'], b0)
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
         # Calculate the impact parameter based on the eccentricity function
         x2 = np.arange(4000) * 0.0001 - 0.2
-        b0 = hstmarg.impact_param(res_sec_dict['Per'], res_sec_dict['MsMpR'], x2, res_sec_dict['inclin'])
+        b0 = marg.impact_param(res_sec_dict['Per'], res_sec_dict['MsMpR'], x2, res_sec_dict['inclin'])
 
-        mulimb02, mulimbf2 = hstmarg.occultnl(res_sec_dict['rl'], res_sec_dict['c1'], res_sec_dict['c2'], res_sec_dict['c3'], res_sec_dict['c4'], b0)
+        mulimb02, mulimbf2 = marg.occultnl(res_sec_dict['rl'], res_sec_dict['c1'], res_sec_dict['c2'], res_sec_dict['c3'], res_sec_dict['c4'], b0)
 
-        systematic_model = hstmarg.sys_model(phase, HSTphase, sh, res_sec_dict['m_fac'], res_sec_dict['HSTP1'], res_sec_dict['HSTP2'],
+        systematic_model = marg.sys_model(phase, HSTphase, sh, res_sec_dict['m_fac'], res_sec_dict['HSTP1'], res_sec_dict['HSTP2'],
                                              res_sec_dict['HSTP3'], res_sec_dict['HSTP4'], res_sec_dict['xshift1'], res_sec_dict['xshift2'],
                                              res_sec_dict['xshift3'], res_sec_dict['xshift4'])
 
@@ -531,7 +526,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     best_sys = np.argmin(rl_sdnr)
 
     ### Radius ratio
-    marg_rl, marg_rl_err = hstmarg.marginalization(count_depth, count_depth_err, w_q)
+    marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
     print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
 
     print('SDNR best model = {}'.format(np.std(count_residuals[:, best_sys]) / np.sqrt(2) * 1e6))
@@ -574,24 +569,24 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
         #plt.hlines(0.0 - (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
         #plt.hlines(0.0 + (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
         plt.draw()
-        plt.pause(0.05)
+        plt.show()
 
     ### Center of transit time
-    marg_epoch, marg_epoch_err = hstmarg.marginalization(count_epoch, count_epoch_err, w_q)
+    marg_epoch, marg_epoch_err = marg.marginalization(count_epoch, count_epoch_err, w_q)
     print('Epoch = {} +/- {}'.format(marg_epoch, marg_epoch_err))
 
     ### Inclination in radians
-    marg_inclin_rad, marg_inclin_rad_err = hstmarg.marginalization(sys_params[:, 3], sys_params_err[:, 3], w_q)
+    marg_inclin_rad, marg_inclin_rad_err = marg.marginalization(sys_params[:, 3], sys_params_err[:, 3], w_q)
     print('inc (rads) = {} +/- {}'.format(marg_inclin_rad, marg_inclin_rad_err))
 
     ### Inclination in degrees
     conv1 = sys_params[:, 3] / (2 * np.pi / 360)
     conv2 = sys_params_err[:, 3] / (2 * np.pi / 360)
-    marg_inclin_deg, marg_inclin_deg_err = hstmarg.marginalization(conv1, conv2, w_q)
+    marg_inclin_deg, marg_inclin_deg_err = marg.marginalization(conv1, conv2, w_q)
     print('inc (deg) = {} +/- {}'.format(marg_inclin_deg, marg_inclin_deg_err))
 
     ### MsMpR
-    marg_msmpr, marg_msmpr_err = hstmarg.marginalization(sys_params[:, 4], sys_params_err[:, 4], w_q)
+    marg_msmpr, marg_msmpr_err = marg.marginalization(sys_params[:, 4], sys_params_err[:, 4], w_q)
     print('MsMpR = {} +/- {}'.format(marg_msmpr, marg_msmpr_err))
 
     marg_aors = constant1 * (marg_msmpr ** 0.333)
