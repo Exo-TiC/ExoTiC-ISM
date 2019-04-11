@@ -260,7 +260,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         # ...........................................
         # TRANSIT MODEL fit to the data
-        # Calculate the impact parameter based on the eccentricity function
+        # Calculate the impact parameter based on the eccentricity function, b0 in stellar radii
         b0 = marg.impact_param(p0_fit_dict['Per'], p0_fit_dict['MsMpR'], phase, p0_fit_dict['inclin'])
 
         mulimb01, mulimbf1 = marg.occultnl(p0_fit_dict['rl'], p0_fit_dict['c1'], p0_fit_dict['c2'], p0_fit_dict['c3'], p0_fit_dict['c4'], b0)
@@ -397,14 +397,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         # ...........................................
         # TRANSIT MODEL fit to the data
-        # Calculate the impact parameter based on the eccentricity function
+        # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
         b0 = marg.impact_param(res_sec_dict['Per'], res_sec_dict['MsMpR'], phase, res_sec_dict['inclin'])
 
         mulimb01, mulimbf1 = marg.occultnl(res_sec_dict['rl'], res_sec_dict['c1'], res_sec_dict['c2'], res_sec_dict['c3'], res_sec_dict['c4'], b0)
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
-        # Calculate the impact parameter based on the eccentricity function
+        # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
         x2 = np.arange(4000) * 0.0001 - 0.2
         b0 = marg.impact_param(res_sec_dict['Per'], res_sec_dict['MsMpR'], x2, res_sec_dict['inclin'])
 
