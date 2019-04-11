@@ -46,7 +46,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True)
         print('phase[0] = {}'.format(phase[0]))
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = impact_param(Per, MsMpR, phase, inclin)
+    b0 = impact_param(Per, MsMpR, phase, inclin)    # b0 in stellar radii
     if not silent:
         print(b0)
 
@@ -102,7 +102,7 @@ def _transit_model(pars, x):
     HSTphase = phase_calc(x, T0, HSTper)
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = impact_param(per*day_to_sec, MsMpR, phase, inclin)  # period in sec here, incl in radians
+    b0 = impact_param(per*day_to_sec, MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
@@ -239,7 +239,7 @@ def occultuniform(b0, w):
     """
     Compute the lightcurve for occultation of a uniform source without microlensing (Mandel & Agol 2002).
 
-    :param b0: array; impact parameter in units of stellar radius
+    :param b0: array; impact parameter in units of stellar radii
     :param w: array; occulting star size in units of stellar radius
     :return: muo1: float; fraction of flux at each b0 for a uniform source
     """
