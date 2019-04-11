@@ -114,8 +114,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * day_to_sec               # period in seconds
 
     constant1 = ((G * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
-    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')
-    MsMpR = (aor / constant1) ** 3.                          # density of the system
+    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')    # this is unitless -> "distance of the planet from the star (meters)/stellar radius (meters)"
+    MsMpR = (aor / constant1) ** 3.     # density of the system in kg/m^3 "(Mass of star (kg) + Mass of planet (kg))/(Radius of star (m)^3)"
 
     # SET THE STARTING PARAMETERS FOR THE SYSTEMATIC MODELS
     m_fac = 0.0  # Linear Slope

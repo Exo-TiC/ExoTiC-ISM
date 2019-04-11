@@ -474,11 +474,11 @@ if __name__ == '__main__':
     ecc = 0.0 * u.deg                   # eccentricity in degrees
     omega = 0.0 * u.deg                 # that other weird angle in degrees
     per = 3.73548535 * u.d              # period in days
-    aor = 7.0780354                     # a/r_star converted to system density for the subroutine
+    aor = 7.0780354                     # a/r_star, which is unitless -> "distance of the planet from the star (meters)/stellar radius (meters)"
 
     # Calculate msmpr, the density of the system
     constant1 = ((G * np.square(per)) / (4 * np.square(np.pi))) ** (1 / 3)
-    msmpr = (aor / constant1) ** 3.                          # density of the system
+    msmpr = (aor / constant1) ** 3.     # density of the system in kg/m^3 "(Mass of star (kg) + Mass of planet (kg))/(Radius of star (m)^3)"
 
     # Import some data
     localDir = CONFIG_INI.get('data_paths', 'local_path')
