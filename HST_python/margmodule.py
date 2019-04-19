@@ -70,7 +70,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True)
     return [0, (y - model) / err]
 
 
-def _transit_model(pars, x):
+def _transit_model(pars, x, sh):
     """
     Transit model by Mandel & Agol (2002).
     --------
@@ -84,31 +84,39 @@ def _transit_model(pars, x):
     ecc: eccentricity of system
     omega: that other weird angle in a planetary system
     per: period of transit in days
-    T0: first x-array data entry in days (MJD)
+    tzero: first x-array data entry in days (MJD)
     c1, c2, c3, c4: limb darkening parameters (quadratic)
     m_fac: ?
     hstp1, hstp2, hstp3, hstp4: HST period systematic parameters (units?)
     xshift1, xshift2, xshift3, xshift4: shift systematic parameters (units?)
+
+    x: array; input time grid
+    sh: array, input shifts
     """
 
-    HSTper = CONFIG_INI.getfloat('constants', 'HST_period')
-    day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
+    HSTper = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
 
     # Define each of the parameters that are read into the fitting routine
-    (rl, flux, epoch, inclin, MsMpR, ecc, omega, per, T0, c1, c2, c3, c4,
+    (rl, flux, epoch, inclin, MsMpR, ecc, omega, per, tzero, c1, c2, c3, c4,
      m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4) = pars
 
+    # Attaching some units
+    x *= u.d
+    epoch *= u.d
+    inclin *= u.rad
+    per *= u.d
+    tzero *= u.d
+
     phase = phase_calc(x, epoch, per)  # Per in days here
-    HSTphase = phase_calc(x, T0, HSTper)
+    HSTphase = phase_calc(x, tzero, HSTper)
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = impact_param(per*day_to_sec, MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
+    b0 = impact_param(per.to(u.second), MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
     # b0 is the impact parameter function and I am not sure how this is handled in BATMAN - need to look into this.
     mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
-    sh = np.ones_like(x) * 0.00278449  # TODO: replace with real data
     systematic_model = sys_model(phase, HSTphase, sh, m_fac, hstp1, hstp2, hstp3, hstp4,
                                  xshift1, xshift2, xshift3, xshift4)
 
@@ -121,7 +129,7 @@ def _transit_model(pars, x):
 class Transit(model.RegriddableModel1D):
     """Transit model"""
 
-    def __init__(self, name='transit'):
+    def __init__(self, name='transit', sh=None):
         self.rl = model.Parameter(name, 'rl', 0.12169232)
         self.flux = model.Parameter(name, 'flux', 1.)
         self.epoch = model.Parameter(name, 'epoch', 57957.970153390, units='days [MJD]')
@@ -145,6 +153,8 @@ class Transit(model.RegriddableModel1D):
         self.xshift3 = model.Parameter(name, 'xshift3', 0)
         self.xshift4 = model.Parameter(name, 'xshift4', 0)
 
+        self.sh_array = sh   # This is not a model parameter but an extra input to the model, like x is
+
         model.RegriddableModel1D.__init__(self, name,
                                           (self.rl, self.flux, self.epoch,
                                            self.inclin, self.msmpr, self.ecc,
@@ -156,7 +166,7 @@ class Transit(model.RegriddableModel1D):
 
     def calc(self, pars, x, *args, **kwargs):
         """Evaluate the model"""
-        return _transit_model(pars, x)
+        return _transit_model(pars, x, self.sh_array)
 
 
 def occultnl(rl, c1, c2, c3, c4, b0):
@@ -250,9 +260,11 @@ def occultuniform(b0, w):
     nb = len(np.atleast_1d(b0))
     muo1 = np.zeros(nb)
 
+
     for i in range(nb):
         # substitute z=b0(i) to shorten expressions
         z = np.atleast_1d(b0)[i]
+        z = z.value    # stripping it of astropy units
         if z >= 1+w:
             muo1[i] = 1.0
             continue
