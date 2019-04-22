@@ -140,7 +140,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     limbDir = os.path.join('..', 'Limb-darkening')
     ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
     grat = CONFIG_INI.get('technical_parameters', 'grating')
-    uLD, c1, c2, c3, c4, cp1, cp2, cp3, cp4, aLD, bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
+    _uLD, c1, c2, c3, c4, _cp1, _cp2, _cp3, _cp4, _aLD, _bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
                                                                       ld_model)
     # =======================
 
