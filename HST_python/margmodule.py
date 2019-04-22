@@ -9,6 +9,14 @@ from sherpa.models import model
 
 from config import CONFIG_INI
 
+# Read planet parameters from configfile
+RL = CONFIG_INI.getfloat('planet_parameters', 'rl')
+EPOCH = CONFIG_INI.getfloat('planet_parameters', 'epoch')
+INCLIN = CONFIG_INI.getfloat('planet_parameters', 'inclin')
+ECC = CONFIG_INI.getfloat('planet_parameters', 'ecc')
+OMEGA = CONFIG_INI.getfloat('planet_parameters', 'omega')
+PERIOD = CONFIG_INI.getfloat('planet_parameters', 'Per')
+
 
 def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True):
     """
@@ -129,20 +137,20 @@ def _transit_model(pars, x, sh):
 class Transit(model.RegriddableModel1D):
     """Transit model"""
 
-    def __init__(self, name='transit', sh=None):
-        self.rl = model.Parameter(name, 'rl', 0.12169232)
-        self.flux = model.Parameter(name, 'flux', 1.)
-        self.epoch = model.Parameter(name, 'epoch', 57957.970153390, units='days [MJD]')
-        self.inclin = model.Parameter(name, 'inclin', np.deg2rad(87.34635), units='radians')
-        self.msmpr = model.Parameter(name, 'msmpr', 2014.1042)
-        self.ecc = model.Parameter(name, 'ecc', 0, units='degrees')
-        self.omega = model.Parameter(name, 'omega', 0, units='degrees')
-        self.period = model.Parameter(name, 'period', 3.73548535, units='days')
-        self.tzero = model.Parameter(name, 'tzero', 557957.859985, units='days [MJD]')
-        self.c1 = model.Parameter(name, 'c1', 0)
-        self.c2 = model.Parameter(name, 'c2', 0)
-        self.c3 = model.Parameter(name, 'c3', 0)
-        self.c4 = model.Parameter(name, 'c4', 0)
+    def __init__(self, tzero, msmpr, c1, c2, c3, c4, flux0=1., name='transit', sh=None):
+        self.rl = model.Parameter(name, 'rl', RL)
+        self.flux = model.Parameter(name, 'flux', flux0)
+        self.epoch = model.Parameter(name, 'epoch', EPOCH, units='days [MJD]')
+        self.inclin = model.Parameter(name, 'inclin', np.deg2rad(INCLIN), units='radians')
+        self.msmpr = model.Parameter(name, 'msmpr', msmpr)
+        self.ecc = model.Parameter(name, 'ecc', ECC, units='degrees')
+        self.omega = model.Parameter(name, 'omega', np.deg2rad(OMEGA), units='degrees')
+        self.period = model.Parameter(name, 'period', PERIOD, units='days')
+        self.tzero = model.Parameter(name, 'tzero', tzero, units='days [MJD]')
+        self.c1 = model.Parameter(name, 'c1', c1)
+        self.c2 = model.Parameter(name, 'c2', c2)
+        self.c3 = model.Parameter(name, 'c3', c3)
+        self.c4 = model.Parameter(name, 'c4', c4)
         self.m_fac = model.Parameter(name, 'm_fac', 0, units='?')
         self.hstp1 = model.Parameter(name, 'hstp1', 0)
         self.hstp2 = model.Parameter(name, 'hstp2', 0)
