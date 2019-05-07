@@ -94,7 +94,7 @@ def _transit_model(pars, x, sh):
     per: period of transit in days
     tzero: first x-array data entry in days (MJD)
     c1, c2, c3, c4: limb darkening parameters (quadratic)
-    m_fac: ?
+    m_fac: global slope factor in the systematic model
     hstp1, hstp2, hstp3, hstp4: HST period systematic parameters (units?)
     xshift1, xshift2, xshift3, xshift4: shift systematic parameters (units?)
 
