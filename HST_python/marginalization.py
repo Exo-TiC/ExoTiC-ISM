@@ -27,9 +27,14 @@ import os
 import time
 import sys
 import matplotlib.pyplot as plt
-from astropy import stats
+import astropy.units as u
 from astropy.constants import G
 from shutil import copy
+
+from sherpa.data import Data1D
+from sherpa.optmethods import LevMar
+from sherpa.stats import Chi2
+from sherpa.fit import Fit
 
 from config import CONFIG_INI
 from limb_darkening import limb_dark_fit
@@ -74,23 +79,23 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     print(
         'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with'
         '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes'
-        'Please hold.')
+        'Please hold.'
+        '\n This is the version using SHERPA for fitting.')
 
     # Copy the config.ini to the experiment folder.
     #copy(os.path.join('config_local.ini'), outDir)
 
     # READ THE CONSTANTS
-    day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
-    HST_period = CONFIG_INI.getfloat('constants', 'HST_period')
+    HST_period = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
 
     # We want to keep the raw data as is, so we generate helper arrays that will get changed from model to model
-    img_date = x    # time array
+    img_date = x * u.d    # time array
     img_flux = y    # flux array
-    flux0 = img_flux[0]   # first flux data point
-    T0 = img_date[0]      # first time data point
-    nexposure = len(img_date)   # Total number of exposures in the observation
+    flux0 = y[0]   # first flux data point
+    tzero = x[0] * u.d      # first time data point
+    nexposure = len(img_date)   # Total number of exposures in the observation #TODO: check if still needed
 
-    # READ IN THE PLANET STARTING PARAMETERS
+    # READ IN THE PLANET STARTING PARAMETERS   #TODO: this goes into the docstring of the Sherpa transit model
     """
     data_params: priors for each parameter used in the fit passed in an array of the form
     data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
@@ -106,54 +111,27 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     - Teff: Stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
     - logg: stellar gravity - depends on whether 1D or 3D limb darkening models are used
     """
-    rl = CONFIG_INI.getfloat('planet_parameters', 'rl')          # Rp/R* estimate
-    epoch = CONFIG_INI.getfloat('planet_parameters', 'epoch')    # center of transit time in MJD
-    inclin = CONFIG_INI.getfloat('planet_parameters', 'inclin') * ((2 * np.pi) / 360)   # inclination, converting it to radians
-    ecc = CONFIG_INI.getfloat('planet_parameters', 'ecc')                            # eccentricity
-    omega = CONFIG_INI.getfloat('planet_parameters', 'omega') * ((2 * np.pi) / 360)    # orbital omega, converting it to radians
-    Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * day_to_sec               # period in seconds
+
+    Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * u.d    # period, converted to seconds in next line
+    Per = Per.to(u.s)
 
     constant1 = ((G * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
     aor = CONFIG_INI.getfloat('planet_parameters', 'aor')    # this is unitless -> "distance of the planet from the star (meters)/stellar radius (meters)"
     MsMpR = (aor / constant1) ** 3.     # density of the system in kg/m^3 "(Mass of star (kg) + Mass of planet (kg))/(Radius of star (m)^3)"
 
-    # SET THE STARTING PARAMETERS FOR THE SYSTEMATIC MODELS
-    m_fac = 0.0  # Linear Slope
-    HSTP1 = 0.0  # Correct HST orbital phase
-    HSTP2 = 0.0  # Correct HST orbital phase^2
-    HSTP3 = 0.0  # Correct HST orbital phase^3
-    HSTP4 = 0.0  # Correct HST orbital phase^4
-    xshift1 = 0.0  # X-shift in wavelength
-    xshift2 = 0.0  # X-shift in wavelength^2
-    xshift3 = 0.0  # X-shift in wavelength^3
-    xshift4 = 0.0  # X-shift in wavelength^4
-
-    # =======================
     # LIMB DARKENING
-    # NEW: Implement a suggestion for the user to use 3D if his parameters match the options available in the 3D models
+    #TODO: Implement a suggestion for the user to use 3D if his parameters match the options available in the 3D models
 
     M_H = CONFIG_INI.getfloat('limb_darkening', 'metallicity')    # metallicity
     Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')   # effective temperature
     logg = CONFIG_INI.getfloat('limb_darkening', 'logg')   # log(g), gravitation
 
-    # Defien limb darkening directory, which is inside this package
+    # Define limb darkening directory, which is inside this package
     limbDir = os.path.join('..', 'Limb-darkening')
     ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
     grat = CONFIG_INI.get('technical_parameters', 'grating')
     _uLD, c1, c2, c3, c4, _cp1, _cp2, _cp3, _cp4, _aLD, _bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
                                                                       ld_model)
-    # =======================
-
-    # PLACE ALL THE PRIORS IN AN ARRAY
-    # p0 =        [0,    1,     2,      3,     4,    5,    6,    7,  8,  9,  10, 11, 12,  13,    14,    15,    16,    17,     18,      19,      20,      21   ]
-    p0 = np.array([rl, flux0, epoch, inclin, MsMpR, ecc, omega, Per, T0, c1, c2, c3, c4, m_fac, HSTP1, HSTP2, HSTP3, HSTP4, xshift1, xshift2, xshift3, xshift4])
-
-    # Create an array with the names of the priors
-    p0_names = np.array(['rl', 'flux0', 'epoch', 'inclin', 'MsMpR', 'ecc', 'omega', 'Per', 'T0', 'c1', 'c2', 'c3', 'c4',
-                         'm_fac', 'HSTP1', 'HSTP2', 'HSTP3', 'HSTP4', 'xshift1', 'xshift2', 'xshift3', 'xshift4'])
-
-    # Create a dictionary for easier use in calculations
-    p0_dict = {key: val for key, val in zip(p0_names, p0)}
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
@@ -163,10 +141,28 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
 
     #  SET UP THE ARRAYS
-
     # save arrays for the first step through to get the err inflation
     w_scatter = np.zeros(nsys)
     w_params = np.zeros((nsys, nparams))   # p0 parameters, but for all the systems in one single array, so that we can acces each one of the individually during the second fit
+
+    # Set up the Sherpa data model
+    # Instantiate a data object
+    data = Data1D('Data', x, y, staterror=err)
+    print(data)
+
+    # Plot the data with Sherpa
+    # dplot = DataPlot()
+    # dplot.prepare(data)
+    # dplot.plot()
+
+    # Set up the Sherpa transit model
+    tmodel = marg.Transit(tzero, MsMpR, c1, c2, c3, c4, flux0, name="testmodel", sh=sh)
+    print('Starting parameters for transit model:\n')
+    print(tmodel)
+
+    # Set up statistics and optimizer
+    stat = Chi2()
+    opt = LevMar()
 
     #################################
     #           FIRST FIT           #
@@ -179,104 +175,60 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         'the inherent scatter in the data for each model.')
 
     # Loop over all systems (= parameter combinations)
-    for s in range(nsys):
+    for i, sys in enumerate(grid):
         print('\n################################')
-        print('SYSTEMATIC MODEL {} of {}'.format(s+1, nsys))
-        systematics = grid[s, :]
+        print('SYSTEMATIC MODEL {} of {}'.format(i+1, nsys))
+
         print('Systematics - fixed and free parameters:')
-        print_dict = {name: fix for name, fix in zip(p0_names, systematics)}   # this is just for printing purposes
-        print(print_dict)
-        print(systematics)
+        print(sys)
         print('  ')
 
-        # Displaying img_date in terms of HST PHASE, on an interval between -0.5 and 0.5
-        HSTphase = marg.phase_calc(img_date, p0_dict['T0'], HST_period)
-
-        # Displaying img_date in terms of PLANET PHASE, on interval between -0.5 and 0.5
-        phase = marg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per']/day_to_sec)
-
-
-        ###############
-        # MPFIT - ONE #
-        ###############
-
-        # Create two dictionaries in which each parameter in p0 gets some extra parameters assigned, which we then feed
-        # into mpfit. This dictionary has the sole purpose of preparing the input data for mpfit in such a way that
-        # it works.
-        parinfo = []
-        for i, value in enumerate(p0):
-            info = {'value': 0., 'fixed': 0, 'limited': [0, 0], 'limits': [0., 0.]}
-            info['value'] = value
-            info['fixed'] = systematics[i]
-            parinfo.append(info)
-        fa = {'x': img_date, 'y': img_flux, 'err': err, 'sh': sh}
-
-        print('\nSTART MPFIT\n')
-        mpfit_result = mpfit(marg.transit_circle, functkw=fa, parinfo=parinfo, quiet=True)
-
-        print('\nTHIS ROUND OF MPFIT IS DONE\n')
-
         # Count free parameters by figuring out how many zeros we have in the current systematics
-        nfree = sum([not p['fixed'] for p in parinfo])
+        nfree = np.sum(sys)
 
-        # The python mpfit does not populate the covariance matrix correctly so mpfit_result.perror is not correct
-        # the mpfit_result.covar is filled sequentially by row with the values of only free parameters, this works if
-        # all parameters are free but not if some are kept fixed.  The code below should work to get the proper error
-        # values i.e. what should be the diagonals of the covariance.
+        # Set up systematics for current run
+        for k, select in enumerate(sys):
+            if select == 0:
+                tmodel.pars[k].thaw()
+            elif select == 1:
+                tmodel.pars[k].freeze()
 
-        pcerror = mpfit_result.perror  # this is how it should be done if it was right
-        """
-        pcerror = np.zeros_like(mpfit_result.perror)
-        covar_res = np.zeros(nfree)
-        covar_res[:nfree] = np.sqrt(
-            np.diag(mpfit_result.covar.flatten()[:nfree ** 2].reshape(nfree, nfree)))  # this might work...
+        print('\nSTART FIT\n')
+        tfit = Fit(data, tmodel, stat=stat, method=opt)  # Instantiate fit object   #TODO: can I take this out of the loop?
+        tres = tfit.fit()  # do the fit
+        if not tres.succeeded: print(tres.message)
+        print('\nTHIS ROUND OF SHERPA FIT IS DONE\n')
 
-        ind = np.where(systematics == 0)
-        pcerror[ind] = covar_res
-        """
+        # Save results of fit
+        w_params[i, :] = tres.parvals   #TODO: this can probably be done more elegantly
 
-
-        # Redefine all of the parameters given the MPFIT output
-        w_params[s, :] = mpfit_result.params
-        # Populate parameters with fits results
-        p0_fit = w_params[s, :]
-        # Recreate the dictionary
-        p0_fit_dict = {key: val for key, val in zip(p0_names, p0_fit)}
-
-
-        # Populate some errors from pcerror array
-        # pcerror = [rl_err, flux0_err, epoch_err, inclin_err, msmpr_err, ecc_err, omega_err, per_err, T0_err,
-        #           c1_err, c2_err, c3_err, c4_err, m_err, hst1_err, hst2_err, hst3_err, hst4_err, sh1_err, sh2_err,
-        #           sh3_err, sh4_err]
-        rl_err = pcerror[0]
-        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at  {}'.format(s+1, nsys, p0_fit_dict['rl'], rl_err, p0_fit_dict['epoch']))
-
+        # Calculate the error on rl
+        rl_err = tfit.est_errors(parlist=(tmodel.rl,))
+        print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters
-        HSTphase = marg.phase_calc(img_date, p0_fit_dict['T0'], HST_period)
-        phase = marg.phase_calc(img_date, p0_fit_dict['epoch'], p0_fit_dict['Per']/day_to_sec)
+        HSTphase = marg.phase_calc(img_date, tmodel.tzero.val*u.d, HST_period)
+        phase = marg.phase_calc(img_date, tmodel.epoch.val*u.d, tmodel.Per.val*u.d)
 
-
-        # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function, b0 in stellar radii
-        b0 = marg.impact_param(p0_fit_dict['Per'], p0_fit_dict['MsMpR'], phase, p0_fit_dict['inclin'])
+        b0 = marg.impact_param((tmodel.Per.val*u.d).to(u.sec), tmodel.msmpr.val, phase, tmodel.inclin.val)
 
-        mulimb01, mulimbf1 = marg.occultnl(p0_fit_dict['rl'], p0_fit_dict['c1'], p0_fit_dict['c2'], p0_fit_dict['c3'], p0_fit_dict['c4'], b0)
+        mulimb01, mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
 
-        systematic_model = marg.sys_model(phase, HSTphase, sh, p0_fit_dict['m_fac'], p0_fit_dict['HSTP1'], p0_fit_dict['HSTP2'], p0_fit_dict['HSTP3'],
-                                             p0_fit_dict['HSTP4'], p0_fit_dict['xshift1'], p0_fit_dict['xshift2'],
-                                             p0_fit_dict['xshift3'], p0_fit_dict['xshift4'])
+        systematic_model = marg.sys_model(phase, HSTphase, sh, tmodel.m_fac.val, tmodel.hstp1.val, tmodel.hstp2.val,
+                                          tmodel.hstp3.val, tmodel.hstp4.val, tmodel.xshift1.val, tmodel.xshift2.val,
+                                          tmodel.xshift3.val, tmodel.xshift4.val)
 
         # Calculate final form of the model fit
-        w_model = mulimb01 * p0_fit_dict['flux0'] * systematic_model   # see Wakeford et al. 2016, Eq. 1
-        # Calculate the residuals
-        w_residuals = (img_flux - w_model) / p0_fit_dict['flux0']
+        w_model = mulimb01 * tmodel.flux.val * systematic_model   # see Wakeford et al. 2016, Eq. 1
+        # Calculate the residuals - data minus model (and normalized)
+        w_residuals = (img_flux - w_model) / tmodel.flux.val
         # Calculate more stuff
-        corrected_data = img_flux / (p0_fit_dict['flux0'] * systematic_model)
-        w_scatter[s] = np.std(w_residuals)
-        print('Scatter on the residuals = {}'.format(w_scatter[s]))   # this result is rather different to IDL result
+        corrected_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: what is this and do we need it?
+        w_scatter[i] = np.std(w_residuals)
+        print('Scatter on the residuals = {}'.format(w_scatter[i]))   # this result is rather different to IDL result
 
     np.savez(os.path.join(outDir, 'run1_scatter_'+run_name), w_scatter=w_scatter, w_params=w_params)
 
@@ -327,8 +279,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         p0_dict = {key: val for key, val in zip(p0_names, p0)}
 
         # HST Phase
-        HSTphase = marg.phase_calc(img_date, p0_dict['T0'], HST_period)
-        phase = marg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per']/day_to_sec)
+        HSTphase = marg.phase_calc(img_date, p0_dict['tzero'], HST_period)
+        phase = marg.phase_calc(img_date, p0_dict['epoch'], p0_dict['Per'])
 
         ###############
         # MPFIT - TWO #
@@ -379,7 +331,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # Recreate the dictionary
         res_sec_dict = {key: val for key, val in zip(p0_names, res_sec)}
 
-        # pcerror = [rl_err, flux0_err, epoch_err, inclin_err, msmpr_err, ecc_err, omega_err, per_err, T0_err,
+        # pcerror = [rl_err, flux0_err, epoch_err, inclin_err, msmpr_err, ecc_err, omega_err, per_err, tzero_err,
         #           c1_err, c2_err, c3_err, c4_err, m_err, HSTP1_err, HSTP2_err, HSTP3_err, HSTP4_err, xshift1_err,
         #           xshift2_err, xshift3_err, xshift4_err]
         rl_err = pcerror[0]
@@ -392,8 +344,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
-        phase = marg.phase_calc(img_date, res_sec_dict['epoch'], res_sec_dict['Per']/day_to_sec)
-        HSTphase = marg.phase_calc(img_date, res_sec_dict['T0'], HST_period)
+        phase = marg.phase_calc(img_date, res_sec_dict['epoch'], res_sec_dict['Per'])
+        HSTphase = marg.phase_calc(img_date, res_sec_dict['tzero'], HST_period)
 
         # ...........................................
         # TRANSIT MODEL fit to the data
