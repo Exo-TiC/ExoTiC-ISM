@@ -32,7 +32,7 @@ from astropy.constants import G
 from shutil import copy
 
 from sherpa.data import Data1D
-from sherpa.optmethods import LevMar
+from sherpa.optmethods import LevMar, NelderMead
 from sherpa.stats import Chi2
 from sherpa.fit import Fit
 
@@ -95,7 +95,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     tzero = x[0] * u.d      # first time data point
     nexposure = len(img_date)   # Total number of exposures in the observation
 
-    # READ IN THE PLANET STARTING PARAMETERS   #TODO: this goes into the docstring of the Sherpa transit model
+    # READ IN THE PLANET STARTING PARAMETERS   #TODO: this block goes into the docstring of the Sherpa transit model
     """
     data_params: priors for each parameter used in the fit passed in an array of the form
     data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
@@ -163,6 +163,10 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     # Set up statistics and optimizer
     stat = Chi2()
     opt = LevMar()
+    #opt = NelderMead()   #TODO: include a choice for this in configfile; figure out which one to use considering epoch problem
+
+    # Set up the fit object
+    tfit = Fit(tdata, tmodel, stat=stat, method=opt)  # Instantiate fit object
 
     #################################
     #           FIRST FIT           #
@@ -176,6 +180,9 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     # Loop over all systems (= parameter combinations)
     for i, sys in enumerate(grid):
+
+        start_one_first_loop = time.time()
+
         print('\n################################')
         print('SYSTEMATIC MODEL {} of {}'.format(i+1, nsys))
 
@@ -189,28 +196,32 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
                 tmodel.pars[k].thaw()
             elif select == 1:
                 tmodel.pars[k].freeze()
+        tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltoghether); this is here only for testing
 
-        print('\nSTART 1st FIT\n')
-        tfit = Fit(tdata, tmodel, stat=stat, method=opt)  # Instantiate fit object   #TODO: can I take this out of the loop?
+        print('\nSTART 1st FIT')
         tres = tfit.fit()  # do the fit
-        if not tres.succeeded: print(tres.message)
+        if not tres.succeeded:
+            print(tres.message)
         print('\n1st ROUND OF SHERPA FIT IS DONE\n')
 
-        # Save results of fit
-        w_params[i, :] = tres.parvals   #TODO: this can probably be done more elegantly
+        # Save results of fit   #TODO: this can probably be done more elegantly and without a loop
+        for pval in range(len(tres.parvals)):
+            w_params[i, pval] = tres.parvals[pval]
 
         # Calculate the error on rl
-        rl_err = tfit.est_errors(parlist=(tmodel.rl,))
+        print('Calculating error on rl...')
+        calc_errors = tfit.est_errors(parlist=(tmodel.rl,))
+        rl_err = calc_errors.parvals[0]
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters
         HSTphase = marg.phase_calc(img_date, tmodel.tzero.val*u.d, HST_period)
-        phase = marg.phase_calc(img_date, tmodel.epoch.val*u.d, tmodel.Per.val*u.d)
+        phase = marg.phase_calc(img_date, tmodel.epoch.val*u.d, tmodel.period.val*u.d)
 
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function, b0 in stellar radii
-        b0 = marg.impact_param((tmodel.Per.val*u.d).to(u.sec), tmodel.msmpr.val, phase, tmodel.inclin.val)
+        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
         mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
 
         systematic_model = marg.sys_model(phase, HSTphase, sh, tmodel.m_fac.val, tmodel.hstp1.val, tmodel.hstp2.val,
@@ -224,10 +235,15 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # Calculate more stuff
         corrected_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: what is this and do we need it?
         w_scatter[i] = np.std(w_residuals)
-        print('Scatter on the residuals = {}'.format(w_scatter[i]))   # this result is rather different to IDL result
+        print('\nScatter on the residuals = {}'.format(w_scatter[i]))   # this result is rather different to IDL result
 
         # Reset the model parameters to the input parameters
         tmodel.reset()
+
+        # Show how long one iteration takes
+        end_one_first_loop = time.time()
+        one_loop = end_one_first_loop - start_one_first_loop
+        print('This 1st loop took {} sec = {} min'.format(one_loop, one_loop/60))
 
     np.savez(os.path.join(outDir, 'run1_scatter_'+run_name), w_scatter=w_scatter, w_params=w_params)
 
@@ -270,8 +286,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # Rescale the err array by the standard deviation of the residuals from the 1st fit.
         err *= (1.0 - w_scatter[i])   # w_scatter are residuals
 
-        # Create new Sherpa object with updated errors on flux
-        #TODO: do I need a new object for every single systematic model?
+        # Update the data object with the new errors
+        tdata.staterror = err
 
         # Count free parameters by figuring out how many zeros we have in the current systematics
         nfree = np.sum(sys)
@@ -282,22 +298,26 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
                 tmodel.pars[k].thaw()
             elif select == 1:
                 tmodel.pars[k].freeze()
+        tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltoghether); this is here only for testing
 
         print('\nSTART 2nd FIT\n')
-        tfit = Fit(tdata, tmodel, stat=stat, method=opt)  # Instantiate fit object   #TODO: can I take this out of the loop?
         tres = tfit.fit()  # do the fit
-        if not tres.succeeded: print(tres.message)
+        if not tres.succeeded:
+            print(tres.message)
         print('\n2nd ROUND OF SHERPA FIT IS DONE\n')
 
-        rl_err, epoch_err = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
+        print('Calculating errors...')
+        calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
+        rl_err = calc_errors.parvals[0]
+        epoch_err = calc_errors.parvals[1]
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
-        #TODO: fill this section from the fit results
         # From mpfit define the DOF, BIC, AIC & CHI
-        bestnorm = mpfit_result.fnorm  # chi squared of resulting fit
+        bestnorm = tfit.calc_stat_chisqr()  # chi squared of resulting fit    #TODO: check if this is correct
         BIC = bestnorm + nfree * np.log(len(img_date))
         AIC = bestnorm + nfree
-        DOF = len(img_date) - sum([p['fixed'] != 1 for p in parinfo])  # nfree
+        #DOF = len(img_date) - sum([p['fixed'] != 1 for p in parinfo])  # nfree   #TODO: what is this exactly? I believe the bracket is simply nfree
+        DOF = len(img_date) - nfree    #TODO: this might be right or might be wrong. check.
         CHI = bestnorm
 
         # EVIDENCE BASED on the AIC and BIC
@@ -306,16 +326,9 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         evidence_BIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * BIC
         evidence_AIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * AIC
-        #TODO: ... all the way till here
-
-        # Redefine all of the parameters given the MPFIT output
-        # Redefine array
-        #res_sec = mpfit_result.params
-        # Recreate the dictionary
-        #res_sec_dict = {key: val for key, val in zip(p0_names, res_sec)}  #TODO: this is the second round result
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (G * np.square(tmodel.period.val) / (4 * np.pi * np.pi)) ** (1 / 3.)
+        constant1 = (G * np.square((tmodel.period.val*u.d).to(u.sec)) / (4 * np.pi * np.pi)) ** (1 / 3.)
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
@@ -325,14 +338,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
-        b0 = marg.impact_param((tmodel.Per.val*u.d).to(u.sec), tmodel.msmpr.val, phase, tmodel.inclin.val)
+        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.sec), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
         mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
         x2 = np.arange(4000) * 0.0001 - 0.2   #TODO: What is happening here?
-        b0 = marg.impact_param((tmodel.Per.val*u.d).to(u.sec), tmodel.msmpr.val, x2, tmodel.inclin.val)
+        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.sec), tmodel.msmpr.val, x2, tmodel.inclin.val*u.rad)
         mulimb02, _mulimbf2 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
 
         systematic_model = marg.sys_model(phase, HSTphase, sh, tmodel.m_fac.val, tmodel.hstp1.val, tmodel.hstp2.val,
@@ -343,7 +356,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         residuals = (img_flux - fit_model) / tmodel.flux.val
         resid_scatter = np.std(w_residuals)    #TODO: where does w_residuals come from? It seems like it's just the last one from the first fit, that wouldn't make any sense.
         fit_data = img_flux / (tmodel.flux.val * systematic_model)
-        fit_err = np.copy(err)  # * (1.0 + resid_scatter)
+        fit_err = np.copy(err)  # * (1.0 + resid_scatter)   #TODO: do I really need to redefine fit_err or can I just save err further below?
 
         if plotting:
             plt.figure(2)
@@ -381,6 +394,9 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         sys_evidenceAIC[i] = evidence_AIC                       # evidence AIC
         sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC
 
+        # Reset the model parameters to the input parameters
+        tmodel.reset()
+
         print('Another round done')
 
     # Save to file
@@ -400,17 +416,17 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     a = (np.sort(sys_evidenceAIC))[::-1]
     print('\nTOP 10 SYSTEMATIC MODELS')
 
-    # What is getting printed here?
+    #TODO: What is getting printed here?
     print(a[:10])
-    # What is getting printed here?
+    #TODO: What is getting printed here?
     print(sys_evidenceAIC)
 
     # REFORMAT all arrays with just positive values
-    pos = np.where(sys_evidenceAIC > -500)
+    pos = np.where(sys_evidenceAIC > -500)   #TODO: change hard coded number?
     if len(pos) == 0:
         pos = -1
     npos = len(pos[0])   # NOT-REUSED
-    # What is getting printed here?
+    #TODO: What is getting printed here?
     print('POS positions = {}'.format(pos))
 
     count_AIC = sys_evidenceAIC[pos]
