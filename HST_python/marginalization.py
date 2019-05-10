@@ -263,6 +263,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     # Initializing arrays for each systematic model, which we will save once we got through all systems with two fits.
     sys_stats = np.zeros((nsys, 5))                 # stats
+
     sys_date = np.zeros((nsys, nexposure))          # img_date
     sys_phase = np.zeros((nsys, nexposure))         # phase
     sys_rawflux = np.zeros((nsys, nexposure))       # raw lightcurve flux
@@ -270,11 +271,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     sys_flux = np.zeros((nsys, nexposure))          # corrected lightcurve flux
     sys_flux_err = np.zeros((nsys, nexposure))      # corrected lightcurve flux error
     sys_residuals = np.zeros((nsys, nexposure))     # residuals
+    sys_systematic_model = np.zeros((nsys, nexposure))  # systematic model
+
     sys_model = np.zeros((nsys, 4000))              # smooth model       #TODO: why 4000?
     sys_model_phase = np.zeros((nsys, 4000))        # smooth phase       #TODO: why 4000?
-    sys_systematic_model = np.zeros((nsys, nexposure))  # systematic model
+
     sys_params = np.zeros((nsys, nparams))          # parameters
     sys_params_err = np.zeros((nsys, nparams))      # parameter errors
+
     sys_depth = np.zeros(nsys)                      # depth
     sys_depth_err = np.zeros(nsys)                  # depth error
     sys_epoch = np.zeros(nsys)                      # transit time
@@ -304,7 +308,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
                 tmodel.pars[k].thaw()
             elif select == 1:
                 tmodel.pars[k].freeze()
-        tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltoghether); this is here only for testing
+        tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltogether); this is here only for testing
 
         print('\nSTART 2nd FIT\n')
         tres = tfit.fit()  # do the fit
@@ -379,25 +383,29 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         # .............................
         # Fill info into arrays to save to file once we iterated through all systems with both fits.
-        sys_stats[i, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats
-        sys_date[i, :] = img_date                               # input time data (x, date)
-        sys_phase[i, :] = phase                                 # phase
-        sys_rawflux[i, :] = img_flux                            # raw lightcurve flux
-        sys_rawflux_err[i, :] = err
+        sys_stats[i, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats  - just saving
+
+        sys_date[i, :] = img_date                               # input time data (x, date)  - reused but not really
+        sys_phase[i, :] = phase                                 # phase  - used for plotting
+        sys_rawflux[i, :] = img_flux                            # raw lightcurve flux  - just saving
+        sys_rawflux_err[i, :] = err                             # raw flux error  - just saving
         sys_flux[i, :] = fit_data                               # corrected lightcurve flux
-        sys_flux_err[i, :] = fit_err
-        sys_residuals[i, :] = residuals                         # residuals
-        sys_model[i, :] = mulimb02                              # smooth model
-        sys_model_phase[i, :] = x2                              # smooth phase
-        sys_systematic_model[i, :] = systematic_model           # systematic model
-        sys_params[i, :] = tres.parvals                 # parameters
-        #sys_params_err[i, :] = pcerror                          # parameter errors   #TODO: calculate errors of all parameters? get this back in
-        sys_depth[i] = tmodel.rl.val                        # depth
-        sys_depth_err[i] = rl_err                               # depth error
-        sys_epoch[i] = tmodel.epoch.val                    # transit time
-        sys_epoch_err[i] = epoch_err                            # transit time error
-        sys_evidenceAIC[i] = evidence_AIC                       # evidence AIC
-        sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC
+        sys_flux_err[i, :] = fit_err                            # corrected flux error  - used for plotting
+        sys_residuals[i, :] = residuals                         # residuals   - REUSED! also for plotting
+        sys_systematic_model[i, :] = systematic_model           # systematic model  - just saving
+
+        sys_model[i, :] = mulimb02                              # smooth model  - used for plotting
+        sys_model_phase[i, :] = x2                              # smooth phase  - used for plotting
+
+        sys_params[i, :] = tres.parvals                         # parameters  - REUSED!
+        #sys_params_err[i, :] = pcerror                         # parameter errors  - REUSED! #TODO: calculate errors of all parameters? get this back in
+
+        sys_depth[i] = tmodel.rl.val                            # depth  - REUSED!
+        sys_depth_err[i] = rl_err                               # depth error  - REUSED!
+        sys_epoch[i] = tmodel.epoch.val                         # transit time  - REUSED!
+        sys_epoch_err[i] = epoch_err                            # transit time error  - REUSED!
+        sys_evidenceAIC[i] = evidence_AIC                       # evidence AIC  - REUSED!
+        sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC  - REUSED!
 
         # Reset the model parameters to the input parameters
         tmodel.reset()
