@@ -156,7 +156,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     # dplot.plot()
 
     # Set up the Sherpa transit model
-    tmodel = marg.Transit(tzero, MsMpR, c1, c2, c3, c4, flux0, name="testmodel", sh=sh)
+    tmodel = marg.Transit(tzero, MsMpR, c1, c2, c3, c4, flux0, name="TransitModel", sh=sh)
     print('Starting parameters for transit model:\n')
     print(tmodel)
 
@@ -178,6 +178,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         'al. (2016) is now being preformed. Using this fit we will scale the uncertainties you input to incorporate '
         'the inherent scatter in the data for each model.')
 
+    start_first_fit = time.time()
     # Loop over all systems (= parameter combinations)
     for i, sys in enumerate(grid):
 
@@ -211,7 +212,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # Calculate the error on rl
         print('Calculating error on rl...')
         calc_errors = tfit.est_errors(parlist=(tmodel.rl,))
-        rl_err = calc_errors.parvals[0]
+        rl_err = calc_errors.parmaxes[0]   # Errors will be symmetric here so I am taking the max, bc it's positive
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
         # OUTPUTS
@@ -222,14 +223,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function, b0 in stellar radii
         b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
-        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
+        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)   #TODO: What is this?
 
         systematic_model = marg.sys_model(phase, HSTphase, sh, tmodel.m_fac.val, tmodel.hstp1.val, tmodel.hstp2.val,
                                           tmodel.hstp3.val, tmodel.hstp4.val, tmodel.xshift1.val, tmodel.xshift2.val,
                                           tmodel.xshift3.val, tmodel.xshift4.val)
 
         # Calculate final form of the model fit
-        w_model = mulimb01 * tmodel.flux.val * systematic_model   # see Wakeford et al. 2016, Eq. 1
+        w_model = mulimb01 * tmodel.flux.val * systematic_model   # see Wakeford et al. 2016, Eq. 1   #TODO: is this the model fit? why are we recalculating this here if Sherpa is giving it to us?
         # Calculate the residuals - data minus model (and normalized)
         w_residuals = (img_flux - w_model) / tmodel.flux.val
         # Calculate more stuff
@@ -245,6 +246,10 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         one_loop = end_one_first_loop - start_one_first_loop
         print('This 1st loop took {} sec = {} min'.format(one_loop, one_loop/60))
 
+    end_first_fit = time.time()
+    print('First fit of all {} models took {} sec = {} min.'.format(nsys, end_first_fit-start_first_fit, (end_first_fit-start_first_fit)/60))
+
+    # Save results of first fit to file.
     np.savez(os.path.join(outDir, 'run1_scatter_'+run_name), w_scatter=w_scatter, w_params=w_params)
 
 
@@ -277,6 +282,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     sys_evidenceAIC = np.zeros(nsys)                # evidence AIC
     sys_evidenceBIC = np.zeros(nsys)                # evidence BIC
 
+    start_second_fit = time.time()
     for i, sys in enumerate(grid):
         print('\n################################')
         print('SYSTEMATIC MODEL {} of {}'.format(i+1, nsys))
@@ -308,12 +314,12 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         print('Calculating errors...')
         calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
-        rl_err = calc_errors.parvals[0]
-        epoch_err = calc_errors.parvals[1]
+        rl_err = calc_errors.parmaxes[0]
+        epoch_err = calc_errors.parmaxes[1]
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
-        # From mpfit define the DOF, BIC, AIC & CHI
-        bestnorm = tfit.calc_stat_chisqr()  # chi squared of resulting fit    #TODO: check if this is correct
+        # From the fit define the DOF, BIC, AIC & CHI
+        bestnorm = tfit.calc_chisqr()  # chi squared of resulting fit    #TODO: check if this is correct
         BIC = bestnorm + nfree * np.log(len(img_date))
         AIC = bestnorm + nfree
         #DOF = len(img_date) - sum([p['fixed'] != 1 for p in parinfo])  # nfree   #TODO: what is this exactly? I believe the bracket is simply nfree
@@ -328,24 +334,24 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         evidence_AIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * AIC
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (G * np.square((tmodel.period.val*u.d).to(u.sec)) / (4 * np.pi * np.pi)) ** (1 / 3.)
+        constant1 = (G * np.square((tmodel.period.val*u.d).to(u.s)) / (4 * np.pi * np.pi)) ** (1 / 3.)   #TODO: this gets calcualted in the loop but hten used outside. NOt sure that's intended.
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
         phase = marg.phase_calc(img_date, tmodel.epoch.val*u.d, tmodel.period.val*u.d)
-        HSTphase = marg.phase_calc(img_date, tmodel.tzero.val, HST_period)
+        HSTphase = marg.phase_calc(img_date, tmodel.tzero.val*u.d, HST_period)
 
         # ...........................................
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
-        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.sec), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
+        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
         mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
         x2 = np.arange(4000) * 0.0001 - 0.2   #TODO: What is happening here?
-        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.sec), tmodel.msmpr.val, x2, tmodel.inclin.val*u.rad)
+        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, x2, tmodel.inclin.val*u.rad)
         mulimb02, _mulimbf2 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
 
         systematic_model = marg.sys_model(phase, HSTphase, sh, tmodel.m_fac.val, tmodel.hstp1.val, tmodel.hstp2.val,
@@ -354,7 +360,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         fit_model = mulimb01 * tmodel.flux.val * systematic_model
         residuals = (img_flux - fit_model) / tmodel.flux.val
-        resid_scatter = np.std(w_residuals)    #TODO: where does w_residuals come from? It seems like it's just the last one from the first fit, that wouldn't make any sense.
+        resid_scatter = np.std(w_residuals)    #TODO: where does w_residuals come from? It seems like it's just the last one from the first fit, that wouldn't make any sense. I think this is supposed to mean 'residuals' instead.
         fit_data = img_flux / (tmodel.flux.val * systematic_model)
         fit_err = np.copy(err)  # * (1.0 + resid_scatter)   #TODO: do I really need to redefine fit_err or can I just save err further below?
 
@@ -372,8 +378,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
             plt.pause(0.05)
 
         # .............................
-        # Fill info into arrays to save to file once we iterated through all systems with both fittings.
-
+        # Fill info into arrays to save to file once we iterated through all systems with both fits.
         sys_stats[i, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats
         sys_date[i, :] = img_date                               # input time data (x, date)
         sys_phase[i, :] = phase                                 # phase
@@ -386,7 +391,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         sys_model_phase[i, :] = x2                              # smooth phase
         sys_systematic_model[i, :] = systematic_model           # systematic model
         sys_params[i, :] = tres.parvals                 # parameters
-        sys_params_err[i, :] = pcerror                          # parameter errors   #TODO: calculate errors of all parameters?
+        #sys_params_err[i, :] = pcerror                          # parameter errors   #TODO: calculate errors of all parameters? get this back in
         sys_depth[i] = tmodel.rl.val                        # depth
         sys_depth_err[i] = rl_err                               # depth error
         sys_epoch[i] = tmodel.epoch.val                    # transit time
@@ -399,12 +404,16 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         print('Another round done')
 
+    end_second_fit = time.time()
+    print('Second fit of all {} models took {} sec = {} min.'.format(nsys, end_second_fit - start_second_fit,
+                                                                    (end_second_fit - start_second_fit) / 60))
+
     # Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
     np.savez(os.path.join(outDir, 'analysis_circle_G141_'+run_name), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
              sys_rawflux=sys_rawflux, sys_rawflux_err=sys_rawflux_err, sys_flux=sys_flux, sys_flux_err=sys_flux_err,
              sys_residuals=sys_residuals, sys_model=sys_model, sys_model_phase=sys_model_phase,
-             sys_systematic_model=sys_systematic_model, sys_params=sys_params, sys_params_err=sys_params_err,
+             sys_systematic_model=sys_systematic_model, sys_params=sys_params, #sys_params_err=sys_params_err,   #TODO: get this back in
              sys_depth=sys_depth, sys_depth_err=sys_depth_err, sys_epoch=sys_epoch, sys_epoch_err=sys_epoch_err,
              sys_evidenceAIC=sys_evidenceAIC, sys_evidenceBIC=sys_evidenceBIC)
 
