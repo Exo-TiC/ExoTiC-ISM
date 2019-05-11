@@ -299,9 +299,6 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # Update the data object with the new errors
         tdata.staterror = err
 
-        # Count free parameters by figuring out how many zeros we have in the current systematics
-        nfree = np.sum(sys)
-
         # Set up systematics for current run
         for k, select in enumerate(sys):
             if select == 0:
@@ -314,7 +311,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         tres = tfit.fit()  # do the fit
         if not tres.succeeded:
             print(tres.message)
-        print('\n2nd ROUND OF SHERPA FIT IS DONE\n')
+        print('2nd ROUND OF SHERPA FIT IS DONE\n')
 
         print('Calculating errors...')
         calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
@@ -322,13 +319,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         epoch_err = calc_errors.parmaxes[1]
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
+        # Count free parameters by figuring out how many zeros we have in the current systematics
+        nfree = np.count_nonzero(sys == 0)
+
         # From the fit define the DOF, BIC, AIC & CHI
-        bestnorm = tfit.calc_chisqr()  # chi squared of resulting fit    #TODO: check if this is correct
-        BIC = bestnorm + nfree * np.log(len(img_date))
-        AIC = bestnorm + nfree
-        #DOF = len(img_date) - sum([p['fixed'] != 1 for p in parinfo])  # nfree   #TODO: what is this exactly? I believe the bracket is simply nfree
-        DOF = len(img_date) - nfree    #TODO: this might be right or might be wrong. check.
-        CHI = bestnorm
+        CHI = tfit.rstat  # chi squared of resulting fit    #TODO: shoudl ths be .statval or .rstat? Check API.
+        BIC = CHI + nfree * np.log(len(img_date))
+        AIC = CHI + nfree
+        DOF = tres.dof
 
         # EVIDENCE BASED on the AIC and BIC
         Npoint = len(img_date)
@@ -397,7 +395,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         sys_model[i, :] = mulimb02                              # smooth model  - used for plotting
         sys_model_phase[i, :] = x2                              # smooth phase  - used for plotting
 
-        sys_params[i, :] = tres.parvals                         # parameters  - REUSED!
+        sys_params[i, :] = [par.val for par in tmodel.pars]     # parameters  - REUSED!
         #sys_params_err[i, :] = pcerror                         # parameter errors  - REUSED! #TODO: calculate errors of all parameters? get this back in
 
         sys_depth[i] = tmodel.rl.val                            # depth  - REUSED!
