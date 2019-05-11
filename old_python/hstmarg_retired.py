@@ -1,7 +1,7 @@
 import numpy as np
 from config import CONFIG_INI
 
-Gr = CONFIG_INI.getfloat('constants', 'big_G')
+Gr = 6.67e-11
 
 
 def residuals():
