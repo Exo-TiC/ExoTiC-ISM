@@ -88,10 +88,11 @@ def _transit_model(pars, x, sh):
     flux:
     epoch: center of transit in days (MJD)
     inclin: inclination of system in radians
-    MsMpR: density of system
-    ecc: eccentricity of system
+    MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
+           constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
+    ecc: eccentricity of the system
     omega: that other weird angle in a planetary system
-    per: period of transit in days
+    per: period of planet transit in days
     tzero: first x-array data entry in days (MJD)
     c1, c2, c3, c4: limb darkening parameters (quadratic)
     m_fac: global slope factor in the systematic model
@@ -151,7 +152,7 @@ class Transit(model.RegriddableModel1D):
         self.c2 = model.Parameter(name, 'c2', c2, alwaysfrozen=True)
         self.c3 = model.Parameter(name, 'c3', c3, alwaysfrozen=True)
         self.c4 = model.Parameter(name, 'c4', c4, alwaysfrozen=True)
-        self.m_fac = model.Parameter(name, 'm_fac', 0, units='?')
+        self.m_fac = model.Parameter(name, 'm_fac', 0)
         self.hstp1 = model.Parameter(name, 'hstp1', 0)
         self.hstp2 = model.Parameter(name, 'hstp2', 0)
         self.hstp3 = model.Parameter(name, 'hstp3', 0)

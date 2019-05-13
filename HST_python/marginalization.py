@@ -80,10 +80,11 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with'
         '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes'
         'Please hold.'
-        '\n This is the version using SHERPA for fitting.')
+        '\n This is the version using SHERPA for fitting.\n')
 
     # Copy the config.ini to the experiment folder.
-    #copy(os.path.join('config_local.ini'), outDir)
+    print('Saving the configfile to outputs folder.')
+    copy(os.path.join('config_local.ini'), outDir)
 
     # READ THE CONSTANTS
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
@@ -95,23 +96,6 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     tzero = x[0] * u.d      # first time data point
     nexposure = len(img_date)   # Total number of exposures in the observation
 
-    # READ IN THE PLANET STARTING PARAMETERS   #TODO: this block goes into the docstring of the Sherpa transit model
-    """
-    data_params: priors for each parameter used in the fit passed in an array of the form
-    data_params = [rl, epoch, inclin, MsMpR, ecc, omega, Per, FeH, Teff, logg]
-    - rl: transit depth (Rp/R*)
-    - epoch: center of transit time (in MJD)
-    - inclin: inclination of the planetary orbit in degrees
-    - MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
-           constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
-    - ecc: eccentricity of the system
-    - omega: omega of the system (degrees)
-    - Per: Period of the planet in days
-    - FeH: Stellar metallicity - limited ranges available
-    - Teff: Stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
-    - logg: stellar gravity - depends on whether 1D or 3D limb darkening models are used
-    """
-
     Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * u.d    # period, converted to seconds in next line
     Per = Per.to(u.s)
 
@@ -122,9 +106,9 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     # LIMB DARKENING
     #TODO: Implement a suggestion for the user to use 3D if his parameters match the options available in the 3D models
 
-    M_H = CONFIG_INI.getfloat('limb_darkening', 'metallicity')    # metallicity
-    Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')   # effective temperature
-    logg = CONFIG_INI.getfloat('limb_darkening', 'logg')   # log(g), gravitation
+    M_H = CONFIG_INI.getfloat('limb_darkening', 'metallicity')    # stellar metallicity - limited ranges available
+    Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')   # stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
+    logg = CONFIG_INI.getfloat('limb_darkening', 'logg')   # log(g), stellar gravity - depends on whether 1D or 3D limb darkening models are used
 
     # Define limb darkening directory, which is inside this package
     limbDir = os.path.join('..', 'Limb-darkening')
@@ -143,7 +127,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     #  SET UP THE ARRAYS
     # save arrays for the first step through to get the err inflation
     w_scatter = np.zeros(nsys)
-    w_params = np.zeros((nsys, nparams))   # all parameters, but for all the systems in one single array,  after the first fit so that we can acces each one of the individually during the second fit
+    w_params = np.zeros((nsys, nparams))   # all parameters, but for all the systems in one single array
 
     # Set up the Sherpa data model
     # Instantiate a data object
@@ -162,8 +146,11 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     # Set up statistics and optimizer
     stat = Chi2()
-    opt = LevMar()
-    #opt = NelderMead()   #TODO: include a choice for this in configfile; figure out which one to use considering epoch problem
+    #opt = LevMar()
+    opt = NelderMead()   #TODO: include a choice for this in configfile; figure out which one to use considering epoch problem
+
+    print('Optimizer used:')
+    print(opt)
 
     # Set up the fit object
     tfit = Fit(tdata, tmodel, stat=stat, method=opt)  # Instantiate fit object
@@ -197,7 +184,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
                 tmodel.pars[k].thaw()
             elif select == 1:
                 tmodel.pars[k].freeze()
-        tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltoghether); this is here only for testing
+        #tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltoghether); this is here only for testing
 
         print('\nSTART 1st FIT')
         tres = tfit.fit()  # do the fit
@@ -205,9 +192,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
             print(tres.message)
         print('\n1st ROUND OF SHERPA FIT IS DONE\n')
 
-        # Save results of fit   #TODO: this can probably be done more elegantly and without a loop
-        for pval in range(len(tres.parvals)):
-            w_params[i, pval] = tres.parvals[pval]
+        # Save results of fit
+        w_params[i, :] = [par.val for par in tmodel.pars]
 
         # Calculate the error on rl
         print('Calculating error on rl...')
@@ -305,7 +291,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
                 tmodel.pars[k].thaw()
             elif select == 1:
                 tmodel.pars[k].freeze()
-        tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltogether); this is here only for testing
+        #tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltogether); this is here only for testing
 
         print('\nSTART 2nd FIT\n')
         tres = tfit.fit()  # do the fit
@@ -323,7 +309,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         nfree = np.count_nonzero(sys == 0)
 
         # From the fit define the DOF, BIC, AIC & CHI
-        CHI = tfit.rstat  # chi squared of resulting fit    #TODO: shoudl ths be .statval or .rstat? Check API.
+        CHI = tres.rstat  # chi squared of resulting fit    #TODO: should ths be .statval or .rstat? Check API.
         BIC = CHI + nfree * np.log(len(img_date))
         AIC = CHI + nfree
         DOF = tres.dof
@@ -336,7 +322,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         evidence_AIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * AIC
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (G * np.square((tmodel.period.val*u.d).to(u.s)) / (4 * np.pi * np.pi)) ** (1 / 3.)   #TODO: this gets calcualted in the loop but hten used outside. NOt sure that's intended.
+        constant1 = (G * np.square((tmodel.period.val*u.d).to(u.s)) / (4 * np.pi * np.pi)) ** (1 / 3.)   #TODO: this gets calcualted in the loop but then used outside. Not sure that's intended.
 
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
@@ -474,10 +460,6 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         rl_sdnr[i] = (np.std(count_residuals[:, i]) / np.sqrt(2)) * 1e6
     best_sys = np.argmin(rl_sdnr)
 
-    ### Radius ratio
-    marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
-    print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
-
     print('SDNR best model = {}'.format(np.std(count_residuals[:, best_sys]) / np.sqrt(2) * 1e6))
     print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), np.argmin(rl_sdnr)))
 
@@ -519,6 +501,10 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         #plt.hlines(0.0 + (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
         plt.draw()
         plt.show()
+
+    ### Radius ratio
+    marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
+    print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
 
     ### Center of transit time
     marg_epoch, marg_epoch_err = marg.marginalization(count_epoch, count_epoch_err, w_q)
