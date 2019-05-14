@@ -300,9 +300,11 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         print('2nd ROUND OF SHERPA FIT IS DONE\n')
 
         print('Calculating errors...')
-        calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
+        calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.inclin, tmodel.msmpr))
         rl_err = calc_errors.parmaxes[0]
         epoch_err = calc_errors.parmaxes[1]
+        incl_err = calc_errors.parmaxes[2]
+        msmpr_err = calc_errors.parmaxes[3]
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
         # Count free parameters by figuring out how many zeros we have in the current systematics
@@ -382,7 +384,11 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         sys_model_phase[i, :] = x2                              # smooth phase  - used for plotting
 
         sys_params[i, :] = [par.val for par in tmodel.pars]     # parameters  - REUSED!
-        #sys_params_err[i, :] = pcerror                         # parameter errors  - REUSED! #TODO: calculate errors of all parameters? get this back in
+        #sys_params_err[i, :] = pcerror                         # parameter errors  - REUSED!
+        # We only really need the errors on rl, epoch, inclination and MsMpR, so I only calculate those. The rest
+        # of the errors in this array will be zero (and hence false), but we'll be redesigning this in the near future.
+        sys_params_err[:, 3] = incl_err
+        sys_params_err[:, 4] = msmpr_err
 
         sys_depth[i] = tmodel.rl.val                            # depth  - REUSED!
         sys_depth_err[i] = rl_err                               # depth error  - REUSED!
@@ -405,7 +411,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     np.savez(os.path.join(outDir, 'analysis_circle_G141_'+run_name), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
              sys_rawflux=sys_rawflux, sys_rawflux_err=sys_rawflux_err, sys_flux=sys_flux, sys_flux_err=sys_flux_err,
              sys_residuals=sys_residuals, sys_model=sys_model, sys_model_phase=sys_model_phase,
-             sys_systematic_model=sys_systematic_model, sys_params=sys_params, #sys_params_err=sys_params_err,   #TODO: get this back in
+             sys_systematic_model=sys_systematic_model, sys_params=sys_params, sys_params_err=sys_params_err,
              sys_depth=sys_depth, sys_depth_err=sys_depth_err, sys_epoch=sys_epoch, sys_epoch_err=sys_epoch_err,
              sys_evidenceAIC=sys_evidenceAIC, sys_evidenceBIC=sys_evidenceBIC)
 
