@@ -146,8 +146,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     # Set up statistics and optimizer
     stat = Chi2()
-    #opt = LevMar()
-    opt = NelderMead()   #TODO: include a choice for this in configfile; figure out which one to use considering epoch problem
+    opt = LevMar()
+    opt.config['epsfcn'] = np.finfo(float).eps
 
     print('Optimizer used:')
     print(opt)
