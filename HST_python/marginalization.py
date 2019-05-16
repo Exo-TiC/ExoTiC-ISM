@@ -311,7 +311,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         nfree = np.count_nonzero(sys == 0)
 
         # From the fit define the DOF, BIC, AIC & CHI
-        CHI = tres.rstat  # chi squared of resulting fit    #TODO: should ths be .statval or .rstat? Check API.
+        CHI = tres.statval  # chi squared of resulting fit
         BIC = CHI + nfree * np.log(len(img_date))
         AIC = CHI + nfree
         DOF = tres.dof
