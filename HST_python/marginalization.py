@@ -32,7 +32,7 @@ from astropy.constants import G
 from shutil import copy
 
 from sherpa.data import Data1D
-from sherpa.optmethods import LevMar, NelderMead
+from sherpa.optmethods import LevMar
 from sherpa.stats import Chi2
 from sherpa.fit import Fit
 
@@ -209,7 +209,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function, b0 in stellar radii
         b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
-        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)   #TODO: What is this?
+        # "new" model to whatever resuolution the data is, based on fit parameters - entirely based on phase array via b0
+        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)   #TODO: think about whether this is needed
 
         systematic_model = marg.sys_model(phase, HSTphase, sh, tmodel.m_fac.val, tmodel.hstp1.val, tmodel.hstp2.val,
                                           tmodel.hstp3.val, tmodel.hstp4.val, tmodel.xshift1.val, tmodel.xshift2.val,
@@ -220,11 +221,12 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # Calculate the residuals - data minus model (and normalized)
         w_residuals = (img_flux - w_model) / tmodel.flux.val
         # Calculate more stuff
-        corrected_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: what is this and do we need it?
+        corrected_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: this is the data after taking the systematics out - just used for plotting in IDL
         w_scatter[i] = np.std(w_residuals)
         print('\nScatter on the residuals = {}'.format(w_scatter[i]))   # this result is rather different to IDL result
 
         # Reset the model parameters to the input parameters
+        # Note on resetting: https://sherpa.readthedocs.io/en/latest/models/index.html#resetting-parameter-values
         tmodel.reset()
 
         # Show how long one iteration takes
@@ -335,12 +337,12 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
         b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
-        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
+        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)  #TODO: recalculated model at data resolution
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
-        x2 = np.arange(4000) * 0.0001 - 0.2   #TODO: What is happening here?
+        x2 = np.arange(4000) * 0.0001 - 0.2   #TODO: use arange or linspace for this - this is the x-array for the smooth model
         b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, x2, tmodel.inclin.val*u.rad)
         mulimb02, _mulimbf2 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
 
@@ -351,8 +353,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         fit_model = mulimb01 * tmodel.flux.val * systematic_model
         residuals = (img_flux - fit_model) / tmodel.flux.val
         resid_scatter = np.std(w_residuals)    #TODO: where does w_residuals come from? It seems like it's just the last one from the first fit, that wouldn't make any sense. I think this is supposed to mean 'residuals' instead.
-        fit_data = img_flux / (tmodel.flux.val * systematic_model)
-        fit_err = np.copy(err)  # * (1.0 + resid_scatter)   #TODO: do I really need to redefine fit_err or can I just save err further below?
+        fit_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: same like corrected_data
+        fit_err = np.copy(err)  # * (1.0 + resid_scatter)   #TODO: do I really need to redefine fit_err or can I just save err further below? no. also, read err directly from the Sherpa model
 
         if plotting:
             plt.figure(2)
@@ -398,6 +400,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC  - REUSED!
 
         # Reset the model parameters to the input parameters
+        # Note on resetting: https://sherpa.readthedocs.io/en/latest/models/index.html#resetting-parameter-values
         tmodel.reset()
 
         print('Another round done')

@@ -187,7 +187,7 @@ def occultnl(rl, c1, c2, c3, c4, b0):
     :param c3: limb darkening parameter 3
     :param c4: limb darkening parameter 4
     :param b0: impact parameter in stellar radii
-    :return: mulimb0?, mulimbf?
+    :return: mulimb0: limb-darkened transit model, mulimbf: lightcurves for each component that you put in the model
     """
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
