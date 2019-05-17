@@ -129,6 +129,10 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     w_scatter = np.zeros(nsys)
     w_params = np.zeros((nsys, nparams))   # all parameters, but for all the systems in one single array
 
+    # Parameters for smooth model
+    resolution = CONFIG_INI.getfloat('smooth_model', 'resolution')
+    half_range = CONFIG_INI.getfloat('smooth_model', 'half_range')
+
     # Set up the Sherpa data model
     # Instantiate a data object
     tdata = Data1D('Data', x, y, staterror=err)
@@ -184,7 +188,6 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
                 tmodel.pars[k].thaw()
             elif select == 1:
                 tmodel.pars[k].freeze()
-        #tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltoghether); this is here only for testing
 
         print('\nSTART 1st FIT')
         tres = tfit.fit()  # do the fit
@@ -261,8 +264,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     sys_residuals = np.zeros((nsys, nexposure))     # residuals
     sys_systematic_model = np.zeros((nsys, nexposure))  # systematic model
 
-    sys_model = np.zeros((nsys, 4000))              # smooth model       #TODO: why 4000?
-    sys_model_phase = np.zeros((nsys, 4000))        # smooth phase       #TODO: why 4000?
+    sys_model = np.zeros((nsys, 2*half_range/resolution))              # smooth model
+    sys_model_phase = np.zeros((nsys, 2*half_range/resolution))        # smooth phase
 
     sys_params = np.zeros((nsys, nparams))          # parameters
     sys_params_err = np.zeros((nsys, nparams))      # parameter errors
@@ -293,7 +296,6 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
                 tmodel.pars[k].thaw()
             elif select == 1:
                 tmodel.pars[k].freeze()
-        #tmodel.epoch.freeze()    #TODO: change this back to thawed (delete line alltogether); this is here only for testing
 
         print('\nSTART 2nd FIT\n')
         tres = tfit.fit()  # do the fit
@@ -337,12 +339,12 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         # TRANSIT MODEL fit to the data
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
         b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
-        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)  #TODO: recalculated model at data resolution
+        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)  # recalculated model at data resolution
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
-        x2 = np.arange(4000) * 0.0001 - 0.2   #TODO: use arange or linspace for this - this is the x-array for the smooth model
+        x2 = np.arange(-half_range, half_range, resolution)   # this is the x-array for the smooth model
         b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, x2, tmodel.inclin.val*u.rad)
         mulimb02, _mulimbf2 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
 
@@ -354,7 +356,6 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         residuals = (img_flux - fit_model) / tmodel.flux.val
         resid_scatter = np.std(w_residuals)    #TODO: where does w_residuals come from? It seems like it's just the last one from the first fit, that wouldn't make any sense. I think this is supposed to mean 'residuals' instead.
         fit_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: same like corrected_data
-        fit_err = np.copy(err)  # * (1.0 + resid_scatter)   #TODO: do I really need to redefine fit_err or can I just save err further below? no. also, read err directly from the Sherpa model
 
         if plotting:
             plt.figure(2)
@@ -378,7 +379,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         sys_rawflux[i, :] = img_flux                            # raw lightcurve flux  - just saving
         sys_rawflux_err[i, :] = err                             # raw flux error  - just saving
         sys_flux[i, :] = fit_data                               # corrected lightcurve flux
-        sys_flux_err[i, :] = fit_err                            # corrected flux error  - used for plotting
+        sys_flux_err[i, :] = err                                # corrected flux error  - used for plotting
         sys_residuals[i, :] = residuals                         # residuals   - REUSED! also for plotting
         sys_systematic_model[i, :] = systematic_model           # systematic model  - just saving
 
@@ -407,7 +408,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     end_second_fit = time.time()
     print('Second fit of all {} models took {} sec = {} min.'.format(nsys, end_second_fit - start_second_fit,
-                                                                    (end_second_fit - start_second_fit) / 60))
+                                                                     (end_second_fit - start_second_fit) / 60))
 
     # Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
@@ -474,13 +475,13 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     if plotting:
         plt.figure(3)
-        plt.subplot(3,1,1)
+        plt.subplot(3, 1, 1)
         plt.plot(w_q)
         plt.title('w_q')
-        plt.subplot(3,1,2)
+        plt.subplot(3, 1, 2)
         plt.plot(rl_sdnr)
         plt.title('rl_sdnr')
-        plt.subplot(3,1,3)
+        plt.subplot(3, 1, 3)
         plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
         plt.title('count_depth')
         plt.draw()
@@ -493,14 +494,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         plt.xlabel('sys_phase')
         plt.ylabel('sys_flux')
 
-        plt.subplot(3,1,2)
+        plt.subplot(3, 1, 2)
         plt.scatter(count_phase[best_sys,:], count_flux[best_sys,:])
         plt.plot(count_model_x[best_sys,:], count_model_y[best_sys,:])
         plt.ylim(np.min(count_flux[0,:]) - 0.001, np.max(count_flux[0,:]) + 0.001)
         plt.xlabel('count_phase')
         plt.ylabel('count_flux')
 
-        plt.subplot(3,1,3)
+        plt.subplot(3, 1, 3)
         plt.errorbar(count_phase[best_sys,:], count_residuals[best_sys,:], yerr=count_flux_err[best_sys,:], fmt='.')
         plt.ylim(-1000, 1000)
         plt.xlabel('count_phase')
