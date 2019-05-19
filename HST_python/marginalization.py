@@ -304,11 +304,32 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         print('2nd ROUND OF SHERPA FIT IS DONE\n')
 
         print('Calculating errors...')
-        calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.inclin, tmodel.msmpr))
-        rl_err = calc_errors.parmaxes[0]
-        epoch_err = calc_errors.parmaxes[1]
-        incl_err = calc_errors.parmaxes[2]
-        msmpr_err = calc_errors.parmaxes[3]
+        #TODO: fix this error mess. at least adjust the fake errors for inclin and msmpr to sth else than 1e-10
+        # We can claculate errors only on thawed parameters, and inclin and msmpr and not always thawed
+        if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
+            print("Est errors on rl, epoch, inclin and msmpr...")
+            calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr, tmodel.inclin,))
+            msmpr_err = calc_errors.parmaxes[2]
+            incl_err = calc_errors.parmaxes[3]
+
+        elif not tmodel.inclin.frozen:
+            print('Est errors on rl, epoch and inclin...')
+            calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.inclin))
+            msmpr_err = 1e-10
+            incl_err = calc_errors.parmaxes[2]
+
+        elif not tmodel.msmpr.frozen:
+            print('Est errors on rl, epoch and msmpr...')
+            calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr))
+            msmpr_err = calc_errors.parmaxes[2]
+            incl_err = 1e-10
+
+        else:
+            print('Est errors for rl and epoch...')
+            calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
+            msmpr_err = 1e-10
+            incl_err = 1e-10
+
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
         # Count free parameters by figuring out how many zeros we have in the current systematics
