@@ -264,8 +264,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     sys_residuals = np.zeros((nsys, nexposure))     # residuals
     sys_systematic_model = np.zeros((nsys, nexposure))  # systematic model
 
-    sys_model = np.zeros((nsys, 2*half_range/resolution))              # smooth model
-    sys_model_phase = np.zeros((nsys, 2*half_range/resolution))        # smooth phase
+    sys_model = np.zeros((nsys, int(2*half_range/resolution)))              # smooth model
+    sys_model_phase = np.zeros((nsys, int(2*half_range/resolution)))        # smooth phase
 
     sys_params = np.zeros((nsys, nparams))          # parameters
     sys_params_err = np.zeros((nsys, nparams))      # parameter errors
