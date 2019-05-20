@@ -445,20 +445,21 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     #          MARGINALISATION          #
     #####################################
 
+    # Sort the systematic models from largest to smallest AIC
     a = (np.sort(sys_evidenceAIC))[::-1]
     print('\nTOP 10 SYSTEMATIC MODELS')
 
-    #TODO: What is getting printed here?
+    # Print the AIC for the top 10 systematic models
     print(a[:10])
-    #TODO: What is getting printed here?
+    # Print all the AIC values (why?)
     print(sys_evidenceAIC)
 
+    #TODO: why exactly is this happening and can I do it better?
     # REFORMAT all arrays with just positive values
     pos = np.where(sys_evidenceAIC > -500)   #TODO: change hard coded number?
     if len(pos) == 0:
         pos = -1
     npos = len(pos[0])   # NOT-REUSED
-    #TODO: What is getting printed here?
     print('POS positions = {}'.format(pos))
 
     count_AIC = sys_evidenceAIC[pos]
@@ -470,7 +471,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     count_epoch_err = sys_epoch_err[pos]
 
     count_residuals = sys_residuals[pos]
-    count_date = sys_date[pos]
+    count_date = sys_date[pos]                #TODO: not reused
     count_flux = sys_flux[pos]
     count_flux_err = sys_flux_err[pos]
     count_phase = sys_phase[pos]
@@ -480,11 +481,11 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     beta = np.min(count_AIC)
     w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))
 
-    n01 = np.where(w_q >= 0.05)
-    print('{} models have a weight over 0.1. -> Models:'.format(len(n01), n01, w_q[n01]))
+    n01 = np.where(w_q >= 0.05)   #TODO: this number and number should be the same, or no?
+    print('{} models have a weight over 0.1. -> Models: {} with weigths: {}'.format(len(n01), n01, w_q[n01]))
     print('Most likely model is number {} at w_q={}'.format(np.argmax(w_q), np.max(w_q)))
 
-    best_sys = np.max(w_q)
+    best_sys = np.max(w_q)   #TODO: redefined couple of lines below...
 
     rl_sdnr = np.zeros(len(w_q))
     for i in range(len(w_q)):
