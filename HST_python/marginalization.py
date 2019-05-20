@@ -330,6 +330,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
             msmpr_err = 1e-10
             incl_err = 1e-10
 
+        # rl and epoch are in this case of "fit_time" always thawed
+        rl_err = calc_errors.parmaxes[0]
+        epoch_err = calc_errors.parmaxes[1]
+
+        # Catch bad error estimation on epoch  #TODO: fix this
+        if epoch_err is None:
+            epoch_err = 1e-10
+
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
         # Count free parameters by figuring out how many zeros we have in the current systematics
