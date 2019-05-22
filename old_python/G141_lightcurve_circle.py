@@ -105,7 +105,7 @@ def G141_lightcurve_circle(x, y, err, sh, wavelength, outDir, run_name, plotting
     #copy(os.path.join('config_local.ini'), outDir)
 
     # READ THE CONSTANTS
-    Gr = CONFIG_INI.getfloat('constants', 'big_G')
+    Gr = 6.67e-11
     day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period')
 

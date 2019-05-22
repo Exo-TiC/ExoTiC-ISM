@@ -9,6 +9,14 @@ from sherpa.models import model
 
 from config import CONFIG_INI
 
+# Read planet parameters from configfile
+RL = CONFIG_INI.getfloat('planet_parameters', 'rl')
+EPOCH = CONFIG_INI.getfloat('planet_parameters', 'epoch')
+INCLIN = CONFIG_INI.getfloat('planet_parameters', 'inclin')
+ECC = CONFIG_INI.getfloat('planet_parameters', 'ecc')
+OMEGA = CONFIG_INI.getfloat('planet_parameters', 'omega')
+PERIOD = CONFIG_INI.getfloat('planet_parameters', 'Per')
+
 
 def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True):
     """
@@ -46,7 +54,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True)
         print('phase[0] = {}'.format(phase[0]))
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = impact_param(Per, MsMpR, phase, inclin)
+    b0 = impact_param(Per, MsMpR, phase, inclin)    # b0 in stellar radii
     if not silent:
         print(b0)
 
@@ -70,7 +78,7 @@ def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True)
     return [0, (y - model) / err]
 
 
-def _transit_model(pars, x):
+def _transit_model(pars, x, sh):
     """
     Transit model by Mandel & Agol (2002).
     --------
@@ -80,35 +88,44 @@ def _transit_model(pars, x):
     flux:
     epoch: center of transit in days (MJD)
     inclin: inclination of system in radians
-    MsMpR: density of system
-    ecc: eccentricity of system
+    MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
+           constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
+    ecc: eccentricity of the system
     omega: that other weird angle in a planetary system
-    per: period of transit in days
-    T0: first x-array data entry in days (MJD)
+    per: period of planet transit in days
+    tzero: first x-array data entry in days (MJD)
     c1, c2, c3, c4: limb darkening parameters (quadratic)
-    m_fac: ?
+    m_fac: global slope factor in the systematic model
     hstp1, hstp2, hstp3, hstp4: HST period systematic parameters (units?)
     xshift1, xshift2, xshift3, xshift4: shift systematic parameters (units?)
+
+    x: array; input time grid
+    sh: array, input shifts
     """
 
-    HSTper = CONFIG_INI.getfloat('constants', 'HST_period')
-    day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
+    HSTper = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
 
     # Define each of the parameters that are read into the fitting routine
-    (rl, flux, epoch, inclin, MsMpR, ecc, omega, per, T0, c1, c2, c3, c4,
+    (rl, flux, epoch, inclin, MsMpR, ecc, omega, per, tzero, c1, c2, c3, c4,
      m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4) = pars
 
+    # Attaching some units
+    x *= u.d
+    epoch *= u.d
+    inclin *= u.rad
+    per *= u.d
+    tzero *= u.d
+
     phase = phase_calc(x, epoch, per)  # Per in days here
-    HSTphase = phase_calc(x, T0, HSTper)
+    HSTphase = phase_calc(x, tzero, HSTper)
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = impact_param(per*day_to_sec, MsMpR, phase, inclin)  # period in sec here, incl in radians
+    b0 = impact_param(per.to(u.second), MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
     # b0 is the impact parameter function and I am not sure how this is handled in BATMAN - need to look into this.
     mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
-    sh = np.ones_like(x) * 0.00278449  # TODO: replace with real data
     systematic_model = sys_model(phase, HSTphase, sh, m_fac, hstp1, hstp2, hstp3, hstp4,
                                  xshift1, xshift2, xshift3, xshift4)
 
@@ -121,21 +138,21 @@ def _transit_model(pars, x):
 class Transit(model.RegriddableModel1D):
     """Transit model"""
 
-    def __init__(self, name='transit'):
-        self.rl = model.Parameter(name, 'rl', 0.12169232)
-        self.flux = model.Parameter(name, 'flux', 1.)
-        self.epoch = model.Parameter(name, 'epoch', 57957.970153390, units='days [MJD]')
-        self.inclin = model.Parameter(name, 'inclin', np.deg2rad(87.34635), units='radians')
-        self.msmpr = model.Parameter(name, 'msmpr', 2014.1042)
-        self.ecc = model.Parameter(name, 'ecc', 0, units='degrees')
-        self.omega = model.Parameter(name, 'omega', 0, units='degrees')
-        self.period = model.Parameter(name, 'period', 3.73548535, units='days')
-        self.tzero = model.Parameter(name, 'tzero', 557957.859985, units='days [MJD]')
-        self.c1 = model.Parameter(name, 'c1', 0)
-        self.c2 = model.Parameter(name, 'c2', 0)
-        self.c3 = model.Parameter(name, 'c3', 0)
-        self.c4 = model.Parameter(name, 'c4', 0)
-        self.m_fac = model.Parameter(name, 'm_fac', 0, units='?')
+    def __init__(self, tzero, msmpr, c1, c2, c3, c4, flux0=1., name='transit', sh=None):
+        self.rl = model.Parameter(name, 'rl', RL)
+        self.flux = model.Parameter(name, 'flux', flux0)
+        self.epoch = model.Parameter(name, 'epoch', EPOCH, units='days [MJD]')
+        self.inclin = model.Parameter(name, 'inclin', np.deg2rad(INCLIN), units='radians')
+        self.msmpr = model.Parameter(name, 'msmpr', msmpr)
+        self.ecc = model.Parameter(name, 'ecc', ECC, units='degrees')
+        self.omega = model.Parameter(name, 'omega', np.deg2rad(OMEGA), units='degrees', alwaysfrozen=True)
+        self.period = model.Parameter(name, 'period', PERIOD, units='days', alwaysfrozen=True)
+        self.tzero = model.Parameter(name, 'tzero', tzero, units='days [MJD]', alwaysfrozen=True)
+        self.c1 = model.Parameter(name, 'c1', c1, alwaysfrozen=True)
+        self.c2 = model.Parameter(name, 'c2', c2, alwaysfrozen=True)
+        self.c3 = model.Parameter(name, 'c3', c3, alwaysfrozen=True)
+        self.c4 = model.Parameter(name, 'c4', c4, alwaysfrozen=True)
+        self.m_fac = model.Parameter(name, 'm_fac', 0)
         self.hstp1 = model.Parameter(name, 'hstp1', 0)
         self.hstp2 = model.Parameter(name, 'hstp2', 0)
         self.hstp3 = model.Parameter(name, 'hstp3', 0)
@@ -144,6 +161,8 @@ class Transit(model.RegriddableModel1D):
         self.xshift2 = model.Parameter(name, 'xshift2', 0)
         self.xshift3 = model.Parameter(name, 'xshift3', 0)
         self.xshift4 = model.Parameter(name, 'xshift4', 0)
+
+        self.sh_array = sh   # This is not a model parameter but an extra input to the model, like x is
 
         model.RegriddableModel1D.__init__(self, name,
                                           (self.rl, self.flux, self.epoch,
@@ -156,7 +175,7 @@ class Transit(model.RegriddableModel1D):
 
     def calc(self, pars, x, *args, **kwargs):
         """Evaluate the model"""
-        return _transit_model(pars, x)
+        return _transit_model(pars, x, self.sh_array)
 
 
 def occultnl(rl, c1, c2, c3, c4, b0):
@@ -168,7 +187,7 @@ def occultnl(rl, c1, c2, c3, c4, b0):
     :param c3: limb darkening parameter 3
     :param c4: limb darkening parameter 4
     :param b0: impact parameter in stellar radii
-    :return: mulimb0?, mulimbf?
+    :return: mulimb0: limb-darkened transit model, mulimbf: lightcurves for each component that you put in the model
     """
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
@@ -239,7 +258,7 @@ def occultuniform(b0, w):
     """
     Compute the lightcurve for occultation of a uniform source without microlensing (Mandel & Agol 2002).
 
-    :param b0: array; impact parameter in units of stellar radius
+    :param b0: array; impact parameter in units of stellar radii
     :param w: array; occulting star size in units of stellar radius
     :return: muo1: float; fraction of flux at each b0 for a uniform source
     """
@@ -250,9 +269,11 @@ def occultuniform(b0, w):
     nb = len(np.atleast_1d(b0))
     muo1 = np.zeros(nb)
 
+
     for i in range(nb):
         # substitute z=b0(i) to shorten expressions
         z = np.atleast_1d(b0)[i]
+        z = z.value    # stripping it of astropy units
         if z >= 1+w:
             muo1[i] = 1.0
             continue
@@ -474,11 +495,11 @@ if __name__ == '__main__':
     ecc = 0.0 * u.deg                   # eccentricity in degrees
     omega = 0.0 * u.deg                 # that other weird angle in degrees
     per = 3.73548535 * u.d              # period in days
-    aor = 7.0780354                     # a/r_star converted to system density for the subroutine
+    aor = 7.0780354                     # a/r_star, which is unitless -> "distance of the planet from the star (meters)/stellar radius (meters)"
 
     # Calculate msmpr, the density of the system
     constant1 = ((G * np.square(per)) / (4 * np.square(np.pi))) ** (1 / 3)
-    msmpr = (aor / constant1) ** 3.                          # density of the system
+    msmpr = (aor / constant1) ** 3.     # density of the system in kg/m^3 "(Mass of star (kg) + Mass of planet (kg))/(Radius of star (m)^3)"
 
     # Import some data
     localDir = CONFIG_INI.get('data_paths', 'local_path')
