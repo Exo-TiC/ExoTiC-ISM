@@ -1,3 +1,0 @@
-inputdata string /Users/hwakeford/Documents/GitHub/HST_Marginalization/data/
-outputs string /Users/hwakeford/Documents/GitHub/HST_Marginalization/outputs/W17/
-limbdarkening string /Users/hwakeford/Documents/GitHub/HST_Marginalization/Limb-darkening/
