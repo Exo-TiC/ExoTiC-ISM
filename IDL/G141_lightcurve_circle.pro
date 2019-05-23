@@ -735,7 +735,7 @@ w_q = (EXP(count_AIC - beta))/TOTAL(EXP(count_AIC - beta))
 
 
 n01 = WHERE(w_q GE 0.05)
-  print,string(n_elements(n01),format='(I2)')+' models have a weight over 0.1. Models:',n01, w_q(n01)
+  print,string(n_elements(n01),format='(I2)')+' models have a weight over 0.05. Models:',n01, w_q(n01)
   print,'Most likely model is number '+string(where(w_q eq max(w_q)),format='(I2)')+' at w_q=',string(w_q(where(w_q eq max(w_q))),format='(f4.2)')
 
   best_sys = MAX(w_q)
