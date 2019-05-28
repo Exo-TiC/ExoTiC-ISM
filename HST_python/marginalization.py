@@ -377,9 +377,6 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         evidence_BIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * BIC
         evidence_AIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * AIC
 
-        # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (G * np.square((tmodel.period.val*u.d).to(u.s)) / (4 * np.pi * np.pi)) ** (1 / 3.)   #TODO: this gets calcualted in the loop but then used outside. Not sure that's intended.
-
         # OUTPUTS
         # Re-Calculate each of the arrays dependent on the output parameters for the epoch
         phase = marg.phase_calc(img_date, tmodel.epoch.val*u.d, tmodel.period.val*u.d)
@@ -437,24 +434,24 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         sys_model_phase[i, :] = x2                              # smooth phase  - used for plotting
 
         sys_params[i, :] = [par.val for par in tmodel.pars]     # parameters  - REUSED!
-        #sys_params_err[i, :] = pcerror                         # parameter errors  - REUSED!
         # We only really need the errors on rl, epoch, inclination and MsMpR, so I only calculate those. The rest
         # of the errors in this array will be zero (and hence false), but we'll be redesigning this in the near future.
-        sys_params_err[:, 3] = incl_err
-        sys_params_err[:, 4] = msmpr_err
+        if not tmodel.inclin.frozen:
+            sys_params_err[:, 3] = incl_err
+        if not tmodel.msmpr.frozen:
+            sys_params_err[:, 4] = msmpr_err
 
         sys_depth[i] = tmodel.rl.val                            # depth  - REUSED!
         sys_depth_err[i] = rl_err                               # depth error  - REUSED!
         sys_epoch[i] = tmodel.epoch.val                         # transit time  - REUSED!
-        sys_epoch_err[i] = epoch_err                            # transit time error  - REUSED!
+        if not tmodel.epoch.frozen:
+            sys_epoch_err[i] = epoch_err                            # transit time error  - REUSED!
         sys_evidenceAIC[i] = evidence_AIC                       # evidence AIC  - REUSED!
         sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC  - REUSED!
 
         # Reset the model parameters to the input parameters
         # Note on resetting: https://sherpa.readthedocs.io/en/latest/models/index.html#resetting-parameter-values
         tmodel.reset()
-
-        print('Another round done')
 
     end_second_fit = time.time()
     print('Second fit of all {} models took {} sec = {} min.'.format(nsys, end_second_fit - start_second_fit,
@@ -473,6 +470,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     #####################################
     #          MARGINALISATION          #
     #####################################
+    #TODO: check the indexing of all arrays: nsys vs. nparams
 
     # Sort the systematic models from largest to smallest AIC
     a = (np.sort(sys_evidenceAIC))[::-1]
@@ -485,7 +483,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     #TODO: why exactly is this happening and can I do it better?
     # REFORMAT all arrays with just positive values
-    pos = np.where(sys_evidenceAIC > -500)   #TODO: change hard coded number?
+    pos = np.where(sys_evidenceAIC > -500)   #TODO: change hard coded number? - it's simply the threshold that makes it work
     if len(pos) == 0:
         pos = -1
     npos = len(pos[0])   # NOT-REUSED
@@ -500,7 +498,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     count_epoch_err = sys_epoch_err[pos]
 
     count_residuals = sys_residuals[pos]
-    count_date = sys_date[pos]                #TODO: not reused
+    count_date = sys_date[pos]                #TODO: not reused - maybe for plotting though?
     count_flux = sys_flux[pos]
     count_flux_err = sys_flux_err[pos]
     count_phase = sys_phase[pos]
@@ -508,21 +506,26 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     count_model_x = sys_model_phase[pos]
 
     beta = np.min(count_AIC)
-    w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))
+    w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))  # weights
 
-    n01 = np.where(w_q >= 0.05)   #TODO: this number and number should be the same, or no?
-    print('{} models have a weight over 0.1. -> Models: {} with weigths: {}'.format(len(n01), n01, w_q[n01]))
+    #  This is just for runtime outputs
+    n01 = np.where(w_q >= 0.05)   #TODO: make this number a variable
+    print('\n{} models have a weight over 0.05. -> Models: {} with weigths: {}'.format(n01[0].shape, n01, w_q[n01]))
     print('Most likely model is number {} at w_q={}'.format(np.argmax(w_q), np.max(w_q)))
 
-    best_sys = np.max(w_q)   #TODO: redefined couple of lines below...
+    # best_sys_weight is the best system from our evidence, as opposed to best system puerly by scatter on residuals
+    best_sys_weight = np.argmax(w_q)
+    print('SDNR best model from evidence = {}, for model {}'.format(
+          np.std(count_residuals[best_sys_weight, :]) / np.sqrt(2) * 1e6, best_sys_weight))
 
+    # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by  model
+    # complexity. This shows us how picking the "best" model differs between std alone and weigthed result.
     rl_sdnr = np.zeros(len(w_q))
     for i in range(len(w_q)):
-        rl_sdnr[i] = (np.std(count_residuals[:, i]) / np.sqrt(2)) * 1e6
-    best_sys = np.argmin(rl_sdnr)
+        rl_sdnr[i] = (np.std(count_residuals[i]) / np.sqrt(2)) * 1e6   # make sure these system indices work on initial indexing, before taking out "bad" values (where we make variable 'pos')
+    best_sys_sdnr = np.argmin(rl_sdnr)
 
-    print('SDNR best model = {}'.format(np.std(count_residuals[:, best_sys]) / np.sqrt(2) * 1e6))
-    print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), np.argmin(rl_sdnr)))
+    print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), best_sys_sdnr))
 
     if plotting:
         plt.figure(3)
@@ -546,52 +549,71 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         plt.ylabel('sys_flux')
 
         plt.subplot(3, 1, 2)
-        plt.scatter(count_phase[best_sys,:], count_flux[best_sys,:])
-        plt.plot(count_model_x[best_sys,:], count_model_y[best_sys,:])
+        plt.scatter(count_phase[best_sys_weight,:], count_flux[best_sys_weight,:])
+        plt.plot(count_model_x[best_sys_weight,:], count_model_y[best_sys_weight,:])
         plt.ylim(np.min(count_flux[0,:]) - 0.001, np.max(count_flux[0,:]) + 0.001)
         plt.xlabel('count_phase')
         plt.ylabel('count_flux')
 
         plt.subplot(3, 1, 3)
-        plt.errorbar(count_phase[best_sys,:], count_residuals[best_sys,:], yerr=count_flux_err[best_sys,:], fmt='.')
+        plt.errorbar(count_phase[best_sys_weight,:], count_residuals[best_sys_weight,:], yerr=count_flux_err[best_sys_weight,:], fmt='.')
         plt.ylim(-1000, 1000)
         plt.xlabel('count_phase')
         plt.ylabel('count_residuals')
-        plt.hlines(0.0, xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dashed')
-        #plt.hlines(0.0 - (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
-        #plt.hlines(0.0 + (rl_sdnr[best_sys] * cut_down), xmin=np.min(count_phase[best_sys,:]), xmax=np.max(count_phase[best_sys,:]), colors='r', linestyles='dotted')
+        plt.hlines(0.0, xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
+        #plt.hlines(0.0 - (rl_sdnr[best_sys_weight] * cut_down), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
+        #plt.hlines(0.0 + (rl_sdnr[best_sys_weight] * cut_down), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
         plt.draw()
         plt.show()
 
-    ### Radius ratio
+    ### Radius ratio - this one always gets calculated
     marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
     print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
 
-    ### Center of transit time
-    marg_epoch, marg_epoch_err = marg.marginalization(count_epoch, count_epoch_err, w_q)
-    print('Epoch = {} +/- {}'.format(marg_epoch, marg_epoch_err))
+    ### Center of transit time (epoch)
+    marg_epoch = None
+    marg_epoch_err = None
+    if not tmodel.epoch.frozen:
+        marg_epoch, marg_epoch_err = marg.marginalization(count_epoch, count_epoch_err, w_q)
+        print('Epoch = {} +/- {}'.format(marg_epoch, marg_epoch_err))
 
-    ### Inclination in radians
-    marg_inclin_rad, marg_inclin_rad_err = marg.marginalization(sys_params[:, 3], sys_params_err[:, 3], w_q)
-    print('inc (rads) = {} +/- {}'.format(marg_inclin_rad, marg_inclin_rad_err))
+    ### Inclination
+    marg_inclin_rad = None
+    marg_inclin_rad_err = None
+    marg_inclin_deg = None
+    marg_inclin_deg_err = None
 
-    ### Inclination in degrees
-    conv1 = sys_params[:, 3] / (2 * np.pi / 360)
-    conv2 = sys_params_err[:, 3] / (2 * np.pi / 360)
-    marg_inclin_deg, marg_inclin_deg_err = marg.marginalization(conv1, conv2, w_q)
-    print('inc (deg) = {} +/- {}'.format(marg_inclin_deg, marg_inclin_deg_err))
+    if not tmodel.inclin.frozen:
+        # Inclication in radians
+        marg_inclin_rad, marg_inclin_rad_err = marg.marginalization(sys_params[:, 3], sys_params_err[:, 3], w_q)
+        print('inc (rads) = {} +/- {}'.format(marg_inclin_rad, marg_inclin_rad_err))
+
+        # Inclination in degrees
+        conv1 = sys_params[:, 3] / (2 * np.pi / 360)
+        conv2 = sys_params_err[:, 3] / (2 * np.pi / 360)
+        marg_inclin_deg, marg_inclin_deg_err = marg.marginalization(conv1, conv2, w_q)
+        print('inc (deg) = {} +/- {}'.format(marg_inclin_deg, marg_inclin_deg_err))
 
     ### MsMpR
-    marg_msmpr, marg_msmpr_err = marg.marginalization(sys_params[:, 4], sys_params_err[:, 4], w_q)
-    print('MsMpR = {} +/- {}'.format(marg_msmpr, marg_msmpr_err))
+    marg_msmpr = None
+    marg_msmpr_err = None
+    marg_aors = None
+    marg_aors_err = None
 
-    marg_aors = constant1 * (marg_msmpr ** 0.333)
-    marg_aors_err = constant1 * (marg_msmpr_err ** 0.3333) / marg_aors
-    print('a/R* = {} +/- {}'.format(marg_aors, marg_aors_err))
+    if not tmodel.msmpr.frozen:
+        marg_msmpr, marg_msmpr_err = marg.marginalization(sys_params[:, 4], sys_params_err[:, 4], w_q)
+        print('MsMpR = {} +/- {}'.format(marg_msmpr, marg_msmpr_err))
+
+        # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
+        constant1 = (G * np.square((tmodel.period.val * u.d).to(u.s)) / (4 * np.pi * np.pi)) ** (1 / 3.)   #TODO: period is constant - make pretty
+
+        marg_aors = constant1 * (marg_msmpr ** (1./3.))
+        marg_aors_err = constant1 * (marg_msmpr_err ** (1./3.)) / marg_aors
+        print('a/R* = {} +/- {}'.format(marg_aors, marg_aors_err))
 
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
-    np.savez(os.path.join(outDir, 'analysis_circle_G141_marginalised_'+run_name), w_q=w_q, best_sys=best_sys,
+    np.savez(os.path.join(outDir, 'analysis_circle_G141_marginalised_'+run_name), w_q=w_q, best_sys=best_sys_weight,
              marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
              marg_inclin_rad=marg_inclin_rad, marg_inclin_rad_err=marg_inclin_rad_err, marg_inclin_deg=marg_inclin_deg,
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
