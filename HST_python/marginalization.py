@@ -25,7 +25,6 @@ Continued translation and implementation of Sherpa by Iva Laginja (laginja.iva@g
 import numpy as np
 import os
 import time
-import sys
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.constants import G
@@ -35,10 +34,15 @@ from sherpa.data import Data1D
 from sherpa.optmethods import LevMar
 from sherpa.stats import Chi2
 from sherpa.fit import Fit
+from sherpa.estmethods import Confidence
 
 from config import CONFIG_INI
 from limb_darkening import limb_dark_fit
 import margmodule as marg
+
+
+# Errors from covariance matrix or with 'Confidence' estimation?
+ERRORS = 'covmatrix'   # 'covmatrix' or 'confidence'
 
 
 def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
@@ -158,6 +162,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     # Set up the fit object
     tfit = Fit(tdata, tmodel, stat=stat, method=opt)  # Instantiate fit object
+    tfit.estmethod = Confidence()    # Set up error estimator we want.
 
     #################################
     #           FIRST FIT           #
@@ -200,8 +205,13 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         # Calculate the error on rl
         print('Calculating error on rl...')
-        calc_errors = tfit.est_errors(parlist=(tmodel.rl,))
-        rl_err = calc_errors.parmaxes[0]   # Errors will be symmetric here so I am taking the max, bc it's positive
+        if ERRORS == 'covmatrix':
+            calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
+            rl_err = calc_errors[0]
+        elif ERRORS == 'confidence':
+            calc_errors = tfit.est_errors(parlist=(tmodel.rl,))
+            rl_err = max(np.abs(calc_errors.parmaxes[0]), np.abs(calc_errors.parmins[0]))
+
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
         # OUTPUTS
@@ -304,39 +314,50 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         print('2nd ROUND OF SHERPA FIT IS DONE\n')
 
         print('Calculating errors...')
-        #TODO: fix this error mess. at least adjust the fake errors for inclin and msmpr to sth else than 1e-10
-        # We can claculate errors only on thawed parameters, and inclin and msmpr and not always thawed
-        if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
-            print("Est errors on rl, epoch, inclin and msmpr...")
-            calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr, tmodel.inclin,))
-            msmpr_err = calc_errors.parmaxes[2]
-            incl_err = calc_errors.parmaxes[3]
 
-        elif not tmodel.inclin.frozen:
-            print('Est errors on rl, epoch and inclin...')
-            calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.inclin))
-            msmpr_err = 1e-10
-            incl_err = calc_errors.parmaxes[2]
+        # Errors directly from the covariance matrix in the fit
+        if ERRORS == 'covmatrix':   #TODO: change this such that it is still correct if epoch is frozen
+            calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
+            rl_err = calc_errors[0]
+            epoch_err = calc_errors[2]
 
-        elif not tmodel.msmpr.frozen:
-            print('Est errors on rl, epoch and msmpr...')
-            calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr))
-            msmpr_err = calc_errors.parmaxes[2]
-            incl_err = 1e-10
+            if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
+                incl_err = calc_errors[3]
+                msmpr_err = calc_errors[4]
 
-        else:
-            print('Est errors for rl and epoch...')
-            calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
-            msmpr_err = 1e-10
-            incl_err = 1e-10
+            elif not tmodel.inclin.frozen:
+                incl_err = calc_errors[3]
 
-        # rl and epoch are in this case of "fit_time" always thawed
-        rl_err = calc_errors.parmaxes[0]
-        epoch_err = calc_errors.parmaxes[1]
+            elif not tmodel.msmpr.frozen:
+                msmpr_err = calc_errors[3]
 
-        # Catch bad error estimation on epoch  #TODO: fix this
-        if epoch_err is None:
-            epoch_err = 1e-10
+        # Errors from the 'Confidence' estimation method
+        elif ERRORS == 'confidence':
+            #TODO: change this such that it is still correct if epoch is frozen
+            # We can calculate errors only on thawed parameters, and inclin and msmpr are not always thawed - neither is epoch
+            if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
+                print("Est errors on rl, epoch, inclin and msmpr...")
+                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr, tmodel.inclin,))
+                msmpr_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
+                incl_err = max(np.abs(calc_errors.parmaxes[3]), np.abs(calc_errors.parmins[3]))
+
+            elif not tmodel.inclin.frozen:
+                print('Est errors on rl, epoch and inclin...')
+                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.inclin))
+                incl_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
+
+            elif not tmodel.msmpr.frozen:
+                print('Est errors on rl, epoch and msmpr...')
+                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr))
+                msmpr_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
+
+            else:
+                print('Est errors for rl and epoch...')
+                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
+
+            # rl and epoch are in this case of "fit_time" always thawed
+            rl_err = max(np.abs(calc_errors.parmaxes[0]), np.abs(calc_errors.parmins[0]))
+            epoch_err = max(np.abs(calc_errors.parmaxes[1]), np.abs(calc_errors.parmins[1]))
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
@@ -383,7 +404,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         fit_model = mulimb01 * tmodel.flux.val * systematic_model
         residuals = (img_flux - fit_model) / tmodel.flux.val
-        resid_scatter = np.std(w_residuals)    #TODO: where does w_residuals come from? It seems like it's just the last one from the first fit, that wouldn't make any sense. I think this is supposed to mean 'residuals' instead.
+        resid_scatter = np.std(residuals)
         fit_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: same like corrected_data
 
         if plotting:
