@@ -293,11 +293,8 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         print(sys)
         print('  ')
 
-        # Rescale the err array by the standard deviation of the residuals from the 1st fit.
-        err *= (1.0 - w_scatter[i])   # w_scatter are residuals
-
-        # Update the data object with the new errors
-        tdata.staterror = err
+        # The errors at this point got rescaled to unity chi squared in the previous fit and were not reset
+        # by model.reset()
 
         # Set up systematics for current run
         for k, select in enumerate(sys):
@@ -371,7 +368,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         # EVIDENCE BASED on the AIC and BIC
         Npoint = len(img_date)
-        sigma_points = np.median(err)
+        sigma_points = np.median(tdata.staterror)
 
         evidence_BIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * BIC
         evidence_AIC = - Npoint * np.log(sigma_points) - 0.5 * Npoint * np.log(2 * np.pi) - 0.5 * AIC
@@ -408,7 +405,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
             plt.clf()
             plt.scatter(phase, img_flux, s=5)
             plt.plot(x2, mulimb02, 'k')
-            plt.errorbar(phase, fit_data, yerr=err, fmt='m.')
+            plt.errorbar(phase, fit_data, yerr=tdata.staterror, fmt='m.')
             plt.xlim(-0.03, 0.03)
             plt.title('Model ' + str(i+1) + '/' + str(nsys))
             plt.xlabel('Planet Phase')
@@ -425,7 +422,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         sys_rawflux[i, :] = img_flux                            # raw lightcurve flux  - just saving
         sys_rawflux_err[i, :] = err                             # raw flux error  - just saving
         sys_flux[i, :] = fit_data                               # corrected lightcurve flux
-        sys_flux_err[i, :] = err                                # corrected flux error  - used for plotting
+        sys_flux_err[i, :] = tdata.staterror                    # corrected flux error  - used for plotting
         sys_residuals[i, :] = residuals                         # residuals   - REUSED! also for plotting
         sys_systematic_model[i, :] = systematic_model           # systematic model  - just saving
 
