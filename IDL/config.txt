@@ -1,3 +1,0 @@
-inputdata string /Users/ilaginja/Documents/Git/HST_Marginalization/data/
-outputs string /Users/ilaginja/Documents/Git/HST_Marginalization/outputs/
-limbdarkening string /Users/ilaginja/Documents/Git/HST_Marginalization/Limb-darkening/
