@@ -41,10 +41,6 @@ from limb_darkening import limb_dark_fit
 import margmodule as marg
 
 
-# Errors from covariance matrix or with 'Confidence' estimation?
-ERRORS = 'covmatrix'   # 'covmatrix' or 'confidence'
-
-
 def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
@@ -92,6 +88,9 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
     # READ THE CONSTANTS
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
+
+    # Errors from Hessian matrix in the fit or with 'Confidence' estimation?
+    ERRORS = CONFIG_INI.get('technical_parameters', 'errors')
 
     # We want to keep the raw data as is, so we generate helper arrays that will get changed from model to model
     img_date = x * u.d    # time array
@@ -205,7 +204,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
         # Calculate the error on rl
         print('Calculating error on rl...')
-        if ERRORS == 'covmatrix':
+        if ERRORS == 'hessian':
             calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
             rl_err = calc_errors[0]
         elif ERRORS == 'confidence':
@@ -316,7 +315,7 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
         print('Calculating errors...')
 
         # Errors directly from the covariance matrix in the fit
-        if ERRORS == 'covmatrix':   #TODO: change this such that it is still correct if epoch is frozen
+        if ERRORS == 'hessian':   #TODO: change this such that it is still correct if epoch is frozen
             calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
             rl_err = calc_errors[0]
             epoch_err = calc_errors[2]
