@@ -1,3 +1,7 @@
+<!-- PROJECT SHIELDS -->
+[![MIT License][license-shield]][license-url]
+
+
 # HST marginalization - NEWNAME
 
 This code performs Levenberg-Marquardt least-squares minimization across a grid of stochastic systematic models to produce marginalized transit parameters given a lightcurve for a specified wavelength range.
@@ -49,21 +53,26 @@ End with an example of getting some data out of the system or using it for a lit
 
 ## Contributing
 
-We still need to create this file, but once it's there:
+We still need to create this file, but once it's there:  
 Please read [CONTRIBUTING.md]() for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Authors
 
-* **Hannah R. Wakefort** - *Method author* - [@hwakeford](https://github.com/hwakeford)
+* **Hannah R. Wakeford** - *Method author* - [@hrwakeford](https://github.com/hrwakeford)
 * **Iva Laginja** - *Upgrades and builds leading up to release 1.0.0* - [@ivalaginja](https://github.com/ivalaginja)
 * **Matthew Hill** - *Translation from IDL to Python* - [@mattjhill](https://github.com/mattjhill)
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.txt) file for details
 
 ## Acknowledgments
 
 * Matthew Hill for a functional translation from IDL to Python
 * Iva Laginja for finding `Sherpa`, making the clunky `mpfit` dispensable
-* The [`Sherpa' team](https://github.com/sherpa/sherpa), providing a fantastic package and answering fast to GitHub issues
+* The [`Sherpa` team](https://github.com/sherpa/sherpa), providing a fantastic package and answering fast to GitHub issues
+
+
+<!-- MARKDOWN LINKS & IMAGES -->
+[license-shield]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
+[license-url]: https://choosealicense.com/licenses/mit
