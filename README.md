@@ -111,7 +111,55 @@ keep permanently.
 
 We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in Wakeford et al. (2016).
 Currently we only support the marginalization of WFC3/G141 datasets. If you want to perform the marginalization on a different 
-transit dataset, you have to add it to the data folder and update the planetary parameters in your local configfile. 
+transit dataset, you have to add it to the data folder and update the planetary parameters in your local configfile.
+
+**The configfile** has the following structure, except here we added some extra comments for clarity:
+```ini
+[data_paths]
+local_path = /Users/MyUser/repos/HST-Marginalization  ; your global path to the repo clone
+data_path = data                                      ; local path to the input data
+output_path = /Users/MyUser/data                      ; global path ot the output directory 
+current_model = W17                                   ; data selection; refers to section in configfile
+
+[limb_darkening]
+ld_model = 3D
+metallicity = -1.0
+Teff = 6550
+logg = 4.5
+
+[system_parameters]
+instrument = WFC3
+grating = G141
+grid_selection = fit_time
+run_name = wl_time_wm3d
+
+[technical_parameters]
+plotting = True
+outlier_limit_std = 3.
+errors = hessian                                       ; error method to be used, "hessian" or "confidence"
+
+[smooth_model]
+resolution = 0.0001
+half_range = 0.2
+
+;[planet_parameters] - make a new section for new data
+[W17]
+rl = 0.12169232                   ; Rp/R* estimate - th transit depth
+epoch = 57957.970153390           ; in MJD
+inclin = 87.34635                 ; inclination in deg
+ecc = 0.0                         ; eccentricity in deg
+omega = 0.0                       ; deg
+Per = 3.73548535                  ; planet period in days
+aor = 7.0780354                   ;a/r* (unitless) --> "distance of the planet from the star (meters)/stellar radius (meters)"
+
+[constants]
+dtosec = 86400                    ; conversion factor from days to seconds
+HST_period = 0.06691666           ; Hubbe Space Telescope period in days
+```
+
+## Error calculation
+
+We said we needed to elaborate on the error estimation in the code...
 
 ## Contributing
 
