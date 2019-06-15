@@ -116,14 +116,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     # Define limb darkening directory, which is inside this package
     limbDir = os.path.join('..', 'Limb-darkening')
     ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
-    grat = CONFIG_INI.get('technical_parameters', 'grating')
+    grat = CONFIG_INI.get('system_parameters', 'grating')
     _uLD, c1, c2, c3, c4, _cp1, _cp2, _cp3, _cp4, _aLD, _bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
                                                                       ld_model)
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
     # grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
-    grid_selection = CONFIG_INI.get('technical_parameters', 'grid_selection')
+    grid_selection = CONFIG_INI.get('system_parameters', 'grid_selection')
     grid = marg.wfc3_systematic_model_grid_selection(grid_selection)
     nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
 
@@ -617,24 +617,27 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
 
 if __name__ == '__main__':
-    """
-    This is a translation of the W17_lightcurve_test.pro
-    """
 
     # Figure out how much time it takes to run this code.
     start_time = time.time()
 
+    # What data are we using?
+    exoplanet = CONFIG_INI.get('data_paths', 'current_model')
+    print('\nWORKING ON EXOPLANET {}\n'.format(exoplanet))
+
+    # Set up the data paths
     localDir = CONFIG_INI.get('data_paths', 'local_path')
     outDir = CONFIG_INI.get('data_paths', 'output_path')
-    curr_model = CONFIG_INI.get('data_paths', 'current_model')
-    dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), curr_model)
+    dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), exoplanet)
 
     # Read in the txt file for the lightcurve data
-    x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'), skiprows=7, unpack=True)
-    wavelength = np.loadtxt(os.path.join(dataDir, 'W17_wavelength_test_data.txt'), skiprows=3)
+    get_timeseries = CONFIG_INI.get(exoplanet, 'lightcurve_file')
+    get_wvln = CONFIG_INI.get(exoplanet, 'wvln_file')
+    x, y, err, sh = np.loadtxt(os.path.join(dataDir, get_timeseries), skiprows=7, unpack=True)
+    wavelength = np.loadtxt(os.path.join(dataDir, get_wvln), skiprows=3)
 
     # What to call the run and whether to turn plotting on
-    run_name = CONFIG_INI.get('technical_parameters', 'run_name')
+    run_name = CONFIG_INI.get('system_parameters', 'run_name')
     plotting = CONFIG_INI.getboolean('technical_parameters', 'plotting')
 
     # Run the main function
