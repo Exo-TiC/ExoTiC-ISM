@@ -128,4 +128,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.tx
 <!-- MARKDOWN LINKS & IMAGES -->
 [license-shield]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
 [license-url]: https://choosealicense.com/licenses/mit
-[python-version-url]: https://img.shields.io/badge/Python-3.6,-green.svg?style=flat
+[python-version-url]: https://img.shields.io/badge/Python-3.6-green.svg?style=flat
