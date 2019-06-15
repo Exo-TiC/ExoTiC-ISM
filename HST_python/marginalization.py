@@ -38,19 +38,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
 
-    Perform Levenberg-Marquardt least-squares minimization across a grid of stochastic systematic models to produce
-    marginalised transit parameters given a WFC3 G141 lightcurve for a specified wavelength range.
-
-    AUTHOR:
-    Hannah R. Wakeford,
-    stellarplanet@gmail.com
-
-    CITATIONS:
-    This procedure follows the method outlined in Wakeford, et al. (2016, ApJ, 819, 1), using marginalisation across a
-    stochastic grid of models. The program makes use of the analytic transit model in Mandel & Agol (2002, ApJ Letters,
-    580, L171-175) and Lavenberg-Markwardt least squares minimisation using the Python package Sherpa.
-    Here, a 4-parameter limb darkening law is used as outlined in Claret, 2010 and Sing et al. 2010.
-
     MAJOR PROGRAMS INCLUDED IN THIS ROUTINE:
     - LIMB-DARKENING (from limb_darkening.py)
         This requires the G141.WFC3.sensitivity.sav file, template.sav, kuruczlist.sav, and the kurucz folder with all
