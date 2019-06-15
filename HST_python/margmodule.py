@@ -21,66 +21,6 @@ OMEGA = CONFIG_INI.getfloat(exoplanet, 'omega')
 PERIOD = CONFIG_INI.getfloat(exoplanet, 'Per')
 
 
-def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True):
-    """
-    This function will be deleted once Sherpa is in place
-    :param p:
-    :param fjac:
-    :param x:
-    :param y:
-    :param err:
-    :param sh:
-    :return:
-    """
-
-    HSTper = CONFIG_INI.getfloat('constants', 'HST_period')
-    day_to_sec = CONFIG_INI.getfloat('constants', 'dtosec')
-
-    # Define each of the parameters that are read into the fitting routine
-    rl = p[0]
-    epoch = p[2]
-    inclin = p[3]
-    MsMpR = p[4]
-    Per = p[7]
-    T0 = p[8]
-    c1 = p[9]
-    c2 = p[10]
-    c3 = p[11]
-    c4 = p[12]
-
-    if not silent:
-        print(epoch)
-    phase = phase_calc(x, epoch, Per/day_to_sec)
-    HSTphase = phase_calc(x, T0, HSTper)
-
-    if not silent:
-        print('phase[0] = {}'.format(phase[0]))
-
-    # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = impact_param(Per, MsMpR, phase, inclin)    # b0 in stellar radii
-    if not silent:
-        print(b0)
-
-    # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
-    # The c1-c4 are the non-linear limb-darkening parameters
-    # b0 is the impact parameter function and I am not sure how this is handled in BATMAN - I will also look into this.
-    mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
-    systematic_model = sys_model(phase, HSTphase, sh, p[13], p[14], p[15], p[16], p[17], p[18], p[19], p[20], p[21])
-
-    # model fit to data = transit model * baseline flux (flux0) * systematic model
-    model = mulimb0 * p[1] * systematic_model
-    # this would be the break point to get the model values
-    # return model
-    print('Rp/R* = {}'.format(p[0]))
-    resids = (y - model) / p[1]
-
-    print('Scatter = {}'.format(np.std(resids)))
-    print('-----------------------------------')
-    print(' ')
-
-    return [0, (y - model) / err]
-
-
 def _transit_model(pars, x, sh):
     """
     Transit model by Mandel & Agol (2002).
@@ -426,7 +366,7 @@ def marginalization(array, error, weight):
 @u.quantity_input(per=u.s, incl=u.rad)
 def impact_param(per, msmpr, phase, incl):
     """
-    Calculate impact parameter
+    Calculate impact parameter.
     :param per: period in seconds
     :param msmpr: MsMpR
     :param phase: phase
@@ -442,7 +382,7 @@ def impact_param(per, msmpr, phase, incl):
 
 def sys_model(phase, hst_phase, sh, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4):
     """
-    Systematic model for WFC3 data
+    Systematic model for WFC3 data.
     :param phase:
     :param hst_phase:
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit
