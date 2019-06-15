@@ -28,13 +28,19 @@ reduced results on your local machine. For a more thorough description of the in
 We assume that you have `conda` and `git` installed.
 
 - Create the `hstmarg` environment:  
-```$ conda env create --file environment.yml```
+```bash
+$ conda env create --file environment.yml
+```
 
 - Navigate to the directory you want to clone the repository  into:  
-```$ cd /User/YourUser/repos/```
+```bash
+$ cd /User/YourUser/repos/
+```
 
 - Clone the repository:  
-```$ git clone https://github.com/hrwakeford/HST_Marginalization.git```
+```bash
+$ git clone https://github.com/hrwakeford/HST_Marginalization.git
+```
 
 - Copy the file `config.ini`, name the copy `config_local.ini` and add the line `config_local.ini` into your `.gitignore`.
 
@@ -52,10 +58,14 @@ output_path = /Users/YourUser/<path-to-data>
 ```
 
 - Navigate to inside the actual package:  
-```$ cd HST_python```
+```bash
+$ cd HST_python
+```
 
 - Run the marginalization on the demo data from the template:  
-```$ python marginalization.py```
+```bash
+$ python marginalization.py
+```
 
 The script takes a short while to run and will output messages to the terminal and save the final data to the path you 
 specified under `[data_paths][output_path]` in your `config_local.ini`!
@@ -69,13 +79,13 @@ from which you can directly build a new conda environment in which we have teste
  
  Run
 
-```
+```bash
 conda env create --file environment.yml
 ```
 
 to build the environment, or optionally
 
-```
+```bash
 conda env create --name <myEnvName> --file environment.yml
 ```
 
@@ -128,4 +138,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.tx
 <!-- MARKDOWN LINKS & IMAGES -->
 [license-shield]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square
 [license-url]: https://choosealicense.com/licenses/mit
-[python-version-url]: https://img.shields.io/badge/Python-3.6,-green.svg?style=flat
+[python-version-url]: https://img.shields.io/badge/Python-3.6-green.svg?style=flat
