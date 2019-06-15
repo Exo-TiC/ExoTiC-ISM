@@ -1,34 +1,27 @@
 """
 This code is based on Hannah Wakeford's IDL code for lightcurve extraction with marginalization over a set of
-systematic models. The original IDL scipts used are:
-G141_lightcurve_circle.pro - the translation of this code is in the G141_lightcurve_circle() function
-W17_lightcurve_test.pro - the translation of this code is in the main() function
-
+systematic models.
 
 Initially, the python code used a python translation of the IDL MPFIT library instead of built LM fitters because for
 some reason neither the script least_squares method, the Astropy wrapper, or the lmfit package find the same minimum
 as the IDL code.
-The python translation of MPFIT is consistent with the IDL code. In theory, all of these packages use the same method,
-so there may be some tuning parameters that need to be adjusted to agree with MPFIT (error tolerance, etc.).
-The python translation of mpfit (mpfit.py) comes from;
-https://github.com/scottransom/presto/blob/master/lib/python/mpfit.py
-This showed to be really flaky though, so we ditched all of that and are now using the fitting package Sherpa.
+Using the python version of mpfit showed to be really flaky though, so we ditched all of that and are now using the
+fitting package Sherpa.
 
 limb_darkening.py contains a python translation of the 3D limb darkening code in the original IDL. It uses Astropy
-for fitting the models. Again, the two are not exactly consistent but in this case the difference is small (good to
-about 3 decimals).
+for fitting the models.
 
 Initial translation of Python to IDL was done by Matthew Hill (mhill92@gmail).
 Continued translation and implementation of Sherpa by Iva Laginja (laginja.iva@gmail.com).
 """
 
-import numpy as np
 import os
 import time
+from shutil import copy
+import numpy as np
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.constants import G
-from shutil import copy
 
 from sherpa.data import Data1D
 from sherpa.optmethods import LevMar
@@ -41,22 +34,9 @@ from limb_darkening import limb_dark_fit
 import margmodule as marg
 
 
-def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
+def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
-
-    Perform Levenberg-Marquardt least-squares minimization across a grid of stochastic systematic models to produce
-    marginalised transit parameters given a WFC3 G141 lightcurve for a specified wavelength range.
-
-    AUTHOR:
-    Hannah R. Wakeford,
-    stellarplanet@gmail.com
-
-    CITATIONS:
-    This procedure follows the method outlined in Wakeford, et al. (2016, ApJ, 819, 1), using marginalisation across a
-    stochastic grid of models. The program makes use of the analytic transit model in Mandel & Agol (2002, ApJ Letters,
-    580, L171-175) and Lavenberg-Markwardt least squares minimisation using the Python package Sherpa.
-    Here, a 4-parameter limb darkening law is used as outlined in Claret, 2010 and Sing et al. 2010.
 
     MAJOR PROGRAMS INCLUDED IN THIS ROUTINE:
     - LIMB-DARKENING (from limb_darkening.py)
@@ -99,11 +79,11 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     tzero = x[0] * u.d      # first time data point
     nexposure = len(img_date)   # Total number of exposures in the observation
 
-    Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * u.d    # period, converted to seconds in next line
+    Per = CONFIG_INI.getfloat(exoplanet, 'Per') * u.d    # period, converted to seconds in next line
     Per = Per.to(u.s)
 
     constant1 = ((G * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
-    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')    # this is unitless -> "distance of the planet from the star (meters)/stellar radius (meters)"
+    aor = CONFIG_INI.getfloat(exoplanet, 'aor')    # this is unitless -> "distance of the planet from the star (meters)/stellar radius (meters)"
     MsMpR = (aor / constant1) ** 3.     # density of the system in kg/m^3 "(Mass of star (kg) + Mass of planet (kg))/(Radius of star (m)^3)"
 
     # LIMB DARKENING
@@ -116,14 +96,14 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     # Define limb darkening directory, which is inside this package
     limbDir = os.path.join('..', 'Limb-darkening')
     ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
-    grat = CONFIG_INI.get('technical_parameters', 'grating')
+    grat = CONFIG_INI.get('system_parameters', 'grating')
     _uLD, c1, c2, c3, c4, _cp1, _cp2, _cp3, _cp4, _aLD, _bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
                                                                       ld_model)
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
     # grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
-    grid_selection = CONFIG_INI.get('technical_parameters', 'grid_selection')
+    grid_selection = CONFIG_INI.get('system_parameters', 'grid_selection')
     grid = marg.wfc3_systematic_model_grid_selection(grid_selection)
     nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
 
@@ -617,28 +597,31 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
 
 
 if __name__ == '__main__':
-    """
-    This is a translation of the W17_lightcurve_test.pro
-    """
 
     # Figure out how much time it takes to run this code.
     start_time = time.time()
 
+    # What data are we using?
+    exoplanet = CONFIG_INI.get('data_paths', 'current_model')
+    print('\nWORKING ON EXOPLANET {}\n'.format(exoplanet))
+
+    # Set up the data paths
     localDir = CONFIG_INI.get('data_paths', 'local_path')
-    outDir = os.path.join(localDir, CONFIG_INI.get('data_paths', 'output_path'))
-    curr_model = CONFIG_INI.get('data_paths', 'current_model')
-    dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), curr_model)
+    outDir = CONFIG_INI.get('data_paths', 'output_path')
+    dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), exoplanet)
 
     # Read in the txt file for the lightcurve data
-    x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'), skiprows=7, unpack=True)
-    wavelength = np.loadtxt(os.path.join(dataDir, 'W17_wavelength_test_data.txt'), skiprows=3)
+    get_timeseries = CONFIG_INI.get(exoplanet, 'lightcurve_file')
+    get_wvln = CONFIG_INI.get(exoplanet, 'wvln_file')
+    x, y, err, sh = np.loadtxt(os.path.join(dataDir, get_timeseries), skiprows=7, unpack=True)
+    wavelength = np.loadtxt(os.path.join(dataDir, get_wvln), skiprows=3)
 
     # What to call the run and whether to turn plotting on
-    run_name = CONFIG_INI.get('technical_parameters', 'run_name')
+    run_name = CONFIG_INI.get('system_parameters', 'run_name')
     plotting = CONFIG_INI.getboolean('technical_parameters', 'plotting')
 
     # Run the main function
-    total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting)
+    total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting)
 
     end_time = time.time()
     print('\nTime it took to run the code:', (end_time-start_time)/60, 'min')
