@@ -12,12 +12,13 @@ from sherpa.models import model
 from config import CONFIG_INI
 
 # Read planet parameters from configfile
-RL = CONFIG_INI.getfloat('planet_parameters', 'rl')
-EPOCH = CONFIG_INI.getfloat('planet_parameters', 'epoch')
-INCLIN = CONFIG_INI.getfloat('planet_parameters', 'inclin')
-ECC = CONFIG_INI.getfloat('planet_parameters', 'ecc')
-OMEGA = CONFIG_INI.getfloat('planet_parameters', 'omega')
-PERIOD = CONFIG_INI.getfloat('planet_parameters', 'Per')
+exoplanet = CONFIG_INI.get('data_paths', 'current_model')
+RL = CONFIG_INI.getfloat(exoplanet, 'rl')
+EPOCH = CONFIG_INI.getfloat(exoplanet, 'epoch')
+INCLIN = CONFIG_INI.getfloat(exoplanet, 'inclin')
+ECC = CONFIG_INI.getfloat(exoplanet, 'ecc')
+OMEGA = CONFIG_INI.getfloat(exoplanet, 'omega')
+PERIOD = CONFIG_INI.getfloat(exoplanet, 'Per')
 
 
 def transit_circle(p, fjac=None, x=None, y=None, err=None, sh=None, silent=True):

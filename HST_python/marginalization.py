@@ -34,7 +34,7 @@ from limb_darkening import limb_dark_fit
 import margmodule as marg
 
 
-def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
+def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     """
     Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
 
@@ -92,11 +92,11 @@ def total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     tzero = x[0] * u.d      # first time data point
     nexposure = len(img_date)   # Total number of exposures in the observation
 
-    Per = CONFIG_INI.getfloat('planet_parameters', 'Per') * u.d    # period, converted to seconds in next line
+    Per = CONFIG_INI.getfloat(exoplanet, 'Per') * u.d    # period, converted to seconds in next line
     Per = Per.to(u.s)
 
     constant1 = ((G * np.square(Per)) / (4 * np.square(np.pi))) ** (1 / 3)
-    aor = CONFIG_INI.getfloat('planet_parameters', 'aor')    # this is unitless -> "distance of the planet from the star (meters)/stellar radius (meters)"
+    aor = CONFIG_INI.getfloat(exoplanet, 'aor')    # this is unitless -> "distance of the planet from the star (meters)/stellar radius (meters)"
     MsMpR = (aor / constant1) ** 3.     # density of the system in kg/m^3 "(Mass of star (kg) + Mass of planet (kg))/(Radius of star (m)^3)"
 
     # LIMB DARKENING
@@ -634,7 +634,7 @@ if __name__ == '__main__':
     plotting = CONFIG_INI.getboolean('technical_parameters', 'plotting')
 
     # Run the main function
-    total_marg(x, y, err, sh, wavelength, outDir, run_name, plotting)
+    total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting)
 
     end_time = time.time()
     print('\nTime it took to run the code:', (end_time-start_time)/60, 'min')
