@@ -1,34 +1,27 @@
 """
 This code is based on Hannah Wakeford's IDL code for lightcurve extraction with marginalization over a set of
-systematic models. The original IDL scipts used are:
-G141_lightcurve_circle.pro - the translation of this code is in the G141_lightcurve_circle() function
-W17_lightcurve_test.pro - the translation of this code is in the main() function
-
+systematic models.
 
 Initially, the python code used a python translation of the IDL MPFIT library instead of built LM fitters because for
 some reason neither the script least_squares method, the Astropy wrapper, or the lmfit package find the same minimum
 as the IDL code.
-The python translation of MPFIT is consistent with the IDL code. In theory, all of these packages use the same method,
-so there may be some tuning parameters that need to be adjusted to agree with MPFIT (error tolerance, etc.).
-The python translation of mpfit (mpfit.py) comes from;
-https://github.com/scottransom/presto/blob/master/lib/python/mpfit.py
-This showed to be really flaky though, so we ditched all of that and are now using the fitting package Sherpa.
+Using the python version of mpfit showed to be really flaky though, so we ditched all of that and are now using the
+fitting package Sherpa.
 
 limb_darkening.py contains a python translation of the 3D limb darkening code in the original IDL. It uses Astropy
-for fitting the models. Again, the two are not exactly consistent but in this case the difference is small (good to
-about 3 decimals).
+for fitting the models.
 
 Initial translation of Python to IDL was done by Matthew Hill (mhill92@gmail).
 Continued translation and implementation of Sherpa by Iva Laginja (laginja.iva@gmail.com).
 """
 
-import numpy as np
 import os
 import time
+from shutil import copy
+import numpy as np
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.constants import G
-from shutil import copy
 
 from sherpa.data import Data1D
 from sherpa.optmethods import LevMar

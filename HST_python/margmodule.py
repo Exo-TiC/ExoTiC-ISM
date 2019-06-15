@@ -1,4 +1,6 @@
-"""Helper module for transit marginalization."""
+"""
+Helper module for transit marginalization.
+"""
 
 import os
 import numpy as np
