@@ -625,7 +625,7 @@ if __name__ == '__main__':
     start_time = time.time()
 
     localDir = CONFIG_INI.get('data_paths', 'local_path')
-    outDir = os.path.join(localDir, CONFIG_INI.get('data_paths', 'output_path'))
+    outDir = CONFIG_INI.get('data_paths', 'output_path')
     curr_model = CONFIG_INI.get('data_paths', 'current_model')
     dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), curr_model)
 
