@@ -50,7 +50,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     :param err: array of error values corresponding to the flux values in y
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err)
     :param wavelength: array of wavelengths covered to compute y
-    :param outDir: string of folder path to save the data to, e.g. '/Volumes/DATA1/user/HST/Planet/sav_file/'
+    :param outDir: string of folder path to save the data to, e.g. '/Users/MyUser/data/'
     :param run_name: string of the individual run name, e.g. 'whitelight', or 'bin1', or '115-120micron'
     :param plotting: bool, default=True; whether or not interactive plots should be shown
     :return:
@@ -230,7 +230,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('First fit of all {} models took {} sec = {} min.'.format(nsys, end_first_fit-start_first_fit, (end_first_fit-start_first_fit)/60))
 
     # Save results of first fit to file.
-    np.savez(os.path.join(outDir, 'run1_scatter_'+run_name), w_scatter=w_scatter, w_params=w_params)
+    np.savez(os.path.join(outDir, 'first-fit'+run_name), w_scatter=w_scatter, w_params=w_params)
 
 
     ################################
@@ -381,15 +381,16 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         fit_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: same like corrected_data
 
         if plotting:
-            plt.figure(2)
+            plt.figure(1)
             plt.clf()
-            plt.scatter(phase, img_flux, s=5)
-            plt.plot(x2, mulimb02, 'k')
-            plt.errorbar(phase, fit_data, yerr=tdata.staterror, fmt='m.')
+            plt.scatter(phase, img_flux, s=5, label='Data')
+            plt.plot(x2, mulimb02, 'k', label='Smooth model')
+            plt.errorbar(phase, fit_data, yerr=tdata.staterror, fmt='m.', label='Fit')
             plt.xlim(-0.03, 0.03)
             plt.title('Model ' + str(i+1) + '/' + str(nsys))
             plt.xlabel('Planet Phase')
-            plt.ylabel('Data')
+            plt.ylabel('Normalized flux')
+            plt.legend()
             plt.draw()
             plt.pause(0.05)
 
@@ -435,7 +436,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
-    np.savez(os.path.join(outDir, 'analysis_circle_G141_'+run_name), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
+    np.savez(os.path.join(outDir, 'full-fit'+run_name), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
              sys_rawflux=sys_rawflux, sys_rawflux_err=sys_rawflux_err, sys_flux=sys_flux, sys_flux_err=sys_flux_err,
              sys_residuals=sys_residuals, sys_model=sys_model, sys_model_phase=sys_model_phase,
              sys_systematic_model=sys_systematic_model, sys_params=sys_params, sys_params_err=sys_params_err,
@@ -503,43 +504,46 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), best_sys_sdnr))
 
+    # Marginalization plots
+    plt.figure(2)
+    plt.suptitle('Marginalization results')
+    plt.subplot(3, 1, 1)
+    plt.plot(w_q)
+    plt.ylabel('Weight')
+    plt.subplot(3, 1, 2)
+    plt.plot(rl_sdnr)
+    plt.ylabel('Standard deviation of residuals')
+    plt.subplot(3, 1, 3)
+    plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
+    plt.ylabel('$R_P/R_*$')
+    plt.xlabel('Systematic model number')
+    plt.savefig(os.path.join(outDir, 'weights-stdr-rl.pdf'))
     if plotting:
-        plt.figure(3)
-        plt.subplot(3, 1, 1)
-        plt.plot(w_q)
-        plt.title('w_q')
-        plt.subplot(3, 1, 2)
-        plt.plot(rl_sdnr)
-        plt.title('rl_sdnr')
-        plt.subplot(3, 1, 3)
-        plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
-        plt.title('count_depth')
-        plt.draw()
-        plt.pause(0.05)
+        plt.show()
 
-        plt.figure(4)
-        plt.subplot(3, 1, 1)
-        plt.scatter(sys_phase[0,:], sys_flux[0,:])
-        plt.ylim(np.min(sys_flux[0,:]) - 0.001, np.max(sys_flux[0,:]) + 0.001)
-        plt.xlabel('sys_phase')
-        plt.ylabel('sys_flux')
+    plt.figure(3)
+    plt.suptitle('First vs. best model')
+    plt.subplot(3, 1, 1)
+    plt.scatter(sys_phase[0,:], sys_flux[0,:])
+    plt.ylim(np.min(sys_flux[0,:]) - 0.001, np.max(sys_flux[0,:]) + 0.001)
+    plt.ylabel('Fitted norm. flux of first sys model')
 
-        plt.subplot(3, 1, 2)
-        plt.scatter(count_phase[best_sys_weight,:], count_flux[best_sys_weight,:])
-        plt.plot(count_model_x[best_sys_weight,:], count_model_y[best_sys_weight,:])
-        plt.ylim(np.min(count_flux[0,:]) - 0.001, np.max(count_flux[0,:]) + 0.001)
-        plt.xlabel('count_phase')
-        plt.ylabel('count_flux')
+    plt.subplot(3, 1, 2)
+    plt.scatter(count_phase[best_sys_weight,:], count_flux[best_sys_weight,:], label='Fit of best model')
+    plt.plot(count_model_x[best_sys_weight,:], count_model_y[best_sys_weight,:], label='Smooth best model')
+    plt.ylim(np.min(count_flux[0,:]) - 0.001, np.max(count_flux[0,:]) + 0.001)
+    plt.ylabel('Best model norm. flux')
 
-        plt.subplot(3, 1, 3)
-        plt.errorbar(count_phase[best_sys_weight,:], count_residuals[best_sys_weight,:], yerr=count_flux_err[best_sys_weight,:], fmt='.')
-        plt.ylim(-1000, 1000)
-        plt.xlabel('count_phase')
-        plt.ylabel('count_residuals')
-        plt.hlines(0.0, xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
-        #plt.hlines(0.0 - (rl_sdnr[best_sys_weight] * cut_down), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
-        #plt.hlines(0.0 + (rl_sdnr[best_sys_weight] * cut_down), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
-        plt.draw()
+    plt.subplot(3, 1, 3)
+    plt.errorbar(count_phase[best_sys_weight,:], count_residuals[best_sys_weight,:], yerr=count_flux_err[best_sys_weight,:], fmt='.')
+    plt.ylim(-1000, 1000)
+    plt.xlabel('Planet phase')
+    plt.ylabel('Best model residuals')
+    plt.hlines(0.0, xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
+    plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
+    plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
+    plt.savefig(os.path.join(outDir, 'residuals_best-model.pdf'))
+    if plotting:
         plt.show()
 
     ### Radius ratio - this one always gets calculated
@@ -589,7 +593,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
-    np.savez(os.path.join(outDir, 'analysis_circle_G141_marginalised_'+run_name), w_q=w_q, best_sys=best_sys_weight,
+    np.savez(os.path.join(outDir, 'marginalization_results'+run_name), w_q=w_q, best_sys=best_sys_weight,
              marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
              marg_inclin_rad=marg_inclin_rad, marg_inclin_rad_err=marg_inclin_rad_err, marg_inclin_deg=marg_inclin_deg,
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
@@ -617,7 +621,7 @@ if __name__ == '__main__':
     wavelength = np.loadtxt(os.path.join(dataDir, get_wvln), skiprows=3)
 
     # What to call the run and whether to turn plotting on
-    run_name = CONFIG_INI.get('system_parameters', 'run_name')
+    run_name = CONFIG_INI.get('data_paths', 'run_name')
     plotting = CONFIG_INI.getboolean('technical_parameters', 'plotting')
 
     # Run the main function

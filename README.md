@@ -105,7 +105,7 @@ your `.gitignore` file!**
 
 The relevant data files and plots from your run will be saved to the directory you specify under **`output_path`** in your 
 local configfile. *This data will be overwritten with every new run*, so make sure to move  or rename results you want to 
-keep permanently.
+keep permanently, or alternatively, define a new output data suffix in the configfile under `[data_paths] -> run_name`.
 
 ### Changing data or the parameters
 
@@ -120,23 +120,23 @@ local_path = /Users/MyUser/repos/HST-Marginalization  ; your global path to the 
 data_path = data                                      ; local path to the input data
 output_path = /Users/MyUser/data                      ; global path ot the output directory 
 current_model = W17                                   ; data selection; refers to section in configfile
+run_name = testing                                    ; suffix for output data
 
 [limb_darkening]
-ld_model = 3D
-metallicity = -1.0
-Teff = 6550
-logg = 4.5
+ld_model = 3D                     ; 3D or 2D limb darkening model
+metallicity = -1.0                ; star metallicity
+Teff = 6550                       ; star effective temperaturs
+logg = 4.5                        ; log gravity of star
 
 [system_parameters]
 instrument = WFC3
 grating = G141
 grid_selection = fit_time
-run_name = wl_time_wm3d
 
 [technical_parameters]
 plotting = True
 outlier_limit_std = 3.
-errors = hessian                                       ; error method to be used, "hessian" or "confidence"
+errors = hessian                  ; error method to be used, "hessian" or "confidence"
 
 [smooth_model]
 resolution = 0.0001
