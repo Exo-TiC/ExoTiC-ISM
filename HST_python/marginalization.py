@@ -87,8 +87,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     MsMpR = (aor / constant1) ** 3.     # density of the system in kg/m^3 "(Mass of star (kg) + Mass of planet (kg))/(Radius of star (m)^3)"
 
     # LIMB DARKENING
-    #TODO: Implement a suggestion for the user to use 3D if his parameters match the options available in the 3D models
-
     M_H = CONFIG_INI.getfloat('limb_darkening', 'metallicity')    # stellar metallicity - limited ranges available
     Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')   # stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
     logg = CONFIG_INI.getfloat('limb_darkening', 'logg')   # log(g), stellar gravity - depends on whether 1D or 3D limb darkening models are used
@@ -145,6 +143,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     #################################
     #           FIRST FIT           #
     #################################
+    # This fit just rescales the errors, should talk about it in the docs.
 
     print('\n 1ST FIT \n')
     print(
@@ -266,7 +265,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         print('Calculating errors...')
 
         # Errors directly from the covariance matrix in the fit
-        if ERRORS == 'hessian':   #TODO: change this such that it is still correct if epoch is frozen
+        if ERRORS == 'hessian':
+            # change this such that it is still correct if epoch is frozen, see first point in issue #24
             calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
             rl_err = calc_errors[0]
             epoch_err = calc_errors[2]
@@ -283,7 +283,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
         # Errors from the 'Confidence' estimation method
         elif ERRORS == 'confidence':
-            #TODO: change this such that it is still correct if epoch is frozen
+            # change this such that it is still correct if epoch is frozen, see first point in issue #24
             # We can calculate errors only on thawed parameters, and inclin and msmpr are not always thawed - neither is epoch
             if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
                 print("Est errors on rl, epoch, inclin and msmpr...")
@@ -333,13 +333,13 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         HSTphase = marg.phase_calc(img_date, tmodel.tzero.val*u.d, HST_period)
 
         # ...........................................
-        # TRANSIT MODEL fit to the data
+        # TRANSIT MODEL fit to the data           # Issue #36
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
         b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
         mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)  # recalculated model at data resolution
 
         # ...........................................
-        # SMOOTH TRANSIT MODEL across all phase
+        # SMOOTH TRANSIT MODEL across all phase    # Issue #35
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
         x2 = np.arange(-half_range, half_range, resolution)   # this is the x-array for the smooth model
         b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, x2, tmodel.inclin.val*u.rad)
@@ -349,10 +349,10 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                                           tmodel.hstp3.val, tmodel.hstp4.val, tmodel.xshift1.val, tmodel.xshift2.val,
                                           tmodel.xshift3.val, tmodel.xshift4.val)
 
-        fit_model = mulimb01 * tmodel.flux.val * systematic_model
-        residuals = (img_flux - fit_model) / tmodel.flux.val
+        fit_model = mulimb01 * tmodel.flux0.val * systematic_model     #  Issue #36
+        residuals = (img_flux - fit_model) / tmodel.flux0.val
         resid_scatter = np.std(residuals)
-        fit_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: same like corrected_data
+        fit_data = img_flux / (tmodel.flux0.val * systematic_model)   # this is the data after taking the fitted systematics out
 
         if plotting:
             plt.figure(1)
@@ -372,7 +372,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         # Fill info into arrays to save to file once we iterated through all systems with both fits.
         sys_stats[i, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats  - just saving
 
-        sys_date[i, :] = img_date                               # input time data (x, date)  - reused but not really
+        sys_date[i, :] = img_date                               # input time data (x = date)  - reused but not really
         sys_phase[i, :] = phase                                 # phase  - used for plotting
         sys_rawflux[i, :] = img_flux                            # raw lightcurve flux  - just saving
         sys_rawflux_err[i, :] = err                             # raw flux error  - just saving
@@ -421,35 +421,30 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     #####################################
     #          MARGINALISATION          #
     #####################################
-    #TODO: check the indexing of all arrays: nsys vs. nparams
 
     # Sort the systematic models from largest to smallest AIC
-    a = (np.sort(sys_evidenceAIC))[::-1]
+    sorted_aic = (np.sort(sys_evidenceAIC))[::-1]
     print('\nTOP 10 SYSTEMATIC MODELS')
 
     # Print the AIC for the top 10 systematic models
-    print(a[:10])
-    # Print all the AIC values (why?)
-    print(sys_evidenceAIC)
+    print('AIC for top 10 models: {}'.format(sorted_aic[:10]))
+    # Print all the AIC values
+    print('AIC for all systems: {}'.format(sys_evidenceAIC))
 
-    #TODO: why exactly is this happening and can I do it better?
     # REFORMAT all arrays with just positive values
-    pos = np.where(sys_evidenceAIC > -500)   #TODO: change hard coded number? - it's simply the threshold that makes it work
+    pos = np.where(sys_evidenceAIC > -500)   # Issue #39
     if len(pos) == 0:
         pos = -1
     npos = len(pos[0])   # NOT-REUSED
     print('POS positions = {}'.format(pos))
-
+    # Issue #37
     count_AIC = sys_evidenceAIC[pos]
-
     count_depth = sys_depth[pos]
     count_depth_err = sys_depth_err[pos]
-
     count_epoch = sys_epoch[pos]
     count_epoch_err = sys_epoch_err[pos]
-
     count_residuals = sys_residuals[pos]
-    count_date = sys_date[pos]                #TODO: not reused - maybe for plotting though?
+    count_date = sys_date[pos]                # not reused - maybe useful for plotting though?
     count_flux = sys_flux[pos]
     count_flux_err = sys_flux_err[pos]
     count_phase = sys_phase[pos]
@@ -460,7 +455,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))  # weights
 
     #  This is just for runtime outputs
-    n01 = np.where(w_q >= 0.05)   #TODO: make this number a variable
+    n01 = np.where(w_q >= 0.05)   # Issue #38
     print('\n{} models have a weight over 0.05. -> Models: {} with weigths: {}'.format(n01[0].shape, n01, w_q[n01]))
     print('Most likely model is number {} at w_q={}'.format(np.argmax(w_q), np.max(w_q)))
 
@@ -491,7 +486,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
     plt.ylabel('$R_P/R_*$')
     plt.xlabel('Systematic model number')
-    plt.savefig(os.path.join(outDir, 'weights-stdr-rl.pdf'))
+    plt.savefig(os.path.join(outDir, 'weights-stdr-rl'+run_name+'.pdf'))
     if plotting:
         plt.show()
 
@@ -516,7 +511,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.hlines(0.0, xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
     plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
     plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
-    plt.savefig(os.path.join(outDir, 'residuals_best-model.pdf'))
+    plt.savefig(os.path.join(outDir, 'residuals_best-model'+run_name+'.pdf'))
     if plotting:
         plt.show()
 
@@ -559,8 +554,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         print('MsMpR = {} +/- {}'.format(marg_msmpr, marg_msmpr_err))
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
-        constant1 = (G * np.square((tmodel.period.val * u.d).to(u.s)) / (4 * np.pi * np.pi)) ** (1 / 3.)   #TODO: period is constant - make pretty
-
         marg_aors = constant1 * (marg_msmpr ** (1./3.))
         marg_aors_err = constant1 * (marg_msmpr_err ** (1./3.)) / marg_aors
         print('a/R* = {} +/- {}'.format(marg_aors, marg_aors_err))
