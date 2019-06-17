@@ -109,7 +109,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     #  SET UP THE ARRAYS
     # save arrays for the first step through to get the err inflation
-    w_scatter = np.zeros(nsys)
     w_params = np.zeros((nsys, nparams))   # all parameters, but for all the systems in one single array
 
     # Parameters for smooth model
@@ -193,29 +192,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
-        # OUTPUTS
-        # Re-Calculate each of the arrays dependent on the output parameters
-        HSTphase = marg.phase_calc(img_date, tmodel.tzero.val*u.d, HST_period)
-        phase = marg.phase_calc(img_date, tmodel.epoch.val*u.d, tmodel.period.val*u.d)
-
-        # TRANSIT MODEL fit to the data
-        # Calculate the impact parameter based on the eccentricity function, b0 in stellar radii
-        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
-        # "new" model to whatever resuolution the data is, based on fit parameters - entirely based on phase array via b0
-        mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)   #TODO: think about whether this is needed
-
-        systematic_model = marg.sys_model(phase, HSTphase, sh, tmodel.m_fac.val, tmodel.hstp1.val, tmodel.hstp2.val,
-                                          tmodel.hstp3.val, tmodel.hstp4.val, tmodel.xshift1.val, tmodel.xshift2.val,
-                                          tmodel.xshift3.val, tmodel.xshift4.val)
-
-        # Calculate final form of the model fit
-        w_model = mulimb01 * tmodel.flux.val * systematic_model   # see Wakeford et al. 2016, Eq. 1   #TODO: is this the model fit? why are we recalculating this here if Sherpa is giving it to us?
-        # Calculate the residuals - data minus model (and normalized)
-        w_residuals = (img_flux - w_model) / tmodel.flux.val
-        # Calculate more stuff
-        corrected_data = img_flux / (tmodel.flux.val * systematic_model)   #TODO: this is the data after taking the systematics out - just used for plotting in IDL
-        w_scatter[i] = np.std(w_residuals)
-        print('\nScatter on the residuals = {}'.format(w_scatter[i]))   # this result is rather different to IDL result
+        # We could extract info from the fit at this point, but since the "real" fit is actually happening in the
+        # second round of fitting, there is no need for that.
 
         # Reset the model parameters to the input parameters
         # Note on resetting: https://sherpa.readthedocs.io/en/latest/models/index.html#resetting-parameter-values
@@ -228,10 +206,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     end_first_fit = time.time()
     print('First fit of all {} models took {} sec = {} min.'.format(nsys, end_first_fit-start_first_fit, (end_first_fit-start_first_fit)/60))
-
-    # Save results of first fit to file.
-    np.savez(os.path.join(outDir, 'first-fit'+run_name), w_scatter=w_scatter, w_params=w_params)
-
 
     ################################
     #          SECOND FIT          #
