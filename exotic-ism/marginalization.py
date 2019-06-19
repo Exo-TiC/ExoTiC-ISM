@@ -474,6 +474,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), best_sys_sdnr))
 
     # Marginalization plots
+    """ Runtime plots limited to fits, this chunk will be restructured for a pretty output PDF, see issue #42.
     plt.figure(2)
     plt.suptitle('Marginalization results')
     plt.subplot(3, 1, 1)
@@ -514,6 +515,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.savefig(os.path.join(outDir, 'residuals_best-model'+run_name+'.pdf'))
     if plotting:
         plt.show()
+    """
 
     ### Radius ratio - this one always gets calculated
     marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
