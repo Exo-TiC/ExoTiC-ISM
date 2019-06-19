@@ -1,0 +1,41 @@
+
+
+
+
+  
+  Table Name         Gravity Range          Table Name           Gravity Range
+
+
+
+ KP01_3500.TAB;1       g00 to g50          KP01_12500.TAB;1        g25 to g50  
+ KP01_3750.TAB;1       g00 to g50          KP01_13000.TAB;1        g25 to g50   
+ KP01_4000.TAB;1       g00 to g50          KP01_14000.TAB;1        g20 to g50   
+ KP01_4250.TAB;1       g00 to g50          KP01_15000.TAB;1        g25 to g50   
+ KP01_4500.TAB;1       g00 to g50          KP01_16000.TAB;1        g25 to g50   
+ KP01_4750.TAB;1       g00 to g50          KP01_17000.TAB;1        g25 to g50   
+ KP01_5000.TAB;1       g00 to g50          KP01_18000.TAB;1        g25 to g50   
+ KP01_5250.TAB;1       g00 to g50          KP01_19000.TAB;1        g25 to g50   
+ KP01_5500.TAB;1       g00 to g50          KP01_20000.TAB;1        g30 to g50   
+ KP01_5750.TAB;1       g00 to g50          KP01_21000.TAB;1        g30 to g50   
+ KP01_6000.TAB;1       g00 to g50          KP01_22000.TAB;1        g30 to g50   
+ KP01_6250.TAB;1       g05 to g50          KP01_23000.TAB;1        g30 to g50   
+ KP01_6500.TAB;1       g05 to g50          KP01_24000.TAB;1        g30 to g50   
+ KP01_6750.TAB;1       g05 to g50          KP01_25000.TAB;1        g30 to g50   
+ KP01_7000.TAB;1       g05 to g50          KP01_26000.TAB;1        g30 to g50
+ KP01_7250.TAB;1       g05 to g50          KP01_27000.TAB;1        g35 to g50   
+ KP01_7500.TAB;1       g05 to g50          KP01_28000.TAB;1        g35 to g50   
+ KP01_7750.TAB;1       g10 to g50          KP01_29000.TAB;1        g35 to g50   
+ KP01_8000.TAB;1       g10 to g50          KP01_30000.TAB;1        g35 to g50   
+ KP01_8250.TAB;1       g10 to g50          KP01_31000.TAB;1        g35 to g50   
+ KP01_8500.TAB;1       g10 to g50          KP01_32000.TAB;1        g40 to g50   
+ KP01_8750.TAB;1       g15 to g50          KP01_33000.TAB;1        g40 to g50   
+ KP01_9000.TAB;1       g15 to g50          KP01_34000.TAB;1        g40 to g50   
+ KP01_9250.TAB;1       g20 to g50          KP01_35000.TAB;1        g40 to g50   
+ KP01_9500.TAB;1       g20 to g50          KP01_37500.TAB;1        g45 to g50   
+ KP01_9750.TAB;1       g20 to g50          KP01_40000.TAB;1        g45 to g50   
+ KP01_10000.TAB;1      g20 to g50          KP01_42500.TAB;1           g50 
+ KP01_10500.TAB;1      g20 to g50          KP01_45000.TAB;1           g50 
+ KP01_11000.TAB;1      g20 to g50          KP01_47500.TAB;1           g50 
+ KP01_11500.TAB;1      g25 to g50          KP01_50000.TAB;1           g50 
+ KP01_12000.TAB;1      g25 to g50      
+
