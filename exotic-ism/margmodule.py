@@ -49,7 +49,7 @@ def _transit_model(pars, x, sh):
     HSTper = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
 
     # Define each of the parameters that are read into the fitting routine
-    (rl, flux, epoch, inclin, MsMpR, ecc, omega, per, tzero, c1, c2, c3, c4,
+    (rl, flux0, epoch, inclin, MsMpR, ecc, omega, per, tzero, c1, c2, c3, c4,
      m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4) = pars
 
     # Attaching some units
@@ -73,7 +73,7 @@ def _transit_model(pars, x, sh):
                                  xshift1, xshift2, xshift3, xshift4)
 
     # model fit to data = transit model * baseline flux (flux0) * systematic model
-    model = mulimb0 * flux * systematic_model
+    model = mulimb0 * flux0 * systematic_model
 
     return model
 
@@ -83,7 +83,7 @@ class Transit(model.RegriddableModel1D):
 
     def __init__(self, tzero, msmpr, c1, c2, c3, c4, flux0=1., name='transit', sh=None):
         self.rl = model.Parameter(name, 'rl', RL)
-        self.flux = model.Parameter(name, 'flux', flux0)
+        self.flux0 = model.Parameter(name, 'flux0', flux0)
         self.epoch = model.Parameter(name, 'epoch', EPOCH, units='days [MJD]')
         self.inclin = model.Parameter(name, 'inclin', np.deg2rad(INCLIN), units='radians')
         self.msmpr = model.Parameter(name, 'msmpr', msmpr)
@@ -108,7 +108,7 @@ class Transit(model.RegriddableModel1D):
         self.sh_array = sh   # This is not a model parameter but an extra input to the model, like x is
 
         model.RegriddableModel1D.__init__(self, name,
-                                          (self.rl, self.flux, self.epoch,
+                                          (self.rl, self.flux0, self.epoch,
                                            self.inclin, self.msmpr, self.ecc,
                                            self.omega, self.period, self.tzero,
                                            self.c1, self.c2, self.c3, self.c4,
