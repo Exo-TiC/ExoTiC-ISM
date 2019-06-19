@@ -1,0 +1,41 @@
+
+
+
+
+  
+  Table Name         Gravity Range         Table Name           Gravity Range
+
+
+
+KM20_3500.TAB;1       g00 to g50         KM20_12500.TAB;1        g25 to g50  
+KM20_3750.TAB;1       g00 to g50         KM20_13000.TAB;1        g25 to g50    
+KM20_4000.TAB;1       g00 to g50         KM20_14000.TAB;1        g20 to g50    
+KM20_4250.TAB;1       g00 to g50         KM20_15000.TAB;1        g25 to g50    
+KM20_4500.TAB;1       g00 to g50         KM20_16000.TAB;1        g25 to g50    
+KM20_4750.TAB;1       g00 to g50         KM20_17000.TAB;1        g25 to g50    
+KM20_5000.TAB;1       g00 to g50         KM20_18000.TAB;1        g25 to g50    
+KM20_5250.TAB;1       g00 to g50         KM20_19000.TAB;1        g25 to g50   
+KM20_5500.TAB;1       g00 to g50         KM20_20000.TAB;1        g30 to g50    
+KM20_5750.TAB;1       g00 to g50         KM20_21000.TAB;1        g30 to g50    
+KM20_6000.TAB;1       g00 to g50         KM20_22000.TAB;1        g30 to g50    
+KM20_6250.TAB;1       g05 to g50         KM20_23000.TAB;1        g30 to g50    
+KM20_6500.TAB;1       g05 to g50         KM20_24000.TAB;1        g30 to g50    
+KM20_6750.TAB;1       g05 to g50         KM20_25000.TAB;1        g30 to g50    
+KM20_7000.TAB;1       g05 to g50         KM20_26000.TAB;1        g30 to g50
+KM20_7250.TAB;1       g05 to g50         KM20_27000.TAB;1        g35 to g50    
+KM20_7500.TAB;1       g05 to g50         KM20_28000.TAB;1        g35 to g50    
+KM20_7750.TAB;1       g10 to g50         KM20_29000.TAB;1        g35 to g50    
+KM20_8000.TAB;1       g10 to g50         KM20_30000.TAB;1        g40 to g50    
+KM20_8250.TAB;1       g15 to g50         KM20_31000.TAB;1        g40 to g50    
+KM20_8500.TAB;1       g15 to g50         KM20_32000.TAB;1        g40 to g50    
+KM20_8750.TAB;1       g20 to g50         KM20_33000.TAB;1        g45 to g50    
+KM20_9000.TAB;1       g20 to g50         KM20_34000.TAB;1        g45 to g50    
+KM20_9250.TAB;1       g20 to g50         KM20_35000.TAB;1        g45 to g50    
+KM20_9500.TAB;1       g20 to g50         KM20_37500.TAB;1        g45 to g50    
+KM20_9750.TAB;1       g20 to g50         KM20_40000.TAB;1        g45 to g50    
+KM20_10000.TAB;1      g20 to g50         KM20_42500.TAB;1           g50 
+KM20_10500.TAB;1      g20 to g50         KM20_45000.TAB;1           g50 
+KM20_11000.TAB;1      g25 to g50         KM20_47500.TAB;1           g50 
+KM20_11500.TAB;1      g25 to g50         KM20_50000.TAB;1           g50 
+KM20_12000.TAB;1      g25 to g50      
+

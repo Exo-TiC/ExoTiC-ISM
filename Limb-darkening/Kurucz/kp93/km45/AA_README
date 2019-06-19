@@ -1,0 +1,41 @@
+
+
+
+
+  
+  Table Name         Gravity Range         Table Name           Gravity Range
+
+
+
+KM45_3500.TAB;1       g00 to g25         KM45_12500.TAB;1        g25 to g50  
+KM45_3750.TAB;1       g00 to g35         KM45_13000.TAB;1        g25 to g50    
+KM45_4000.TAB;1       g00 to g35         KM45_14000.TAB;1        g20 to g50    
+KM45_4250.TAB;1       g00 to g45         KM45_15000.TAB;1        g25 to g50    
+KM45_4500.TAB;1       g00 to g50         KM45_16000.TAB;1        g25 to g50    
+KM45_4750.TAB;1       g00 to g50         KM45_17000.TAB;1        g25 to g50    
+KM45_5000.TAB;1       g00 to g50         KM45_18000.TAB;1        g25 to g50    
+KM45_5250.TAB;1       g00 to g50         KM45_19000.TAB;1        g25 to g50   
+KM45_5500.TAB;1       g00 to g50         KM45_20000.TAB;1        g30 to g50    
+KM45_5750.TAB;1       g00 to g50         KM45_21000.TAB;1        g30 to g50    
+KM45_6000.TAB;1       g00 to g50         KM45_22000.TAB;1        g30 to g50    
+KM45_6250.TAB;1       g05 to g50         KM45_23000.TAB;1        g30 to g50    
+KM45_6500.TAB;1       g05 to g50         KM45_24000.TAB;1        g30 to g50    
+KM45_6750.TAB;1       g05 to g50         KM45_25000.TAB;1        g30 to g50    
+KM45_7000.TAB;1       g05 to g50         KM45_26000.TAB;1        g30 to g50
+KM45_7250.TAB;1       g10 to g50         KM45_27000.TAB;1        g35 to g50    
+KM45_7500.TAB;1       g10 to g50         KM45_28000.TAB;1        g35 to g50    
+KM45_7750.TAB;1       g15 to g50         KM45_29000.TAB;1        g35 to g50    
+KM45_8000.TAB;1       g15 to g50         KM45_30000.TAB;1        g35 to g50    
+KM45_8250.TAB;1       g20 to g50         KM45_31000.TAB;1        g35 to g50    
+KM45_8500.TAB;1       g15 to g50         KM45_32000.TAB;1        g40 to g50    
+KM45_8750.TAB;1       g20 to g50         KM45_33000.TAB;1        g40 to g50    
+KM45_9000.TAB;1       g15 to g50         KM45_34000.TAB;1        g40 to g50    
+KM45_9250.TAB;1       g20 to g50         KM45_35000.TAB;1        g40 to g50    
+KM45_9500.TAB;1       g20 to g50         KM45_37500.TAB;1        g45 to g50    
+KM45_9750.TAB;1       g20 to g50         KM45_40000.TAB;1        g45 to g50    
+KM45_10000.TAB;1      g20 to g50         KM45_42500.TAB;1           g50 
+KM45_10500.TAB;1      g20 to g50         KM45_45000.TAB;1           g50 
+KM45_11000.TAB;1      g25 to g50         KM45_47500.TAB;1           g50 
+KM45_11500.TAB;1      g25 to g50         KM45_50000.TAB;1           g50 
+KM45_12000.TAB;1      g25 to g50      
+
