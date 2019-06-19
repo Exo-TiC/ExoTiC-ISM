@@ -1,6 +1,6 @@
 """
 This is a self-standing module that calculates limb darkening parameters for either 1D or 3D stellar models. It
-returns the parameteres for 4D, 3D, 2D and 1D limb darkening models.
+returns the parameters for 4D, 3D, 2D and 1D limb darkening models.
 """
 
 import os

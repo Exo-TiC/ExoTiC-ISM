@@ -2,16 +2,18 @@
 [![MIT License][license-shield]][license-url]
 ![Python version][python-version-url]
 
+<img src="logo.png" align="left" />
 
-# HST marginalization - NEWNAME
+# ExoTiC-ISM
+**Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation**
 
-This code performs Levenberg-Marquardt least-squares minimization across a grid of stochastic systematic models to produce marginalized transit parameters given a lightcurve for a specified wavelength range.
+This code performs Levenberg-Marquardt least-squares minimization across a grid of stochastic systematic models to produce marginalised transit parameters given a lightcurve for a specified wavelength range.
 
 This was developed and tested for data from Wide Field Camera 3 (WFC3) on the Hubble Space Telescope (HST), specifically with the G141 spectroscopic grism, as published in Wakeford et al. (2016, ApJ, 819, 1). Future work includes plans to extend this to other WFC3 grids, STIS data, and eventually data from the James Webb Space Telescope (JWST).
 
-This code follows the method outlined in Wakeford, et al. (2016), using marginalization across a stochastic grid of models. The program makes use of the analytic transit model in Mandel & Agol (2002, ApJ Letters, 580, L171-175) and a Levenberg-Marquardt least squares minimization using [Sherpa](https://sherpa.readthedocs.io/en/latest/), a Python package for modeling and fitting data. The transit model uses a 4-parameter limb darkening law, as outlined in Claret (2010) and Sing et al. (2010).
+This code follows the method outlined in Wakeford, et al. (2016), using marginalisation across a stochastic grid of models. The program makes use of the analytic transit model in Mandel & Agol (2002, ApJ Letters, 580, L171-175) and a Levenberg-Marquardt least squares minimization using [Sherpa](https://sherpa.readthedocs.io/en/latest/), a Python package for modeling and fitting data. The transit model uses a 4-parameter limb darkening law, as outlined in Claret (2010) and Sing et al. (2010).
 
-This package was built from the original IDL code used for the analysis in Wakeford et al. (2016), initially translated by Matthew Hill and then further adapted and transformed into a full astronomy Python package by Iva Laginja.
+This package was built from the original IDL code used for the analysis in Wakeford et al. (2016), initially translated by Matthew Hill and then further adapted and transformed into a full astronomy Python package with the help of Iva Laginja.
 
 Note how this is not an installable package, but you will  always need to clone it if you want to work with it.
 
@@ -25,9 +27,9 @@ This section will you give all the necessary terminal commands to go from openin
 reduced results on your local machine. For a more thorough description of the individual steps, please continue to the section 
 **Prerequisites** and beyond.
 
-We assume that you have `conda` and `git` installed.
+We assume that you have `conda` and `git` installed and that you're using `bash`.
 
-- Create the `hstmarg` environment:  
+- Create the `exoticism` environment:  
 ```bash
 $ conda env create --file environment.yml
 ```
@@ -42,7 +44,7 @@ $ cd /User/YourUser/repos/
 $ git clone https://github.com/hrwakeford/HST_Marginalization.git
 ```
 
-- Copy the file `config.ini`, name the copy `config_local.ini` and add the line `config_local.ini` into your `.gitignore`.
+- Copy the file `config.ini` and name the copy `config_local.ini`.
 
 - Open your local configfile `config_loca.ini` and edit the entries `[data_paths][local_path]` to point to your local repo clone, e.g.:  
 ```ini
@@ -59,7 +61,7 @@ output_path = /Users/YourUser/<path-to-data>
 
 - Navigate to inside the actual package:  
 ```bash
-$ cd HST_python
+$ cd exotic-ism
 ```
 
 - Run the marginalization on the demo data from the template:  
@@ -75,7 +77,7 @@ specified under `[data_paths][output_path]` in your `config_local.ini`!
 We highly recommend the usage of the package and environment manager [Conda](https://docs.conda.io/projects/conda/en/latest/index.html), 
 which is free and runs on Windows, macOS and Linux. We have included an [environment](environment.yml) file in our repository 
 from which you can directly build a new conda environment in which we have tested our package. We developed and tested our 
- package with **Python 3.6.8** in **conda 4.6.7**. 
+ package with **Python 3.7.3** in **conda 4.6.7**. 
  
  Run
 
@@ -98,19 +100,18 @@ however, is version controlled, and the paths to local directories will get mess
 file; you might also lose the changes you made to the parameters. This is why config.ini is supposed to be used as a **TEMPLATE**.
 
 In order to make it work for you, copy `config.ini` and rename the copy to `config_local.ini`. In this **local configfile**, 
-you can set all your parameters, and it will override the config.ini at runtime. **Make sure you add `config_local.ini` to 
-your `.gitignore` file!**
+you can set all your parameters, and it will override the config.ini at runtime.
 
 ### Output data
 
 The relevant data files and plots from your run will be saved to the directory you specify under **`output_path`** in your 
 local configfile. *This data will be overwritten with every new run*, so make sure to move  or rename results you want to 
-keep permanently, or alternatively, define a new output data suffix in the configfile under `[data_paths] -> run_name`.
+keep permanently, or alternatively, define a new output path for new data under `[data_paths] -> output_path`.
 
 ### Changing data or the parameters
 
 We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in Wakeford et al. (2016).
-Currently we only support the marginalization of WFC3/G141 datasets. If you want to perform the marginalization on a different 
+Currently we only support the marginalisation of WFC3/G141 datasets. If you want to perform the marginalization on a different 
 transit dataset, you have to add it to the data folder and update the planetary parameters in your local configfile.
 
 **The configfile** has the following structure, except here we added some extra comments for clarity:
@@ -174,7 +175,7 @@ Please read [CONTRIBUTING.md]() for details on our code of conduct, and the proc
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.txt) file for details
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.txt) file for details.
 
 ## Acknowledgments
 
