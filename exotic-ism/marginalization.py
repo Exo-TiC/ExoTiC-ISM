@@ -432,11 +432,11 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('AIC for all systems: {}'.format(sys_evidenceAIC))
 
     # REFORMAT all arrays with just positive values
-    pos = np.where(sys_evidenceAIC > -500)   # Issue #39
+    pos = np.where(sys_evidenceAIC > 0)
     if len(pos) == 0:
         pos = -1
-    npos = len(pos[0])   # NOT-REUSED
-    print('POS positions = {}'.format(pos))
+    print('Negative AIC at  positions = {}'.format(pos))
+
     # Issue #37
     count_AIC = sys_evidenceAIC[pos]
     count_depth = sys_depth[pos]
