@@ -56,8 +56,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     """
 
     print(
-        'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with'
-        '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes'
+        'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with\n'
+        '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes.\n'
         'Please hold.'
         '\n This is the version using SHERPA for fitting.\n')
 
@@ -132,7 +132,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     opt = LevMar()
     opt.config['epsfcn'] = np.finfo(float).eps
 
-    print('Optimizer used:')
+    print('\nOptimizer used:')
     print(opt)
 
     # Set up the fit object
@@ -436,9 +436,15 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     pos = np.where(sys_evidenceAIC > 0)
     if len(pos) == 0:
         pos = -1
-    print('Negative AIC at  positions = {}'.format(pos))
+    print('Non-negative AIC at positions = {}'.format(pos))
 
-    # Issue #37
+    #masked
+    sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, 0.)
+    np.ma.set_fill_value(sys_evidenceAIC_masked, np.nan)
+    #-m
+    print(sys_evidenceAIC_masked)
+    print(sys_evidenceAIC_masked.mask)
+
     count_AIC = sys_evidenceAIC[pos]
     count_depth = sys_depth[pos]
     count_depth_err = sys_depth_err[pos]
@@ -452,27 +458,76 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     count_model_y = sys_model[pos]
     count_model_x = sys_model_phase[pos]
 
+    #masked
+    count_AIC_masked = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
+    count_depth_masked = np.ma.masked_array(sys_depth, mask=sys_evidenceAIC_masked.mask)
+    count_depth_err_masked = np.ma.masked_array(sys_depth_err, mask=sys_evidenceAIC_masked.mask)
+    count_epoch_masked = np.ma.masked_array(sys_epoch, mask=sys_evidenceAIC_masked.mask)
+    count_epoch_err_masked = np.ma.masked_array(sys_epoch_err, mask=sys_evidenceAIC_masked.mask)
+    count_residuals_masked = np.ma.masked_array(sys_residuals, mask=sys_evidenceAIC_masked.mask)
+    count_date_masked = np.ma.masked_array(sys_date, mask=sys_evidenceAIC_masked.mask)                # not reused - maybe useful for plotting though?
+    count_flux_masked = np.ma.masked_array(sys_flux, mask=sys_evidenceAIC_masked.mask)
+    count_flux_err_masked = np.ma.masked_array(sys_flux_err, mask=sys_evidenceAIC_masked.mask)
+    count_phase_masked = np.ma.masked_array(sys_phase, mask=sys_evidenceAIC_masked.mask)
+    count_model_y_masked = np.ma.masked_array(sys_model, mask=sys_evidenceAIC_masked.mask)
+    count_model_x_masked = np.ma.masked_array(sys_model_phase, mask=sys_evidenceAIC_masked.mask)
+    #-m
+
     beta = np.min(count_AIC)
     w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))  # weights
+
+    #masked
+    beta_masked = np.min(count_AIC_masked)
+    w_q_masked = (np.exp(count_AIC_masked - beta)) / np.sum(np.exp(count_AIC_masked - beta))  # weights
+    #-m
+    print(beta)
+    print(beta_masked)
+    print(w_q)
+    print(w_q_masked)
 
     #  This is just for runtime outputs
     n01 = np.where(w_q >= 0.05)   # Issue #38
     print('\n{} models have a weight over 0.05. -> Models: {} with weigths: {}'.format(n01[0].shape, n01, w_q[n01]))
     print('Most likely model is number {} at w_q={}'.format(np.argmax(w_q), np.max(w_q)))
 
+    #masked
+    #  This is just for runtime outputs
+    n01_masked = np.where(w_q_masked >= 0.05)   # Issue #38
+    print('\n{} models have a weight over 0.05. -> Models: {} with weigths: {}'.format(n01_masked[0].shape, n01_masked, w_q_masked[n01_masked]))
+    print('Most likely model is number {} at w_q_masked={}'.format(np.argmax(w_q_masked), np.max(w_q_masked)))
+    #-m
+
     # best_sys_weight is the best system from our evidence, as opposed to best system puerly by scatter on residuals
     best_sys_weight = np.argmax(w_q)
     print('SDNR best model from evidence = {}, for model {}'.format(marg.calc_sdnr(count_residuals[best_sys_weight, :]),
                                                                     best_sys_weight))
 
-    # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by  model
-    # complexity. This shows us how picking the "best" model differs between std alone and weigthed result.
+    #masked
+    # best_sys_weight is the best system from our evidence, as opposed to best system puerly by scatter on residuals
+    best_sys_weight_masked = np.argmax(w_q_masked)
+    print('SDNR masked of best model from evidence = {}, for model {}'.format(
+          np.std(count_residuals_masked[best_sys_weight_masked, :]) / np.sqrt(2) * 1e6, best_sys_weight_masked))
+    #-m
+
+    # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by model
+    # complexity. This shows us how picking the "best" model differs between std alone and weighted result.
     rl_sdnr = np.zeros(len(w_q))
     for i in range(len(w_q)):
-        rl_sdnr[i] = marg.calc_sdnr(count_residuals[i])   # make sure these system indices work on initial indexing, before taking out "bad" values (where we make variable 'pos')
+        rl_sdnr[i] = marg.calc_sdnr(count_residuals[i])
     best_sys_sdnr = np.argmin(rl_sdnr)
 
     print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), best_sys_sdnr))
+
+    #masked
+    # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by model
+    # complexity. This shows us how picking the "best" model differs between std alone and weighted result.
+    rl_sdnr_masked = np.zeros(nsys)
+    for i in range(nsys):
+        rl_sdnr_masked[i] = (np.std(count_residuals_masked[i]) / np.sqrt(2)) * 1e6
+    best_sys_sdnr_masked = np.argmin(rl_sdnr_masked)
+
+    print('SDNR masked best = {} for model {}'.format(np.min(rl_sdnr_masked), best_sys_sdnr_masked))
+    #-m
 
     # Marginalization plots
     fig2_fname = os.path.join(outDir, 'weights-stdr-rl_'+run_name+'.png')
@@ -522,6 +577,10 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     ### Radius ratio - this one always gets calculated
     marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
     print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
+    #masked
+    marg_rl_masked, marg_rl_err_masked = marg.marginalization(count_depth_masked, count_depth_err_masked, w_q_masked)
+    print('Rp/R* masked = {} +/- {}'.format(marg_rl_masked, marg_rl_err_masked))
+    #-m
 
     ### Center of transit time (epoch)
     marg_epoch = None
@@ -529,6 +588,13 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     if not tmodel.epoch.frozen:
         marg_epoch, marg_epoch_err = marg.marginalization(count_epoch, count_epoch_err, w_q)
         print('Epoch = {} +/- {}'.format(marg_epoch, marg_epoch_err))
+    #masked
+    marg_epoch_masked = None
+    marg_epoch_err_masked = None
+    if not tmodel.epoch.frozen:
+        marg_epoch_masked, marg_epoch_err_masked = marg.marginalization(count_epoch_masked, count_epoch_err_masked, w_q_masked)
+        print('Epoch masked = {} +/- {}'.format(marg_epoch_masked, marg_epoch_err_masked))
+    #-m
 
     ### Inclination
     marg_inclin_rad = None
@@ -547,6 +613,24 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         marg_inclin_deg, marg_inclin_deg_err = marg.marginalization(conv1, conv2, w_q)
         print('inc (deg) = {} +/- {}'.format(marg_inclin_deg, marg_inclin_deg_err))
 
+    #masked
+    marg_inclin_rad_masked = None
+    marg_inclin_rad_err_masked = None
+    marg_inclin_deg_masked = None
+    marg_inclin_deg_err_masked = None
+
+    if not tmodel.inclin.frozen:
+        # Inclication in radians
+        marg_inclin_rad_masked, marg_inclin_rad_err_masked = marg.marginalization(sys_params[:, 3], sys_params_err[:, 3], w_q_masked)
+        print('inc (rads) = {} +/- {}'.format(marg_inclin_rad_masked, marg_inclin_rad_err_masked))
+
+        # Inclination in degrees
+        conv1 = sys_params[:, 3] / (2 * np.pi / 360)
+        conv2 = sys_params_err[:, 3] / (2 * np.pi / 360)
+        marg_inclin_deg_masked, marg_inclin_deg_err_masked = marg.marginalization(conv1, conv2, w_q_masked)
+        print('inc (deg) = {} +/- {}'.format(marg_inclin_deg_masked, marg_inclin_deg_err_masked))
+    #-m
+
     ### MsMpR
     marg_msmpr = None
     marg_msmpr_err = None
@@ -562,13 +646,46 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         marg_aors_err = constant1 * (marg_msmpr_err ** (1./3.)) / marg_aors
         print('a/R* = {} +/- {}'.format(marg_aors, marg_aors_err))
 
+    #masked
+    marg_msmpr_masked = None
+    marg_msmpr_err_masked = None
+    marg_aors_masked = None
+    marg_aors_err_masked = None
+
+    if not tmodel.msmpr.frozen:
+        marg_msmpr_masked, marg_msmpr_err_masked = marg.marginalization(sys_params[:, 4], sys_params_err[:, 4], w_q_masked)
+        print('MsMpR = {} +/- {}'.format(marg_msmpr_masked, marg_msmpr_err_masked))
+
+        # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
+        marg_aors_masked = constant1 * (marg_msmpr_masked ** (1./3.))
+        marg_aors_err_masked = constant1 * (marg_msmpr_err_masked ** (1./3.)) / marg_aors_masked
+        print('a/R* = {} +/- {}'.format(marg_aors_masked, marg_aors_err_masked))
+    #-m
+
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
     np.savez(os.path.join(outDir, 'marginalization_results_'+run_name), w_q=w_q, best_sys=best_sys_weight,
              marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
              marg_inclin_rad=marg_inclin_rad, marg_inclin_rad_err=marg_inclin_rad_err, marg_inclin_deg=marg_inclin_deg,
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
-             marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, pos=pos)
+             marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, pos=pos,
+             allow_pickle=True)
+
+    #masked
+    np.savez(os.path.join(outDir, 'masked_marginalization_results'+run_name), w_q=np.ma.filled(w_q_masked), best_sys=np.ma.filled(best_sys_weight_masked),
+             marg_rl=np.ma.filled(marg_rl_masked), marg_rl_err=np.ma.filled(marg_rl_err_masked), marg_epoch=np.ma.filled(marg_epoch_masked), marg_epoch_err=np.ma.filled(marg_epoch_err_masked),
+             marg_inclin_rad=np.ma.filled(marg_inclin_rad_masked), marg_inclin_rad_err=np.ma.filled(marg_inclin_rad_err_masked), marg_inclin_deg=np.ma.filled(marg_inclin_deg_masked),
+             marg_inclin_deg_err=np.ma.filled(marg_inclin_deg_err_masked), marg_msmpr=np.ma.filled(marg_msmpr_masked), marg_msmpr_err=np.ma.filled(marg_msmpr_err_masked),
+             marg_aors=np.ma.filled(marg_aors_masked), marg_aors_err=np.ma.filled(marg_aors_err_masked), rl_sdnr=np.ma.filled(rl_sdnr_masked), pos=sys_evidenceAIC_masked.mask,
+             allow_pickle=True)
+    #unmasked saves
+    np.savez(os.path.join(outDir, 'unmasked_marginalization_results'+run_name), w_q=w_q_masked, best_sys=best_sys_weight_masked,
+             marg_rl=marg_rl_masked, marg_rl_err=marg_rl_err_masked, marg_epoch=marg_epoch_masked, marg_epoch_err=marg_epoch_err_masked,
+             marg_inclin_rad=marg_inclin_rad_masked, marg_inclin_rad_err=marg_inclin_rad_err_masked, marg_inclin_deg=marg_inclin_deg_masked,
+             marg_inclin_deg_err=marg_inclin_deg_err_masked, marg_msmpr=marg_msmpr_masked, marg_msmpr_err=marg_msmpr_err_masked,
+             marg_aors=marg_aors_masked, marg_aors_err=marg_aors_err_masked, rl_sdnr=rl_sdnr_masked, pos=sys_evidenceAIC_masked.mask,
+             allow_pickle=True)
+    #-m
 
     ### Save as PDF report
     report = CONFIG_INI.get('technical_parameters', 'report')
