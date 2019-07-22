@@ -1,6 +1,6 @@
 """
 This is a self-standing module that calculates limb darkening parameters for either 1D or 3D stellar models. It
-returns the parameters for 4D, 3D, 2D and 1D limb darkening models.
+returns the parameters for 4-parameter, 3-parameter, quadratic and linear limb darkening models.
 """
 
 import os
@@ -20,7 +20,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
     Procedure from Sing et al. (2010, A&A, 510, A21).
     Uses 3D limb darkening from Magic et al. (2015, A&A, 573, 90).
     Uses photon FLUX Sum over (lambda*dlamba).
-    :param grating: string; grating to use ('G430L','G750L','WFC3','R500B','R500R')
+    :param grating: string; grating to use ('G430L','G750L','G750M', 'G280', 'G102', 'G141')
     :param wsdata: array; data wavelength solution
     :param M_H: float; stellar metallicity
     :param Teff: float; stellar effective temperature (K)
@@ -225,29 +225,30 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
         # Passed on to main body of function are: ws, fcalc, phot1, mu
 
     # =============
-    # HST, GTC - load response function and interpolate onto kurucz model grid
+    # Load response function and interpolate onto kurucz model grid
+    # Currently supports: 
+    #                    HST STIS G750L, G750M, G430L gratings
+    #                    HST WFC3 UVIS/G280, IR/G102, IR/G141 grisms
     # =============
-
     # FOR STIS
     if grating == 'G430L':
-        sav = readsav(os.path.join(dirsen, 'G430L.sensitivity.sav'))  # wssens,sensitivity
+        sav = readsav(os.path.join(dirsen, 'G430L.STIS.sensitivity.sav'))  # wssens,sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 3
 
     if grating == 'G750M':
-        sav = readsav(os.path.join(dirsen, 'G750M.sensitivity.sav'))  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'G750M.STIS.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 0.554
 
     if grating == 'G750L':
-        sav = readsav(os.path.join(dirsen, 'G750L.sensitivity.sav'))  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'G750L.STIS.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 4.882
     # =============
-
     # FOR WFC3
     if grating == 'G141':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
         sav = readsav(os.path.join(dirsen, 'G141.WFC3.sensitivity.sav'))  # wssens, sensitivity
@@ -260,7 +261,12 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 1
-    # =============
+
+    if grating == 'G280':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
+        sav = readsav(os.path.join(dirsen, 'G280.WFC3.sensitivity.sav'))  # wssens, sensitivity
+        wssens = sav['wssens']
+        sensitivity = sav['sensitivity']
+        wdel = 1
     # =============
 
     widek = np.arange(len(wsdata))
