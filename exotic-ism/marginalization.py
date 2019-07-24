@@ -568,6 +568,46 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
              marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, pos=pos)
 
+    ### Create PDF report
+    template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
+                     'run_name': CONFIG_INI.get('data_paths', 'run_name'),
+                     'rl_in': CONFIG_INI.getfloat(exoplanet, 'rl'),
+                     'epoch_in': CONFIG_INI.getfloat(exoplanet, 'epoch'),
+                     'incl_deg_in': CONFIG_INI.getfloat(exoplanet, 'inclin'),
+                     'ecc_in': CONFIG_INI.getfloat(exoplanet, 'ecc'),
+                     'omega_in': CONFIG_INI.getfloat(exoplanet, 'omega'),
+                     'period_in': CONFIG_INI.getfloat(exoplanet, 'Per'),
+                     'aor_in': CONFIG_INI.getfloat(exoplanet, 'aor'),
+                     'metallicity': CONFIG_INI.getfloat('limb_darkening', 'metallicity'),
+                     'teff_in': CONFIG_INI.getfloat('limb_darkening', 'Teff'),
+                     'logg_in': CONFIG_INI.getfloat('limb_darkening', 'logg'),
+                     'c1': c1,
+                     'c2': c2,
+                     'c3': c3,
+                     'c4': c4,
+                     'top_five_numbers': 'test',
+                     'top_five_weights': 'test',
+                     'top_five_sndr': 'test',
+                     'white_noise': 'test',
+                     'red_noise': 'test',
+                     'photon_noise': 'test',
+                     'rl_marg': marg_rl,
+                     'rl_marg_err': marg_rl_err,
+                     'epoch_marg': marg_epoch,
+                     'epoch_marg_err': marg_epoch_err,
+                     'inclin_rad_marg': marg_inclin_rad,
+                     'inclin_rad_marg_err': marg_inclin_rad_err,
+                     'inclin_deg_marg': marg_inclin_deg,
+                     'inclin_deg_marg_err': marg_inclin_deg_err,
+                     'msmpr_marg': marg_msmpr,
+                     'msmpr_marg_err': marg_msmpr_err,
+                     'aor_marg': marg_aors,
+                     'aor_marg_err': marg_aors_err,
+                     'lightcurve_figure': 'test',
+                     'systematics_figure': 'test'}
+
+    marg.create_pdf_report(template_vars, os.path.join(outDir, 'report.pdf'))
+
 
 if __name__ == '__main__':
 
