@@ -410,7 +410,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
-    np.savez(os.path.join(outDir, 'full-fit'+run_name), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
+    np.savez(os.path.join(outDir, 'full-fit_'+run_name), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
              sys_rawflux=sys_rawflux, sys_rawflux_err=sys_rawflux_err, sys_flux=sys_flux, sys_flux_err=sys_flux_err,
              sys_residuals=sys_residuals, sys_model=sys_model, sys_model_phase=sys_model_phase,
              sys_systematic_model=sys_systematic_model, sys_params=sys_params, sys_params_err=sys_params_err,
@@ -487,7 +487,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
     plt.ylabel('$R_P/R_*$')
     plt.xlabel('Systematic model number')
-    plt.savefig(os.path.join(outDir, 'weights-stdr-rl'+run_name+'.pdf'))
+    plt.savefig(os.path.join(outDir, 'weights-stdr-rl_'+run_name+'.pdf'))
     if plotting:
         plt.show()
 
@@ -512,7 +512,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.hlines(0.0, xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
     plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
     plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
-    plt.savefig(os.path.join(outDir, 'residuals_best-model'+run_name+'.pdf'))
+    plt.savefig(os.path.join(outDir, 'residuals_best-model_'+run_name+'.pdf'))
     if plotting:
         plt.show()
     """
@@ -562,7 +562,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
-    np.savez(os.path.join(outDir, 'marginalization_results'+run_name), w_q=w_q, best_sys=best_sys_weight,
+    np.savez(os.path.join(outDir, 'marginalization_results_'+run_name), w_q=w_q, best_sys=best_sys_weight,
              marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
              marg_inclin_rad=marg_inclin_rad, marg_inclin_rad_err=marg_inclin_rad_err, marg_inclin_deg=marg_inclin_deg,
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
@@ -606,7 +606,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                      'lightcurve_figure': 'test',
                      'systematics_figure': 'test'}
 
-    marg.create_pdf_report(template_vars, os.path.join(outDir, 'report.pdf'))
+    marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+run_name+'.pdf'))
 
 
 if __name__ == '__main__':
