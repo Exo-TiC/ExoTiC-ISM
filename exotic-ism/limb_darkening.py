@@ -396,7 +396,7 @@ if __name__ == '__main__':
     datapath = 'W17'
 
     dirsen = os.path.join('..', 'Limb-darkening')   # Directory for sensitivity files
-    wavelength = np.loadtxt(os.path.join('..', 'data', datapath, 'W17_wavelength_test_data.txt'), skiprows=3)
+    wavelength = np.loadtxt(os.path.join('..', 'data', datapath, 'W17_G141_wavelength_test_data.txt'), skiprows=3)
 
     # Chose your parameters
     ld_model = '3D'
