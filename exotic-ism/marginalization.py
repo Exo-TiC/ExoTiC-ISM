@@ -36,12 +36,11 @@ import margmodule as marg
 
 def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=True):
     """
-    Produce marginalized transit parameters from WFC3 G141 lightcurve for specified wavelength range.
+    Produce marginalized transit parameters from HST lightcurves over a specified wavelength range.
 
     MAJOR PROGRAMS INCLUDED IN THIS ROUTINE:
     - LIMB-DARKENING (from limb_darkening.py)
-        This requires the G141.WFC3.sensitivity.sav file, template.sav, kuruczlist.sav, and the kurucz folder with all
-        models, as well as the 3D models in the folder 3DGrid.
+        This requires the instrument mode sensitivity file (e.g., G141.WFC3.sensitivity.sav), template.sav, kuruczlist.sav, and the kurucz folder with all models, as well as the 3D models in the folder 3DGrid.
     - MANDEL & AGOL (2002) transit model (occultnl.py)
     - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (marg.wfc3_systematic_model_grid_selection() )
 
