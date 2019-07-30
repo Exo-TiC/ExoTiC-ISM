@@ -40,7 +40,7 @@
             C4 = {{ c4 }}
             </p>
             
-            <h3> Top five systematic models </h3>
+            <h3> Top five systematic models by their weight </h3>
             
             <p>
             Model numbers = {{ top_five_numbers }}<br>
@@ -68,17 +68,17 @@
             <h3> Lightcurves </h3>
             
             <p>
-            Top: Input lightcurve with no systematic correction. Middle: Lightcurve corrected by highest weight systematic model, the planetary transit model is shown in red. Bottom: Residuals and uncertainties associated with the middle panel.<br>
+            <img src="{{ lightcurve_figure }}" alt="lightcurves" width="900" height="650"><br>
             <br>
-            <img src="{{ lightcurve_figure }}" alt="lightcurves" width="900" height="650">
+            Top: Input lightcurve with no systematic correction. Middle: Lightcurve corrected by highest weight systematic model, the planetary transit model is shown in red. Bottom: Residuals and uncertainties associated with the middle panel.
             </p>
             
             <h3> Systematics </h3>
             
             <p>
-            Top: Weight associated with each systematic model applied to the data. Middle: Radius ratio measured for each systematic correction. Bottom: Center of transit time measured for each systematic correction.<br>
+            <img src="{{ systematics_figure }}" alt="systematics" width="900" height="650"><br>
             <br>
-            <img src="{{ systematics_figure }}" alt="systematics" width="900" height="650">
+            Top: Weight associated with each systematic model applied to the data. Middle: Radius ratio measured for each systematic correction. Bottom: Center of transit time measured for each systematic correction.
             </p>
         
     </body>
