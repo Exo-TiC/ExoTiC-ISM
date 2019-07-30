@@ -461,14 +461,14 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # best_sys_weight is the best system from our evidence, as opposed to best system puerly by scatter on residuals
     best_sys_weight = np.argmax(w_q)
-    print('SDNR best model from evidence = {}, for model {}'.format(
-          np.std(count_residuals[best_sys_weight, :]) / np.sqrt(2) * 1e6, best_sys_weight))
+    print('SDNR best model from evidence = {}, for model {}'.format(marg.calc_sdnr(count_residuals[best_sys_weight, :]),
+                                                                    best_sys_weight))
 
     # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by  model
     # complexity. This shows us how picking the "best" model differs between std alone and weigthed result.
     rl_sdnr = np.zeros(len(w_q))
     for i in range(len(w_q)):
-        rl_sdnr[i] = (np.std(count_residuals[i]) / np.sqrt(2)) * 1e6   # make sure these system indices work on initial indexing, before taking out "bad" values (where we make variable 'pos')
+        rl_sdnr[i] = marg.calc_sdnr(count_residuals[i])   # make sure these system indices work on initial indexing, before taking out "bad" values (where we make variable 'pos')
     best_sys_sdnr = np.argmin(rl_sdnr)
 
     print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), best_sys_sdnr))
@@ -569,7 +569,15 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
              marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, pos=pos)
 
-    ### Create PDF report
+    ### Save as PDF report
+    # Figure out best five models through the highest weights, and their SDNR
+    best_five_index = w_q.argsort()[-5:][::-1]    # sorting the array by highest argument and taking first five of that
+    sdnr_top_five = np.zeros_like(best_five_index, dtype=float)
+
+    for i in range(len(best_five_index)):
+        sdnr_top_five[i] = marg.calc_sdnr(count_residuals[best_five_index[i]])
+
+    # Prepare variables that go into PDF report
     template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
                      'run_name': CONFIG_INI.get('data_paths', 'run_name'),
                      'rl_in': CONFIG_INI.getfloat(exoplanet, 'rl'),
@@ -586,9 +594,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                      'c2': c2,
                      'c3': c3,
                      'c4': c4,
-                     'top_five_numbers': 'test',
-                     'top_five_weights': 'test',
-                     'top_five_sndr': 'test',
+                     'top_five_numbers': best_five_index,
+                     'top_five_weights': w_q[best_five_index],
+                     'top_five_sdnr': sdnr_top_five,
                      'white_noise': 'test',
                      'red_noise': 'test',
                      'photon_noise': 'test',
@@ -607,6 +615,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                      'lightcurve_figure': fig2_fname,
                      'systematics_figure': fig3_fname}
 
+    # Create PDf report
     marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+run_name+'.pdf'))
 
 

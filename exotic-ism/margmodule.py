@@ -440,6 +440,12 @@ def create_pdf_report(template_vars, outfile):
     HTML(string=html_out, base_url='.').write_pdf(outfile)
 
 
+def calc_sdnr(residuals):
+
+    sdnr = (np.std(residuals) / np.sqrt(2.)) * 1e6
+    return sdnr
+
+
 if __name__ == '__main__':
 
     print("Testing margmodule.py\n")
