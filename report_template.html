@@ -9,7 +9,7 @@
     
     <body>
         
-        <h1> Test report page ExoTIC-ISM </h1>
+        <h1> Report page ExoTIC-ISM </h1>
         
         <h2> {{ data_file }} - {{ run_name }} </h2>
         
@@ -70,7 +70,7 @@
             <p>
             Top: Input lightcurve with no systematic correction. Middle: Lightcurve corrected by highest weight systematic model, the planetary transit model is shown in red. Bottom: Residuals and uncertainties associated with the middle panel.<br>
             <br>
-            <img src={{ lightcurve_figure }} alt="lightcurves" width="900" height="540">
+            <img src="{{ lightcurve_figure }}" alt="lightcurves" width="900" height="650">
             </p>
             
             <h3> Systematics </h3>
@@ -78,7 +78,7 @@
             <p>
             Top: Weight associated with each systematic model applied to the data. Middle: Radius ratio measured for each systematic correction. Bottom: Center of transit time measured for each systematic correction.<br>
             <br>
-            <img src={{ systematics_figure }} alt="systematics" width="900" height="540">
+            <img src="{{ systematics_figure }}" alt="systematics" width="900" height="650">
             </p>
         
     </body>

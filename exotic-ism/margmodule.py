@@ -437,7 +437,7 @@ def create_pdf_report(template_vars, outfile):
 
     # Generate PDF
     from weasyprint import HTML
-    HTML(string=html_out).write_pdf(outfile)
+    HTML(string=html_out, base_url='.').write_pdf(outfile)
 
 
 if __name__ == '__main__':

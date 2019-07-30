@@ -474,7 +474,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), best_sys_sdnr))
 
     # Marginalization plots
-    """ Runtime plots limited to fits, this chunk will be restructured for a pretty output PDF, see issue #42.
+    fig2_fname = os.path.join(outDir, 'weights-stdr-rl_'+run_name+'.png')
     plt.figure(2)
     plt.suptitle('Marginalization results')
     plt.subplot(3, 1, 1)
@@ -487,12 +487,14 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
     plt.ylabel('$R_P/R_*$')
     plt.xlabel('Systematic model number')
-    plt.savefig(os.path.join(outDir, 'weights-stdr-rl_'+run_name+'.pdf'))
+    plt.savefig(fig2_fname)
     if plotting:
         plt.show()
 
+    fig3_fname = os.path.join(outDir, 'residuals_best-model_'+run_name+'.png')
     plt.figure(3)
     plt.suptitle('First vs. best model')
+
     plt.subplot(3, 1, 1)
     plt.scatter(sys_phase[0,:], sys_flux[0,:])
     plt.ylim(np.min(sys_flux[0,:]) - 0.001, np.max(sys_flux[0,:]) + 0.001)
@@ -512,10 +514,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.hlines(0.0, xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
     plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
     plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
-    plt.savefig(os.path.join(outDir, 'residuals_best-model_'+run_name+'.pdf'))
+    plt.savefig(fig3_fname)
     if plotting:
         plt.show()
-    """
 
     ### Radius ratio - this one always gets calculated
     marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
@@ -603,8 +604,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                      'msmpr_marg_err': marg_msmpr_err,
                      'aor_marg': marg_aors,
                      'aor_marg_err': marg_aors_err,
-                     'lightcurve_figure': 'test',
-                     'systematics_figure': 'test'}
+                     'lightcurve_figure': fig2_fname,
+                     'systematics_figure': fig3_fname}
 
     marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+run_name+'.pdf'))
 
