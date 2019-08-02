@@ -570,53 +570,56 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
              marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, pos=pos)
 
     ### Save as PDF report
-    # Figure out best five models through the highest weights, and their SDNR
-    best_five_index = w_q.argsort()[-5:][::-1]    # sorting the array by highest argument and taking first five of that
-    sdnr_top_five = np.zeros_like(best_five_index, dtype=float)
+    report = CONFIG_INI.get('technical_parameters', 'report')
+    if report:
 
-    for i in range(len(best_five_index)):
-        sdnr_top_five[i] = marg.calc_sdnr(count_residuals[best_five_index[i]])
+        # Figure out best five models through the highest weights, and their SDNR
+        best_five_index = w_q.argsort()[-5:][::-1]    # sorting the array by highest argument and taking first five of that
+        sdnr_top_five = np.zeros_like(best_five_index, dtype=float)
 
-    # Prepare variables that go into PDF report
-    template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
-                     'run_name': CONFIG_INI.get('data_paths', 'run_name'),
-                     'rl_in': CONFIG_INI.getfloat(exoplanet, 'rl'),
-                     'epoch_in': CONFIG_INI.getfloat(exoplanet, 'epoch'),
-                     'incl_deg_in': CONFIG_INI.getfloat(exoplanet, 'inclin'),
-                     'ecc_in': CONFIG_INI.getfloat(exoplanet, 'ecc'),
-                     'omega_in': CONFIG_INI.getfloat(exoplanet, 'omega'),
-                     'period_in': CONFIG_INI.getfloat(exoplanet, 'Per'),
-                     'aor_in': CONFIG_INI.getfloat(exoplanet, 'aor'),
-                     'metallicity': CONFIG_INI.getfloat('limb_darkening', 'metallicity'),
-                     'teff_in': CONFIG_INI.getfloat('limb_darkening', 'Teff'),
-                     'logg_in': CONFIG_INI.getfloat('limb_darkening', 'logg'),
-                     'c1': c1,
-                     'c2': c2,
-                     'c3': c3,
-                     'c4': c4,
-                     'top_five_numbers': best_five_index,
-                     'top_five_weights': w_q[best_five_index],
-                     'top_five_sdnr': sdnr_top_five,
-                     'white_noise': 'test',
-                     'red_noise': 'test',
-                     'photon_noise': 'test',
-                     'rl_marg': marg_rl,
-                     'rl_marg_err': marg_rl_err,
-                     'epoch_marg': marg_epoch,
-                     'epoch_marg_err': marg_epoch_err,
-                     'inclin_rad_marg': marg_inclin_rad,
-                     'inclin_rad_marg_err': marg_inclin_rad_err,
-                     'inclin_deg_marg': marg_inclin_deg,
-                     'inclin_deg_marg_err': marg_inclin_deg_err,
-                     'msmpr_marg': marg_msmpr,
-                     'msmpr_marg_err': marg_msmpr_err,
-                     'aor_marg': marg_aors,
-                     'aor_marg_err': marg_aors_err,
-                     'lightcurve_figure': fig2_fname,
-                     'systematics_figure': fig3_fname}
+        for i in range(len(best_five_index)):
+            sdnr_top_five[i] = marg.calc_sdnr(count_residuals[best_five_index[i]])
 
-    # Create PDf report
-    marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+run_name+'.pdf'))
+        # Prepare variables that go into PDF report
+        template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
+                         'run_name': CONFIG_INI.get('data_paths', 'run_name'),
+                         'rl_in': CONFIG_INI.getfloat(exoplanet, 'rl'),
+                         'epoch_in': CONFIG_INI.getfloat(exoplanet, 'epoch'),
+                         'incl_deg_in': CONFIG_INI.getfloat(exoplanet, 'inclin'),
+                         'ecc_in': CONFIG_INI.getfloat(exoplanet, 'ecc'),
+                         'omega_in': CONFIG_INI.getfloat(exoplanet, 'omega'),
+                         'period_in': CONFIG_INI.getfloat(exoplanet, 'Per'),
+                         'aor_in': CONFIG_INI.getfloat(exoplanet, 'aor'),
+                         'metallicity': CONFIG_INI.getfloat('limb_darkening', 'metallicity'),
+                         'teff_in': CONFIG_INI.getfloat('limb_darkening', 'Teff'),
+                         'logg_in': CONFIG_INI.getfloat('limb_darkening', 'logg'),
+                         'c1': c1,
+                         'c2': c2,
+                         'c3': c3,
+                         'c4': c4,
+                         'top_five_numbers': best_five_index,
+                         'top_five_weights': w_q[best_five_index],
+                         'top_five_sdnr': sdnr_top_five,
+                         'white_noise': 'test',
+                         'red_noise': 'test',
+                         'photon_noise': 'test',
+                         'rl_marg': marg_rl,
+                         'rl_marg_err': marg_rl_err,
+                         'epoch_marg': marg_epoch,
+                         'epoch_marg_err': marg_epoch_err,
+                         'inclin_rad_marg': marg_inclin_rad,
+                         'inclin_rad_marg_err': marg_inclin_rad_err,
+                         'inclin_deg_marg': marg_inclin_deg,
+                         'inclin_deg_marg_err': marg_inclin_deg_err,
+                         'msmpr_marg': marg_msmpr,
+                         'msmpr_marg_err': marg_msmpr_err,
+                         'aor_marg': marg_aors,
+                         'aor_marg_err': marg_aors_err,
+                         'lightcurve_figure': fig2_fname,
+                         'systematics_figure': fig3_fname}
+
+        # Create PDf report
+        marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+run_name+'.pdf'))
 
 
 if __name__ == '__main__':
