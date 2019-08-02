@@ -425,6 +425,27 @@ def phase_calc(data, epoch, period):
     return phase
 
 
+def create_pdf_report(template_vars, outfile):
+
+    # Create Jinja environment and get template
+    from jinja2 import Environment, FileSystemLoader
+    env = Environment(loader=FileSystemLoader(CONFIG_INI.get('data_paths', 'local_path')))
+    template = env.get_template('report_template.html')
+
+    # Render HTML with input variables
+    html_out = template.render(template_vars)
+
+    # Generate PDF
+    from weasyprint import HTML
+    HTML(string=html_out, base_url='.').write_pdf(outfile)
+
+
+def calc_sdnr(residuals):
+
+    sdnr = (np.std(residuals) / np.sqrt(2.)) * 1e6
+    return sdnr
+
+
 if __name__ == '__main__':
 
     print("Testing margmodule.py\n")
