@@ -214,7 +214,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('Each systematic model will now be re-fit with the previously determined parameters serving as the new starting points.')
 
     # Initializing arrays for each systematic model, which we will save once we got through all systems with two fits.
-    sys_stats = np.zeros((nsys, 5))                 # stats
+    sys_stats = np.zeros((nsys, 8))                 # stats
 
     sys_date = np.zeros((nsys, nexposure))          # img_date
     sys_phase = np.zeros((nsys, nexposure))         # phase
@@ -353,6 +353,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         resid_scatter = np.std(residuals)
         fit_data = img_flux / (tmodel.flux0.val * systematic_model)   # this is the data after taking the fitted systematics out
 
+        white_noise, red_noise, beta = marg.noise_calculator(residuals)
+
         if plotting:
             plt.figure(1)
             plt.clf()
@@ -369,7 +371,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
         # .............................
         # Fill info into arrays to save to file once we iterated through all systems with both fits.
-        sys_stats[i, :] = [AIC, BIC, DOF, CHI, resid_scatter]   # stats  - just saving
+        sys_stats[i, :] = [AIC, BIC, DOF, CHI, resid_scatter, white_noise, red_noise, beta]   # stats  - just saving
 
         sys_date[i, :] = img_date                               # input time data (x = date)  - reused but not really
         sys_phase[i, :] = phase                                 # phase  - used for plotting
@@ -599,9 +601,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                          'top_five_numbers': best_five_index,
                          'top_five_weights': w_q[best_five_index],
                          'top_five_sdnr': sdnr_top_five,
-                         'white_noise': 'test',
-                         'red_noise': 'test',
-                         'photon_noise': 'test',
+                         'white_noise': sys_stats[best_sys_weight,5],
+                         'red_noise': sys_stats[best_sys_weight,6],
+                         'beta': sys_stats[best_sys_weight,7],
                          'rl_marg': marg_rl,
                          'rl_marg_err': marg_rl_err,
                          'epoch_marg': marg_epoch,
@@ -614,8 +616,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                          'msmpr_marg_err': marg_msmpr_err,
                          'aor_marg': marg_aors,
                          'aor_marg_err': marg_aors_err,
-                         'lightcurve_figure': fig2_fname,
-                         'systematics_figure': fig3_fname}
+                         'systematics_figure': fig2_fname,
+                         'lightcurve_figure': fig3_fname}
 
         # Create PDf report
         marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+run_name+'.pdf'))
