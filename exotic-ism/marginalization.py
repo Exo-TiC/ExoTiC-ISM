@@ -68,9 +68,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     # READ THE CONSTANTS
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
 
-    # Errors from Hessian matrix in the fit or with 'Confidence' estimation?
-    ERRORS = CONFIG_INI.get('technical_parameters', 'errors')
-
     # We want to keep the raw data as is, so we generate helper arrays that will get changed from model to model
     img_date = x * u.d    # time array
     img_flux = y    # flux array
@@ -179,14 +176,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         # Save results of fit
         w_params[i, :] = [par.val for par in tmodel.pars]
 
-        # Calculate the error on rl
-        print('Calculating error on rl...')
-        if ERRORS == 'hessian':
-            calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
-            rl_err = calc_errors[0]
-        elif ERRORS == 'confidence':
-            calc_errors = tfit.est_errors(parlist=(tmodel.rl,))
-            rl_err = max(np.abs(calc_errors.parmaxes[0]), np.abs(calc_errors.parmins[0]))
+        # Extract the error on rl fro the Hessian
+        calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
+        rl_err = calc_errors[0]
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
@@ -261,52 +253,23 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
             print(tres.message)
         print('2nd ROUND OF SHERPA FIT IS DONE\n')
 
-        print('Calculating errors...')
+        print('Extracting errors...')
 
         # Errors directly from the covariance matrix in the fit
-        if ERRORS == 'hessian':
-            # change this such that it is still correct if epoch is frozen, see first point in issue #24
-            calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
-            rl_err = calc_errors[0]
-            epoch_err = calc_errors[2]
+        # change this such that it is still correct if epoch is frozen, see first point in issue #24
+        calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
+        rl_err = calc_errors[0]
+        epoch_err = calc_errors[2]
 
-            if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
-                incl_err = calc_errors[3]
-                msmpr_err = calc_errors[4]
+        if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
+            incl_err = calc_errors[3]
+            msmpr_err = calc_errors[4]
 
-            elif not tmodel.inclin.frozen:
-                incl_err = calc_errors[3]
+        elif not tmodel.inclin.frozen:
+            incl_err = calc_errors[3]
 
-            elif not tmodel.msmpr.frozen:
-                msmpr_err = calc_errors[3]
-
-        # Errors from the 'Confidence' estimation method
-        elif ERRORS == 'confidence':
-            # change this such that it is still correct if epoch is frozen, see first point in issue #24
-            # We can calculate errors only on thawed parameters, and inclin and msmpr are not always thawed - neither is epoch
-            if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
-                print("Est errors on rl, epoch, inclin and msmpr...")
-                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr, tmodel.inclin,))
-                msmpr_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
-                incl_err = max(np.abs(calc_errors.parmaxes[3]), np.abs(calc_errors.parmins[3]))
-
-            elif not tmodel.inclin.frozen:
-                print('Est errors on rl, epoch and inclin...')
-                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.inclin))
-                incl_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
-
-            elif not tmodel.msmpr.frozen:
-                print('Est errors on rl, epoch and msmpr...')
-                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr))
-                msmpr_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
-
-            else:
-                print('Est errors for rl and epoch...')
-                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
-
-            # rl and epoch are in this case of "fit_time" always thawed
-            rl_err = max(np.abs(calc_errors.parmaxes[0]), np.abs(calc_errors.parmins[0]))
-            epoch_err = max(np.abs(calc_errors.parmaxes[1]), np.abs(calc_errors.parmins[1]))
+        elif not tmodel.msmpr.frozen:
+            msmpr_err = calc_errors[3]
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
