@@ -588,7 +588,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
              marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, mask=sys_evidenceAIC_masked.mask,
              allow_pickle=True)
-    #-m
 
     ### Save as PDF report
     report = CONFIG_INI.get('technical_parameters', 'report')
@@ -605,6 +604,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         # Prepare variables that go into PDF report
         template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
                          'run_name': CONFIG_INI.get('data_paths', 'run_name'),
+                         'nsys': nsys,
                          'rl_in': CONFIG_INI.getfloat(exoplanet, 'rl'),
                          'epoch_in': CONFIG_INI.getfloat(exoplanet, 'epoch'),
                          'incl_deg_in': CONFIG_INI.getfloat(exoplanet, 'inclin'),
@@ -625,6 +625,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                          'white_noise': sys_stats[best_sys_weight, 5],
                          'red_noise': sys_stats[best_sys_weight, 6],
                          'beta': sys_stats[best_sys_weight, 7],
+                         'num_rejected': num_rejected,
+                         'indices_rejected': ind_rejected,
                          'rl_marg': marg_rl,
                          'rl_marg_err': marg_rl_err,
                          'epoch_marg': marg_epoch,
