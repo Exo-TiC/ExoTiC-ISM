@@ -447,17 +447,16 @@ def calc_sdnr(residuals):
 
 
 def noise_calculator(data, maxnbins=None, binstep=1):
-    '''
-    Using the residuals of the fit data calculate the noise parameters of the data
-    INPUTS:
-        data - residuals
-        maxnbin - maximum # of bins (default is len(data)/10)
-        binstep - Bin step size
-    OUTPUTS
-        red_noise - correlated noise in the data
-        white_noise - statistical noise in the data
-        beta - scaling factor to account for correlated noise
-    '''
+    """
+    Calculate the noise parameters of the data by using the residuals of the fit
+    :param data: array, residuals of (2nd) fit
+    :param maxnbins: int, maximum number of bins (default is len(data)/10)
+    :param binstep: bin step size
+    :return:
+        red_noise: float, correlated noise in the data
+        white_noise: float, statistical noise in the data
+        beta: float, scaling factor to account for correlated noise
+    """
 
     # bin data into multiple bin sizes
     npts = len(data)
@@ -477,15 +476,15 @@ def noise_calculator(data, maxnbins=None, binstep=1):
     
     for i in range(len(binz)):
         nbins[i] = int(np.floor(data.size/binz[i]))
-        bindata   = np.zeros(nbins[i], dtype=float)
+        bindata = np.zeros(nbins[i], dtype=float)
         
         # bin data - contains the different arrays of the residuals binned down by binz
         for j in range(nbins[i]):
-            bindata[j] = np.mean(data[j*binz[i]:(j+1)*binz[i]])
+            bindata[j] = np.mean(data[j*binz[i] : (j+1)*binz[i]])
 
         # get root_mean_square statistic
-        root_mean_square[i]    = np.sqrt(np.mean(bindata**2))
-        root_mean_square_err[i] = root_mean_square[i]/np.sqrt(2.*nbins[i])
+        root_mean_square[i] = np.sqrt(np.mean(bindata**2))
+        root_mean_square_err[i] = root_mean_square[i] / np.sqrt(2.*nbins[i])
       
     expected_noise = (np.std(data)/np.sqrt(binz)) * np.sqrt(nbins/(nbins - 1.))
  
@@ -496,7 +495,7 @@ def noise_calculator(data, maxnbins=None, binstep=1):
     white_noise = np.sqrt(root_mean_square[0]**2 - base_noise**2)
     # Determine if there is correlated noise in the data
     red_noise = np.sqrt(final_noise**2 - white_noise**2 / nbins[midbin])
-    # calculate the beta scaling factor
+    # Calculate the beta scaling factor
     beta = np.sqrt(root_mean_square[0]**2 + nbins[midbin] * red_noise**2) / root_mean_square[0]
 
     # If White, Red, or Beta return NaN's replace with 0, 0, 1
@@ -508,7 +507,7 @@ def noise_calculator(data, maxnbins=None, binstep=1):
     # plt.figure()
     # plt.errorbar(binz,root_mean_square, yerr=root_mean_square_err, color='k', lw=1.5, label='RMS')
     # plt.plot(binz, expected_noise, color='r', ls='-', lw=2, label='expected noise')
-    
+    #
     # plt.xscale('log')
     # plt.yscale('log')
     # plt.tight_layout()
