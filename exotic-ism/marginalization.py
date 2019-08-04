@@ -595,7 +595,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     if report:
 
         # Figure out best five models through the highest weights, and their SDNR
-        best_five_index = w_q.argsort()[-5:][::-1]    # sorting the array by highest argument and taking first five of that
+        # sorting the array by highest argument and taking first five of that
+        best_five_index = w_q.argsort(fill_value=0)[-5:][::-1]    # need to use fill_value=0, otherwise the NaNs win
         sdnr_top_five = np.zeros_like(best_five_index, dtype=float)
 
         for i in range(len(best_five_index)):
