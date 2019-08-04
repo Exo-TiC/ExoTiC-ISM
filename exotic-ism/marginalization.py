@@ -505,8 +505,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     #masked
     # best_sys_weight is the best system from our evidence, as opposed to best system puerly by scatter on residuals
     best_sys_weight_masked = np.argmax(w_q_masked)
-    print('SDNR masked of best model from evidence = {}, for model {}'.format(
-          np.std(count_residuals_masked[best_sys_weight_masked, :]) / np.sqrt(2) * 1e6, best_sys_weight_masked))
+    print('SDNR masked of best model from evidence = {}, for model {}'.format(marg.calc_sdnr(count_residuals_masked[best_sys_weight_masked, :]),
+                                                                              best_sys_weight_masked))
     #-m
 
     # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by model
@@ -523,7 +523,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     # complexity. This shows us how picking the "best" model differs between std alone and weighted result.
     rl_sdnr_masked = np.zeros(nsys)
     for i in range(nsys):
-        rl_sdnr_masked[i] = (np.std(count_residuals_masked[i]) / np.sqrt(2)) * 1e6
+        rl_sdnr_masked[i] = marg.calc_sdnr(count_residuals_masked[i])
     best_sys_sdnr_masked = np.argmin(rl_sdnr_masked)
 
     print('SDNR masked best = {} for model {}'.format(np.min(rl_sdnr_masked), best_sys_sdnr_masked))
