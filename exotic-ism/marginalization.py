@@ -464,13 +464,29 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     count_depth_err_masked = np.ma.masked_array(sys_depth_err, mask=sys_evidenceAIC_masked.mask)
     count_epoch_masked = np.ma.masked_array(sys_epoch, mask=sys_evidenceAIC_masked.mask)
     count_epoch_err_masked = np.ma.masked_array(sys_epoch_err, mask=sys_evidenceAIC_masked.mask)
-    count_residuals_masked = np.ma.masked_array(sys_residuals, mask=sys_evidenceAIC_masked.mask)
-    count_date_masked = np.ma.masked_array(sys_date, mask=sys_evidenceAIC_masked.mask)                # not reused - maybe useful for plotting though?
-    count_flux_masked = np.ma.masked_array(sys_flux, mask=sys_evidenceAIC_masked.mask)
-    count_flux_err_masked = np.ma.masked_array(sys_flux_err, mask=sys_evidenceAIC_masked.mask)
-    count_phase_masked = np.ma.masked_array(sys_phase, mask=sys_evidenceAIC_masked.mask)
-    count_model_y_masked = np.ma.masked_array(sys_model, mask=sys_evidenceAIC_masked.mask)
-    count_model_x_masked = np.ma.masked_array(sys_model_phase, mask=sys_evidenceAIC_masked.mask)
+
+    # Get equivalent masks for arrays with extra dimension
+    bigmask = np.tile(sys_evidenceAIC_masked.mask, (nexposure, 1))
+    np.ma.set_fill_value(bigmask, np.nan)
+    bigmask = np.transpose(bigmask)
+    print(bigmask.shape)
+    print(bigmask)
+
+    # Same for mask for smooth models
+    bigmasksmooth = np.tile(sys_evidenceAIC_masked.mask, (int(2*half_range/resolution), 1))
+    np.ma.set_fill_value(bigmasksmooth, np.nan)
+    bigmasksmooth = np.transpose(bigmasksmooth)
+    print(bigmasksmooth.shape)
+    print(bigmasksmooth)
+
+    count_residuals_masked = np.ma.masked_array(sys_residuals, mask=bigmask)
+    count_date_masked = np.ma.masked_array(sys_date, mask=bigmask)                # not reused - maybe useful for plotting though?
+    count_flux_masked = np.ma.masked_array(sys_flux, mask=bigmask)
+    count_flux_err_masked = np.ma.masked_array(sys_flux_err, mask=bigmask)
+    count_phase_masked = np.ma.masked_array(sys_phase, mask=bigmask)
+
+    count_model_y_masked = np.ma.masked_array(sys_model, mask=bigmasksmooth)
+    count_model_x_masked = np.ma.masked_array(sys_model_phase, mask=bigmasksmooth)
     #-m
 
     beta = np.min(count_AIC)
