@@ -540,9 +540,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     rl_sdnr_masked = np.zeros(nsys)
     for i in range(nsys):
         rl_sdnr_masked[i] = marg.calc_sdnr(count_residuals_masked[i])
-    best_sys_sdnr_masked = np.argmin(rl_sdnr_masked)
+    best_sys_sdnr_masked = np.nanargmin(rl_sdnr_masked)   # argument of minimum, ignoring possible NaNs
 
-    print('SDNR masked best = {} for model {}'.format(np.min(rl_sdnr_masked), best_sys_sdnr_masked))
+    print('SDNR masked best = {} for model {}'.format(np.nanmin(rl_sdnr_masked), best_sys_sdnr_masked))
     #-m
 
     # Marginalization plots
