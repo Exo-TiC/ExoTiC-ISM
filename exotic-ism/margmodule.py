@@ -537,10 +537,10 @@ if __name__ == '__main__':
 
     # Import some data
     localDir = CONFIG_INI.get('data_paths', 'local_path')
-    dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), "W17")
-    x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_white_lightcurve_test_data.txt'),
+    dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), 'W17')
+    x, y, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_G141_lightcurve_test_data.txt.txt'),
                                skiprows=7, unpack=True) * u.d   # not sure why u*MJD won't work
-    wavelength = np.loadtxt(os.path.join(dataDir, 'W17_wavelength_test_data.txt'), skiprows=3) * u.Angstrom
+    wavelength = np.loadtxt(os.path.join(dataDir, 'W17_G141_wavelength_test_data.txt'), skiprows=3) * u.Angstrom
 
     tzero = x[0]
 
