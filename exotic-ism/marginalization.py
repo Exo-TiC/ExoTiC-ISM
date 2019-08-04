@@ -436,7 +436,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     pos = np.where(sys_evidenceAIC > 0)
     if len(pos) == 0:
         pos = -1
-    print('Non-negative AIC at positions = {}'.format(pos))
+    print('Valid models positions = {}'.format(pos))
 
     #masked
     sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, 0.)
