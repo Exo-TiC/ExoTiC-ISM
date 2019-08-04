@@ -504,12 +504,17 @@ def noise_calculator(data, maxnbins=None, binstep=1):
     beta = 1 if np.isnan(beta) else beta
     
     # Plot up the bin statistic against the expected statistic
+    # This can be used later when we are setting up unit testing.
     # plt.figure()
-    # plt.errorbar(binz,root_mean_square, yerr=root_mean_square_err, color='k', lw=1.5, label='RMS')
+    # plt.errorbar(binz, root_mean_square, yerr=root_mean_square_err, color='k', lw=1.5, label='RMS')
     # plt.plot(binz, expected_noise, color='r', ls='-', lw=2, label='expected noise')
     #
+    # plt.title('Expected vs. measured noise binning statistic')
+    # plt.xlabel('?')
+    # plt.ylabel('?')
     # plt.xscale('log')
     # plt.yscale('log')
+    # plt.legend()
     # plt.tight_layout()
     # plt.show()
 
