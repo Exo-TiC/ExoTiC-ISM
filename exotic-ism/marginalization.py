@@ -435,8 +435,21 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     # REFORMAT all arrays with just positive values
     sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, 0.)
     np.ma.set_fill_value(sys_evidenceAIC_masked, np.nan)
-    print('Valid models positions = {}'.format(sys_evidenceAIC_masked))
 
+    # Print some info about good and bad models
+    num_rejected = np.ma.count_masked(sys_evidenceAIC_masked)
+    ind_rejected = np.where(sys_evidenceAIC_masked.mask == True)
+    print('\n')
+    if np.ma.is_masked(sys_evidenceAIC_masked):
+        print('{} models do not satisfy the positive AIC condition, these model numbers are:\n{}'.format(num_rejected,
+                                                                                                         ind_rejected))
+    else:
+        print('All models have positive AIC.')
+    print('{} valid models at positions =\n{}'.format(np.ma.count(sys_evidenceAIC_masked),
+                                                      np.where(sys_evidenceAIC_masked.mask == False)))
+    print('Valid model AIC values = {}'.format(sys_evidenceAIC_masked))
+
+    # Mask models numbers that have negative AIC
     count_AIC = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
     count_depth = np.ma.masked_array(sys_depth, mask=sys_evidenceAIC_masked.mask)
     count_depth_err = np.ma.masked_array(sys_depth_err, mask=sys_evidenceAIC_masked.mask)
@@ -462,6 +475,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     count_model_y = np.ma.masked_array(sys_model, mask=bigmasksmooth)
     count_model_x = np.ma.masked_array(sys_model_phase, mask=bigmasksmooth)
 
+    # Calculate the model weights
     beta = np.min(count_AIC)
     w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))  # weights
 
@@ -470,7 +484,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('\n{} models have a weight over 0.05. -> Models: {} with weigths: {}'.format(n01[0].shape, n01, w_q[n01]))
     print('Most likely model is number {} at w_q={}'.format(np.argmax(w_q), np.max(w_q)))
 
-    # best_sys_weight is the best system from our evidence, as opposed to best system puerly by scatter on residuals
+    # best_sys_weight is the best system from our evidence (weights),
+    # as opposed to best system purely by scatter on residuals
     best_sys_weight = np.argmax(w_q)
     print('SDNR of best model from evidence = {}, for model {}'.format(marg.calc_sdnr(count_residuals[best_sys_weight, :]),
                                                                               best_sys_weight))
@@ -481,7 +496,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     for i in range(nsys):
         rl_sdnr[i] = marg.calc_sdnr(count_residuals[i])
     best_sys_sdnr = np.nanargmin(rl_sdnr)   # argument of minimum, ignoring possible NaNs
-    print('SDNR best = {} for model {}'.format(np.nanmin(rl_sdnr), best_sys_sdnr))
+    print('SDNR best without the evidence (weights) = {} for model {}'.format(np.nanmin(rl_sdnr), best_sys_sdnr))
 
     # Marginalization plots
     fig2_fname = os.path.join(outDir, 'weights-stdr-rl_'+run_name+'.png')
