@@ -47,9 +47,10 @@
             Weights = {{ top_five_weights }}<br>
             SDNR = {{ top_five_sdnr }}<br>
             <br>
+            <h5> Top model: </h5>
             White noise = {{ white_noise }}<br>
             Red noise = {{ red_noise }}<br>
-            Photon noise = {{ photon_noise }}
+            Beta = {{ beta }}
             </p>
             
             <h3> Marginalized parameters: </h3>
@@ -65,20 +66,20 @@
             a/R* = {{ aor_marg }} +/- {{ aor_marg_err }}<br>
             </p>
             
-            <h3> Lightcurves </h3>
-            
-            <p>
-            <img src="{{ lightcurve_figure }}" alt="lightcurves" width="900" height="650"><br>
-            <br>
-            Top: Input lightcurve with no systematic correction. Middle: Lightcurve corrected by highest weight systematic model, the planetary transit model is shown in red. Bottom: Residuals and uncertainties associated with the middle panel.
-            </p>
-            
             <h3> Systematics </h3>
             
             <p>
             <img src="{{ systematics_figure }}" alt="systematics" width="900" height="650"><br>
             <br>
             Top: Weight associated with each systematic model applied to the data. Middle: Radius ratio measured for each systematic correction. Bottom: Center of transit time measured for each systematic correction.
+            </p>
+            
+            <h3> Lightcurves </h3>
+            
+            <p>
+            <img src="{{ lightcurve_figure }}" alt="lightcurve" width="900" height="650"><br>
+            <br>
+            Top: Input lightcurve with no systematic correction. Middle: Lightcurve corrected by highest weight systematic model, the planetary transit model is shown in red. Bottom: Residuals and uncertainties associated with the middle panel.
             </p>
         
     </body>
