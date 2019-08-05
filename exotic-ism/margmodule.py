@@ -510,8 +510,8 @@ def noise_calculator(data, maxnbins=None, binstep=1):
     # plt.plot(binz, expected_noise, color='r', ls='-', lw=2, label='expected noise')
     #
     # plt.title('Expected vs. measured noise binning statistic')
-    # plt.xlabel('?')
-    # plt.ylabel('?')
+    # plt.xlabel('Number of bins')
+    # plt.ylabel('RMS')
     # plt.xscale('log')
     # plt.yscale('log')
     # plt.legend()
