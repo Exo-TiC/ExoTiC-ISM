@@ -16,6 +16,10 @@
             <h3> Input parameters: </h3>
             
             <p>
+            Number of systematic models: {{ nsys }}
+            </p>
+            
+            <p>
             <h5> Planet parameters: </h5>
             Rp/R* = {{ rl_in }}<br>
             Epoch (MJD) = {{ epoch_in }}<br>
@@ -54,6 +58,12 @@
             </p>
             
             <h3> Marginalized parameters: </h3>
+            
+            <p>
+            {{ num_rejected }} models do not satisfy the positive AIC condition and were removed
+            from the marginalisation. Their model numbers are:<br>
+            {{ indices_rejected }}
+            </p>
             
             <p>
             (If uncertainty = 0, then the value is frozen.)<br>
