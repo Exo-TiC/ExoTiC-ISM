@@ -68,9 +68,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     # READ THE CONSTANTS
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
 
-    # Errors from Hessian matrix in the fit or with 'Confidence' estimation?
-    ERRORS = CONFIG_INI.get('technical_parameters', 'errors')
-
     # We want to keep the raw data as is, so we generate helper arrays that will get changed from model to model
     img_date = x * u.d    # time array
     img_flux = y    # flux array
@@ -137,7 +134,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Set up the fit object
     tfit = Fit(tdata, tmodel, stat=stat, method=opt)  # Instantiate fit object
-    tfit.estmethod = Confidence()    # Set up error estimator we want.
+    tfit.estmethod = Confidence()    # Set up error estimator we want. Need to define one even if we rely on the Hessian onyly.
 
     #################################
     #           FIRST FIT           #
@@ -179,14 +176,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         # Save results of fit
         w_params[i, :] = [par.val for par in tmodel.pars]
 
-        # Calculate the error on rl
-        print('Calculating error on rl...')
-        if ERRORS == 'hessian':
-            calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
-            rl_err = calc_errors[0]
-        elif ERRORS == 'confidence':
-            calc_errors = tfit.est_errors(parlist=(tmodel.rl,))
-            rl_err = max(np.abs(calc_errors.parmaxes[0]), np.abs(calc_errors.parmins[0]))
+        # Extract the error on rl from the Hessian
+        calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
+        rl_err = calc_errors[0]
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
@@ -261,52 +253,33 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
             print(tres.message)
         print('2nd ROUND OF SHERPA FIT IS DONE\n')
 
-        print('Calculating errors...')
+        print('Extracting errors...')
 
-        # Errors directly from the covariance matrix in the fit
-        if ERRORS == 'hessian':
-            # change this such that it is still correct if epoch is frozen, see first point in issue #24
-            calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
-            rl_err = calc_errors[0]
+        # Getting errors directly from the covariance matrix in the fit, rl is always thawed.
+        calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
+        rl_err = calc_errors[0]
+
+        # These are the only errors we might need, depending on "grid_selection"
+        epoch_err = None
+        incl_err = None
+        msmpr_err = None
+        ecc_err = None
+
+        # Read errors from Hessian depending on which parameters actually got fit
+        if grid_selection == 'fix_time':
+            pass
+        elif grid_selection == 'fit_time':
             epoch_err = calc_errors[2]
-
-            if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
-                incl_err = calc_errors[3]
-                msmpr_err = calc_errors[4]
-
-            elif not tmodel.inclin.frozen:
-                incl_err = calc_errors[3]
-
-            elif not tmodel.msmpr.frozen:
-                msmpr_err = calc_errors[3]
-
-        # Errors from the 'Confidence' estimation method
-        elif ERRORS == 'confidence':
-            # change this such that it is still correct if epoch is frozen, see first point in issue #24
-            # We can calculate errors only on thawed parameters, and inclin and msmpr are not always thawed - neither is epoch
-            if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
-                print("Est errors on rl, epoch, inclin and msmpr...")
-                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr, tmodel.inclin,))
-                msmpr_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
-                incl_err = max(np.abs(calc_errors.parmaxes[3]), np.abs(calc_errors.parmins[3]))
-
-            elif not tmodel.inclin.frozen:
-                print('Est errors on rl, epoch and inclin...')
-                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.inclin))
-                incl_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
-
-            elif not tmodel.msmpr.frozen:
-                print('Est errors on rl, epoch and msmpr...')
-                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch, tmodel.msmpr))
-                msmpr_err = max(np.abs(calc_errors.parmaxes[2]), np.abs(calc_errors.parmins[2]))
-
-            else:
-                print('Est errors for rl and epoch...')
-                calc_errors = tfit.est_errors(parlist=(tmodel.rl, tmodel.epoch))
-
-            # rl and epoch are in this case of "fit_time" always thawed
-            rl_err = max(np.abs(calc_errors.parmaxes[0]), np.abs(calc_errors.parmins[0]))
-            epoch_err = max(np.abs(calc_errors.parmaxes[1]), np.abs(calc_errors.parmins[1]))
+        elif grid_selection == 'fit_inclin':
+            incl_err = calc_errors[2]
+        elif grid_selection == 'fit_msmpr':
+            msmpr_err = calc_errors[2]
+        elif grid_selection == 'fit_ecc':
+            ecc_err = calc_errors[2]
+        elif grid_selection == 'fit_all':
+            epoch_err = calc_errors[2]
+            incl_err = calc_errors[3]
+            msmpr_err = calc_errors[4]
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
@@ -386,18 +359,23 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         sys_model_phase[i, :] = x2                              # smooth phase  - used for plotting
 
         sys_params[i, :] = [par.val for par in tmodel.pars]     # parameters  - REUSED!
-        # We only really need the errors on rl, epoch, inclination and MsMpR, so I only calculate those. The rest
-        # of the errors in this array will be zero (and hence false), but we'll be redesigning this in the near future.
+        # We only really need the errors on rl, epoch, inclination, MsMpR and ecc, so I only save those. The rest
+        # of the errors in this array will be zero (and hence false, but we don't need them).
+        sys_params_err[i, 0] = rl_err
+        if not tmodel.epoch.frozen:
+            sys_params_err[i, 2] = epoch_err
         if not tmodel.inclin.frozen:
-            sys_params_err[:, 3] = incl_err
+            sys_params_err[i, 3] = incl_err
         if not tmodel.msmpr.frozen:
-            sys_params_err[:, 4] = msmpr_err
+            sys_params_err[i, 4] = msmpr_err
+        if not tmodel.ecc.frozen:
+            sys_params_err[i, 5] = ecc_err
 
         sys_depth[i] = tmodel.rl.val                            # depth  - REUSED!
         sys_depth_err[i] = rl_err                               # depth error  - REUSED!
         sys_epoch[i] = tmodel.epoch.val                         # transit time  - REUSED!
         if not tmodel.epoch.frozen:
-            sys_epoch_err[i] = epoch_err                            # transit time error  - REUSED!
+            sys_epoch_err[i] = epoch_err                        # transit time error  - REUSED!
         sys_evidenceAIC[i] = evidence_AIC                       # evidence AIC  - REUSED!
         sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC  - REUSED!
 
@@ -592,6 +570,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         marg_aors = constant1 * (marg_msmpr ** (1./3.))
         marg_aors_err = constant1 * (marg_msmpr_err ** (1./3.)) / marg_aors
         print('a/R* = {} +/- {}'.format(marg_aors, marg_aors_err))
+
+    #TODO: add marginalization for eccentricity, see GitHub issue #56
 
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
