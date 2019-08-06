@@ -134,7 +134,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Set up the fit object
     tfit = Fit(tdata, tmodel, stat=stat, method=opt)  # Instantiate fit object
-    tfit.estmethod = Confidence()    # Set up error estimator we want.
+    tfit.estmethod = Confidence()    # Set up error estimator we want. Need to define one even if we rely on the Hessian onyly.
 
     #################################
     #           FIRST FIT           #
@@ -176,7 +176,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         # Save results of fit
         w_params[i, :] = [par.val for par in tmodel.pars]
 
-        # Extract the error on rl fro the Hessian
+        # Extract the error on rl from the Hessian
         calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
         rl_err = calc_errors[0]
 
@@ -570,6 +570,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         marg_aors = constant1 * (marg_msmpr ** (1./3.))
         marg_aors_err = constant1 * (marg_msmpr_err ** (1./3.)) / marg_aors
         print('a/R* = {} +/- {}'.format(marg_aors, marg_aors_err))
+
+    #TODO: add marginalization for eccentricity, see GitHub issue #56
 
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
