@@ -56,8 +56,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     """
 
     print(
-        'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with'
-        '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes'
+        'Welcome to the Wakeford WFC3 light curve analysis pipeline. We will now compute the evidence associated with\n'
+        '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes.\n'
         'Please hold.'
         '\n This is the version using SHERPA for fitting.\n')
 
@@ -132,7 +132,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     opt = LevMar()
     opt.config['epsfcn'] = np.finfo(float).eps
 
-    print('Optimizer used:')
+    print('\nOptimizer used:')
     print(opt)
 
     # Set up the fit object
@@ -433,25 +433,56 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('AIC for all systems: {}'.format(sys_evidenceAIC))
 
     # REFORMAT all arrays with just positive values
-    pos = np.where(sys_evidenceAIC > 0)
-    if len(pos) == 0:
-        pos = -1
-    print('Negative AIC at  positions = {}'.format(pos))
+    sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, 0.)
+    np.ma.set_fill_value(sys_evidenceAIC_masked, np.nan)
 
-    # Issue #37
-    count_AIC = sys_evidenceAIC[pos]
-    count_depth = sys_depth[pos]
-    count_depth_err = sys_depth_err[pos]
-    count_epoch = sys_epoch[pos]
-    count_epoch_err = sys_epoch_err[pos]
-    count_residuals = sys_residuals[pos]
-    count_date = sys_date[pos]                # not reused - maybe useful for plotting though?
-    count_flux = sys_flux[pos]
-    count_flux_err = sys_flux_err[pos]
-    count_phase = sys_phase[pos]
-    count_model_y = sys_model[pos]
-    count_model_x = sys_model_phase[pos]
+    # Print some info about good and bad models
+    num_rejected = np.ma.count_masked(sys_evidenceAIC_masked)
+    ind_rejected = np.where(sys_evidenceAIC_masked.mask == True)
+    print('\n')
+    if np.ma.is_masked(sys_evidenceAIC_masked):
+        print('{} models do not satisfy the positive AIC condition, these model numbers are:\n{}'.format(num_rejected,
+                                                                                                         ind_rejected))
+    else:
+        print('All models have positive AIC.')
+    print('{} valid models at positions =\n{}'.format(np.ma.count(sys_evidenceAIC_masked),
+                                                      np.where(sys_evidenceAIC_masked.mask == False)))
+    print('Valid model AIC values = {}'.format(sys_evidenceAIC_masked))
 
+    # Mask models numbers that have negative AIC
+    count_AIC = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
+    count_depth = np.ma.masked_array(sys_depth, mask=sys_evidenceAIC_masked.mask)
+    count_depth_err = np.ma.masked_array(sys_depth_err, mask=sys_evidenceAIC_masked.mask)
+    count_epoch = np.ma.masked_array(sys_epoch, mask=sys_evidenceAIC_masked.mask)
+    count_epoch_err = np.ma.masked_array(sys_epoch_err, mask=sys_evidenceAIC_masked.mask)
+
+    # Get equivalent masks for arrays with extra dimension
+    # If there is no bad AIC, the mask will just be a numpy boolean "False" as opposed to a bool array.
+    if isinstance(sys_evidenceAIC_masked.mask, np.bool_):    # numpy booleans are different from Python booleans!
+        bigmask = sys_evidenceAIC_masked.mask
+    else:
+        bigmask = np.tile(sys_evidenceAIC_masked.mask, (nexposure, 1))
+        np.ma.set_fill_value(bigmask, np.nan)
+        bigmask = np.transpose(bigmask)
+
+    # Same for mask for smooth models
+    if isinstance(sys_evidenceAIC_masked.mask, np.bool_):
+        bigmasksmooth = sys_evidenceAIC_masked.mask
+    else:
+        bigmasksmooth = np.tile(sys_evidenceAIC_masked.mask, (int(2*half_range/resolution), 1))
+        np.ma.set_fill_value(bigmasksmooth, np.nan)
+        bigmasksmooth = np.transpose(bigmasksmooth)
+
+    count_residuals = np.ma.masked_array(sys_residuals, mask=bigmask)
+    count_date = np.ma.masked_array(sys_date, mask=bigmask)            # not reused - maybe useful for plotting though?
+    count_flux = np.ma.masked_array(sys_flux, mask=bigmask)
+    count_flux_err = np.ma.masked_array(sys_flux_err, mask=bigmask)
+    count_phase = np.ma.masked_array(sys_phase, mask=bigmask)
+
+    count_model_y = np.ma.masked_array(sys_model, mask=bigmasksmooth)
+    count_model_x = np.ma.masked_array(sys_model_phase, mask=bigmasksmooth)
+
+    # Calculate the model weights
     beta = np.min(count_AIC)
     w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))  # weights
 
@@ -460,19 +491,19 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('\n{} models have a weight over 0.05. -> Models: {} with weigths: {}'.format(n01[0].shape, n01, w_q[n01]))
     print('Most likely model is number {} at w_q={}'.format(np.argmax(w_q), np.max(w_q)))
 
-    # best_sys_weight is the best system from our evidence, as opposed to best system puerly by scatter on residuals
+    # best_sys_weight is the best system from our evidence (weights),
+    # as opposed to best system purely by scatter on residuals
     best_sys_weight = np.argmax(w_q)
-    print('SDNR best model from evidence = {}, for model {}'.format(marg.calc_sdnr(count_residuals[best_sys_weight, :]),
-                                                                    best_sys_weight))
+    print('SDNR of best model from evidence = {}, for model {}'.format(marg.calc_sdnr(count_residuals[best_sys_weight, :]),
+                                                                              best_sys_weight))
 
-    # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by  model
-    # complexity. This shows us how picking the "best" model differs between std alone and weigthed result.
-    rl_sdnr = np.zeros(len(w_q))
-    for i in range(len(w_q)):
-        rl_sdnr[i] = marg.calc_sdnr(count_residuals[i])   # make sure these system indices work on initial indexing, before taking out "bad" values (where we make variable 'pos')
-    best_sys_sdnr = np.argmin(rl_sdnr)
-
-    print('SDNR best = {} for model {}'.format(np.min(rl_sdnr), best_sys_sdnr))
+    # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by model
+    # complexity. This shows us how picking the "best" model differs between std alone and weighted result.
+    rl_sdnr = np.zeros(nsys)
+    for i in range(nsys):
+        rl_sdnr[i] = marg.calc_sdnr(count_residuals[i])
+    best_sys_sdnr = np.nanargmin(rl_sdnr)   # argument of minimum, ignoring possible NaNs
+    print('SDNR best without the evidence (weights) = {} for model {}'.format(np.nanmin(rl_sdnr), best_sys_sdnr))
 
     # Marginalization plots
     fig2_fname = os.path.join(outDir, 'weights-stdr-rl_'+run_name+'.png')
@@ -564,18 +595,29 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
-    np.savez(os.path.join(outDir, 'marginalization_results_'+run_name), w_q=w_q, best_sys=best_sys_weight,
+    # masked saves
+    np.savez(os.path.join(outDir, 'masked_marginalization_results'+run_name), w_q=np.ma.filled(w_q), best_sys=np.ma.filled(best_sys_weight),
+             marg_rl=np.ma.filled(marg_rl), marg_rl_err=np.ma.filled(marg_rl_err), marg_epoch=np.ma.filled(marg_epoch), marg_epoch_err=np.ma.filled(marg_epoch_err),
+             marg_inclin_rad=np.ma.filled(marg_inclin_rad), marg_inclin_rad_err=np.ma.filled(marg_inclin_rad_err), marg_inclin_deg=np.ma.filled(marg_inclin_deg),
+             marg_inclin_deg_err=np.ma.filled(marg_inclin_deg_err), marg_msmpr=np.ma.filled(marg_msmpr), marg_msmpr_err=np.ma.filled(marg_msmpr_err),
+             marg_aors=np.ma.filled(marg_aors), marg_aors_err=np.ma.filled(marg_aors_err), rl_sdnr=np.ma.filled(rl_sdnr), mask=sys_evidenceAIC_masked.mask,
+             allow_pickle=True)
+
+    #unmasked saves
+    np.savez(os.path.join(outDir, 'unmasked_marginalization_results'+run_name), w_q=w_q, best_sys=best_sys_weight,
              marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
              marg_inclin_rad=marg_inclin_rad, marg_inclin_rad_err=marg_inclin_rad_err, marg_inclin_deg=marg_inclin_deg,
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
-             marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, pos=pos)
+             marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, mask=sys_evidenceAIC_masked.mask,
+             allow_pickle=True)
 
     ### Save as PDF report
     report = CONFIG_INI.get('technical_parameters', 'report')
     if report:
 
         # Figure out best five models through the highest weights, and their SDNR
-        best_five_index = w_q.argsort()[-5:][::-1]    # sorting the array by highest argument and taking first five of that
+        # sorting the array by highest argument and taking first five of that
+        best_five_index = w_q.argsort(fill_value=0)[-5:][::-1]    # need to use fill_value=0, otherwise the NaNs win
         sdnr_top_five = np.zeros_like(best_five_index, dtype=float)
 
         for i in range(len(best_five_index)):
@@ -584,6 +626,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         # Prepare variables that go into PDF report
         template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
                          'run_name': CONFIG_INI.get('data_paths', 'run_name'),
+                         'nsys': nsys,
                          'rl_in': CONFIG_INI.getfloat(exoplanet, 'rl'),
                          'epoch_in': CONFIG_INI.getfloat(exoplanet, 'epoch'),
                          'incl_deg_in': CONFIG_INI.getfloat(exoplanet, 'inclin'),
@@ -604,6 +647,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                          'white_noise': sys_stats[best_sys_weight, 5],
                          'red_noise': sys_stats[best_sys_weight, 6],
                          'beta': sys_stats[best_sys_weight, 7],
+                         'num_rejected': num_rejected,
+                         'indices_rejected': ind_rejected,
                          'rl_marg': marg_rl,
                          'rl_marg_err': marg_rl_err,
                          'epoch_marg': marg_epoch,
