@@ -255,21 +255,31 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
         print('Extracting errors...')
 
-        # Errors directly from the covariance matrix in the fit
-        # change this such that it is still correct if epoch is frozen, see first point in issue #24
+        # Getting errors directly from the covariance matrix in the fit, rl is always thawed.
         calc_errors = np.sqrt(tres.extra_output['covar'].diagonal())
         rl_err = calc_errors[0]
-        epoch_err = calc_errors[2]
 
-        if not tmodel.inclin.frozen and not tmodel.msmpr.frozen:
+        # These are the only errors we might need, depending on "grid_selection"
+        epoch_err = None
+        incl_err = None
+        msmpr_err = None
+        ecc_err = None
+
+        # Read errors from Hessian depending on which parameters actually got fit
+        if grid_selection == 'fix_time':
+            pass
+        elif grid_selection == 'fit_time':
+            epoch_err = calc_errors[2]
+        elif grid_selection == 'fit_inclin':
+            incl_err = calc_errors[2]
+        elif grid_selection == 'fit_msmpr':
+            msmpr_err = calc_errors[2]
+        elif grid_selection == 'fit_ecc':
+            ecc_err = calc_errors[2]
+        elif grid_selection == 'fit_all':
+            epoch_err = calc_errors[2]
             incl_err = calc_errors[3]
             msmpr_err = calc_errors[4]
-
-        elif not tmodel.inclin.frozen:
-            incl_err = calc_errors[3]
-
-        elif not tmodel.msmpr.frozen:
-            msmpr_err = calc_errors[3]
 
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
@@ -349,18 +359,23 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         sys_model_phase[i, :] = x2                              # smooth phase  - used for plotting
 
         sys_params[i, :] = [par.val for par in tmodel.pars]     # parameters  - REUSED!
-        # We only really need the errors on rl, epoch, inclination and MsMpR, so I only calculate those. The rest
-        # of the errors in this array will be zero (and hence false), but we'll be redesigning this in the near future.
+        # We only really need the errors on rl, epoch, inclination, MsMpR and ecc, so I only save those. The rest
+        # of the errors in this array will be zero (and hence false, but we don't need them).
+        sys_params_err[i, 0] = rl_err
+        if not tmodel.epoch.frozen:
+            sys_params_err[i, 2] = epoch_err
         if not tmodel.inclin.frozen:
-            sys_params_err[:, 3] = incl_err
+            sys_params_err[i, 3] = incl_err
         if not tmodel.msmpr.frozen:
-            sys_params_err[:, 4] = msmpr_err
+            sys_params_err[i, 4] = msmpr_err
+        if not tmodel.ecc.frozen:
+            sys_params_err[i, 5] = ecc_err
 
         sys_depth[i] = tmodel.rl.val                            # depth  - REUSED!
         sys_depth_err[i] = rl_err                               # depth error  - REUSED!
         sys_epoch[i] = tmodel.epoch.val                         # transit time  - REUSED!
         if not tmodel.epoch.frozen:
-            sys_epoch_err[i] = epoch_err                            # transit time error  - REUSED!
+            sys_epoch_err[i] = epoch_err                        # transit time error  - REUSED!
         sys_evidenceAIC[i] = evidence_AIC                       # evidence AIC  - REUSED!
         sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC  - REUSED!
 
