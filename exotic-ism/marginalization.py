@@ -457,17 +457,24 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     count_epoch_err = np.ma.masked_array(sys_epoch_err, mask=sys_evidenceAIC_masked.mask)
 
     # Get equivalent masks for arrays with extra dimension
-    bigmask = np.tile(sys_evidenceAIC_masked.mask, (nexposure, 1))
-    np.ma.set_fill_value(bigmask, np.nan)
-    bigmask = np.transpose(bigmask)
+    # If there is no bad AIC, the mask will just be a numpy boolean "False" as opposed to a bool array.
+    if isinstance(sys_evidenceAIC_masked.mask, np.bool_):    # numpy booleans are different from Python booleans!
+        bigmask = sys_evidenceAIC_masked.mask
+    else:
+        bigmask = np.tile(sys_evidenceAIC_masked.mask, (nexposure, 1))
+        np.ma.set_fill_value(bigmask, np.nan)
+        bigmask = np.transpose(bigmask)
 
     # Same for mask for smooth models
-    bigmasksmooth = np.tile(sys_evidenceAIC_masked.mask, (int(2*half_range/resolution), 1))
-    np.ma.set_fill_value(bigmasksmooth, np.nan)
-    bigmasksmooth = np.transpose(bigmasksmooth)
+    if isinstance(sys_evidenceAIC_masked.mask, np.bool_):
+        bigmasksmooth = sys_evidenceAIC_masked.mask
+    else:
+        bigmasksmooth = np.tile(sys_evidenceAIC_masked.mask, (int(2*half_range/resolution), 1))
+        np.ma.set_fill_value(bigmasksmooth, np.nan)
+        bigmasksmooth = np.transpose(bigmasksmooth)
 
     count_residuals = np.ma.masked_array(sys_residuals, mask=bigmask)
-    count_date = np.ma.masked_array(sys_date, mask=bigmask)                # not reused - maybe useful for plotting though?
+    count_date = np.ma.masked_array(sys_date, mask=bigmask)            # not reused - maybe useful for plotting though?
     count_flux = np.ma.masked_array(sys_flux, mask=bigmask)
     count_flux_err = np.ma.masked_array(sys_flux_err, mask=bigmask)
     count_phase = np.ma.masked_array(sys_phase, mask=bigmask)
