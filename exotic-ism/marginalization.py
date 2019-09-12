@@ -223,10 +223,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     sys_params = np.zeros((nsys, nparams))          # parameters
     sys_params_err = np.zeros((nsys, nparams))      # parameter errors
 
-    sys_depth = np.zeros(nsys)                      # depth
-    sys_depth_err = np.zeros(nsys)                  # depth error
-    sys_epoch = np.zeros(nsys)                      # transit time
-    sys_epoch_err = np.zeros(nsys)                  # transit time error
     sys_evidenceAIC = np.zeros(nsys)                # evidence AIC
     sys_evidenceBIC = np.zeros(nsys)                # evidence BIC
 
@@ -371,11 +367,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         if not tmodel.ecc.frozen:
             sys_params_err[i, 5] = ecc_err
 
-        sys_depth[i] = tmodel.rl.val                            # depth  - REUSED!
-        sys_depth_err[i] = rl_err                               # depth error  - REUSED!
-        sys_epoch[i] = tmodel.epoch.val                         # transit time  - REUSED!
-        if not tmodel.epoch.frozen:
-            sys_epoch_err[i] = epoch_err                        # transit time error  - REUSED!
         sys_evidenceAIC[i] = evidence_AIC                       # evidence AIC  - REUSED!
         sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC  - REUSED!
 
@@ -393,7 +384,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
              sys_rawflux=sys_rawflux, sys_rawflux_err=sys_rawflux_err, sys_flux=sys_flux, sys_flux_err=sys_flux_err,
              sys_residuals=sys_residuals, sys_model=sys_model, sys_model_phase=sys_model_phase,
              sys_systematic_model=sys_systematic_model, sys_params=sys_params, sys_params_err=sys_params_err,
-             sys_depth=sys_depth, sys_depth_err=sys_depth_err, sys_epoch=sys_epoch, sys_epoch_err=sys_epoch_err,
              sys_evidenceAIC=sys_evidenceAIC, sys_evidenceBIC=sys_evidenceBIC)
 
 
@@ -429,10 +419,10 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Mask models numbers that have negative AIC
     count_AIC = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
-    count_depth = np.ma.masked_array(sys_depth, mask=sys_evidenceAIC_masked.mask)
-    count_depth_err = np.ma.masked_array(sys_depth_err, mask=sys_evidenceAIC_masked.mask)
-    count_epoch = np.ma.masked_array(sys_epoch, mask=sys_evidenceAIC_masked.mask)
-    count_epoch_err = np.ma.masked_array(sys_epoch_err, mask=sys_evidenceAIC_masked.mask)
+    count_rl = np.ma.masked_array(sys_params[:, 0], mask=sys_evidenceAIC_masked.mask)
+    count_rl_err = np.ma.masked_array(sys_params_err[:, 0], mask=sys_evidenceAIC_masked.mask)
+    count_epoch = np.ma.masked_array(sys_params[:, 2], mask=sys_evidenceAIC_masked.mask)            # transit time
+    count_epoch_err = np.ma.masked_array(sys_params_err[:, 2], mask=sys_evidenceAIC_masked.mask)    # transit time error
 
     # Get equivalent masks for arrays with extra dimension
     # If there is no bad AIC, the mask will just be a numpy boolean "False" as opposed to a bool array.
@@ -494,7 +484,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.plot(rl_sdnr)
     plt.ylabel('Standard deviation of residuals')
     plt.subplot(3, 1, 3)
-    plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
+    plt.errorbar(np.arange(1, len(count_rl)+1), count_rl, yerr=count_rl_err, fmt='.')
     plt.ylabel('$R_P/R_*$')
     plt.xlabel('Systematic model number')
     plt.savefig(fig2_fname)
@@ -529,7 +519,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         plt.show()
 
     ### Radius ratio - this one always gets calculated
-    marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
+    marg_rl, marg_rl_err = marg.marginalization(count_rl, count_rl_err, w_q)
     print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
 
     ### Center of transit time (epoch)
