@@ -223,10 +223,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     sys_params = np.zeros((nsys, nparams))          # parameters
     sys_params_err = np.zeros((nsys, nparams))      # parameter errors
 
-    sys_depth = np.zeros(nsys)                      # depth
-    sys_depth_err = np.zeros(nsys)                  # depth error
-    sys_epoch = np.zeros(nsys)                      # transit time
-    sys_epoch_err = np.zeros(nsys)                  # transit time error
     sys_evidenceAIC = np.zeros(nsys)                # evidence AIC
     sys_evidenceBIC = np.zeros(nsys)                # evidence BIC
 
@@ -371,11 +367,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         if not tmodel.ecc.frozen:
             sys_params_err[i, 5] = ecc_err
 
-        sys_depth[i] = tmodel.rl.val                            # depth  - REUSED!
-        sys_depth_err[i] = rl_err                               # depth error  - REUSED!
-        sys_epoch[i] = tmodel.epoch.val                         # transit time  - REUSED!
-        if not tmodel.epoch.frozen:
-            sys_epoch_err[i] = epoch_err                        # transit time error  - REUSED!
         sys_evidenceAIC[i] = evidence_AIC                       # evidence AIC  - REUSED!
         sys_evidenceBIC[i] = evidence_BIC                       # evidence BIC  - REUSED!
 
@@ -393,7 +384,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
              sys_rawflux=sys_rawflux, sys_rawflux_err=sys_rawflux_err, sys_flux=sys_flux, sys_flux_err=sys_flux_err,
              sys_residuals=sys_residuals, sys_model=sys_model, sys_model_phase=sys_model_phase,
              sys_systematic_model=sys_systematic_model, sys_params=sys_params, sys_params_err=sys_params_err,
-             sys_depth=sys_depth, sys_depth_err=sys_depth_err, sys_epoch=sys_epoch, sys_epoch_err=sys_epoch_err,
              sys_evidenceAIC=sys_evidenceAIC, sys_evidenceBIC=sys_evidenceBIC)
 
 
@@ -410,7 +400,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     # Print all the AIC values
     print('AIC for all systems: {}'.format(sys_evidenceAIC))
 
-    # REFORMAT all arrays with just positive values
+    # REFORMAT all arrays, masking all negative AIC values
     sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, 0.)
     np.ma.set_fill_value(sys_evidenceAIC_masked, np.nan)
 
@@ -428,13 +418,17 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('Valid model AIC values = {}'.format(sys_evidenceAIC_masked))
 
     # Mask models numbers that have negative AIC
-    count_AIC = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
-    count_depth = np.ma.masked_array(sys_depth, mask=sys_evidenceAIC_masked.mask)
-    count_depth_err = np.ma.masked_array(sys_depth_err, mask=sys_evidenceAIC_masked.mask)
-    count_epoch = np.ma.masked_array(sys_epoch, mask=sys_evidenceAIC_masked.mask)
-    count_epoch_err = np.ma.masked_array(sys_epoch_err, mask=sys_evidenceAIC_masked.mask)
+    masked_aic = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
+    masked_rl = np.ma.masked_array(sys_params[:, 0], mask=sys_evidenceAIC_masked.mask)             # transit depth
+    masked_rl_err = np.ma.masked_array(sys_params_err[:, 0], mask=sys_evidenceAIC_masked.mask)     # transit depth error
+    masked_epoch = np.ma.masked_array(sys_params[:, 2], mask=sys_evidenceAIC_masked.mask)          # transit time
+    masked_epoch_err = np.ma.masked_array(sys_params_err[:, 2], mask=sys_evidenceAIC_masked.mask)  # transit time error
+    masked_inclin = np.ma.masked_array(sys_params[:, 3], mask=sys_evidenceAIC_masked.mask)         # inclination
+    masked_inclin_err = np.ma.masked_array(sys_params_err[:, 3], mask=sys_evidenceAIC_masked.mask) # inclination error
+    masked_msmpr = np.ma.masked_array(sys_params[:, 4], mask=sys_evidenceAIC_masked.mask)          # MsMpR
+    masked_msmpr_err = np.ma.masked_array(sys_params_err[:, 4], mask=sys_evidenceAIC_masked.mask)  # MsMpR error
 
-    # Get equivalent masks for arrays with extra dimension
+    # Get equivalent masks for arrays with extra dimension.
     # If there is no bad AIC, the mask will just be a numpy boolean "False" as opposed to a bool array.
     if isinstance(sys_evidenceAIC_masked.mask, np.bool_):    # numpy booleans are different from Python booleans!
         bigmask = sys_evidenceAIC_masked.mask
@@ -451,35 +445,35 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         np.ma.set_fill_value(bigmasksmooth, np.nan)
         bigmasksmooth = np.transpose(bigmasksmooth)
 
-    count_residuals = np.ma.masked_array(sys_residuals, mask=bigmask)
-    count_date = np.ma.masked_array(sys_date, mask=bigmask)            # not reused - maybe useful for plotting though?
-    count_flux = np.ma.masked_array(sys_flux, mask=bigmask)
-    count_flux_err = np.ma.masked_array(sys_flux_err, mask=bigmask)
-    count_phase = np.ma.masked_array(sys_phase, mask=bigmask)
+    masked_residuals = np.ma.masked_array(sys_residuals, mask=bigmask)
+    masked_date = np.ma.masked_array(sys_date, mask=bigmask)            # not reused - maybe useful for plotting though?
+    masked_flux = np.ma.masked_array(sys_flux, mask=bigmask)
+    masked_flux_err = np.ma.masked_array(sys_flux_err, mask=bigmask)
+    masked_phase = np.ma.masked_array(sys_phase, mask=bigmask)
 
-    count_model_y = np.ma.masked_array(sys_model, mask=bigmasksmooth)
-    count_model_x = np.ma.masked_array(sys_model_phase, mask=bigmasksmooth)
+    masked_model_y = np.ma.masked_array(sys_model, mask=bigmasksmooth)
+    masked_model_x = np.ma.masked_array(sys_model_phase, mask=bigmasksmooth)
 
     # Calculate the model weights
-    beta = np.min(count_AIC)
-    w_q = (np.exp(count_AIC - beta)) / np.sum(np.exp(count_AIC - beta))  # weights
+    beta = np.min(masked_aic)
+    w_q = (np.exp(masked_aic - beta)) / np.sum(np.exp(masked_aic - beta))  # weights
 
     #  This is just for runtime outputs
-    n01 = np.where(w_q >= 0.05)   # Issue #38
+    n01 = np.where(w_q >= 0.05)
     print('\n{} models have a weight over 0.05. -> Models: {} with weigths: {}'.format(n01[0].shape, n01, w_q[n01]))
     print('Most likely model is number {} at w_q={}'.format(np.argmax(w_q), np.max(w_q)))
 
-    # best_sys_weight is the best system from our evidence (weights),
+    # Best_sys_weight is the best system from our evidence (weights),
     # as opposed to best system purely by scatter on residuals
     best_sys_weight = np.argmax(w_q)
-    print('SDNR of best model from evidence = {}, for model {}'.format(marg.calc_sdnr(count_residuals[best_sys_weight, :]),
+    print('SDNR of best model from evidence = {}, for model {}'.format(marg.calc_sdnr(masked_residuals[best_sys_weight, :]),
                                                                               best_sys_weight))
 
-    # best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by model
+    # Best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by model
     # complexity. This shows us how picking the "best" model differs between std alone and weighted result.
-    rl_sdnr = np.zeros(nsys)
+    rl_sdnr = np.zeros(nsys)    # this will also end up a masked array due to the statement two lines below
     for i in range(nsys):
-        rl_sdnr[i] = marg.calc_sdnr(count_residuals[i])
+        rl_sdnr[i] = marg.calc_sdnr(masked_residuals[i])
     best_sys_sdnr = np.nanargmin(rl_sdnr)   # argument of minimum, ignoring possible NaNs
     print('SDNR best without the evidence (weights) = {} for model {}'.format(np.nanmin(rl_sdnr), best_sys_sdnr))
 
@@ -494,7 +488,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.plot(rl_sdnr)
     plt.ylabel('Standard deviation of residuals')
     plt.subplot(3, 1, 3)
-    plt.errorbar(np.arange(1, len(count_depth)+1), count_depth, yerr=count_depth_err, fmt='.')
+    plt.errorbar(np.arange(1, len(masked_rl)+1), masked_rl, yerr=masked_rl_err, fmt='.')
     plt.ylabel('$R_P/R_*$')
     plt.xlabel('Systematic model number')
     plt.savefig(fig2_fname)
@@ -511,32 +505,32 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     plt.ylabel('Fitted norm. flux of first sys model')
 
     plt.subplot(3, 1, 2)
-    plt.scatter(count_phase[best_sys_weight,:], count_flux[best_sys_weight,:], label='Fit of best model')
-    plt.plot(count_model_x[best_sys_weight,:], count_model_y[best_sys_weight,:], label='Smooth best model')
-    plt.ylim(np.min(count_flux[0,:]) - 0.001, np.max(count_flux[0,:]) + 0.001)
+    plt.scatter(masked_phase[best_sys_weight,:], masked_flux[best_sys_weight,:], label='Fit of best model')
+    plt.plot(masked_model_x[best_sys_weight,:], masked_model_y[best_sys_weight,:], label='Smooth best model')
+    plt.ylim(np.min(masked_flux[0,:]) - 0.001, np.max(masked_flux[0,:]) + 0.001)
     plt.ylabel('Best model norm. flux')
 
     plt.subplot(3, 1, 3)
-    plt.errorbar(count_phase[best_sys_weight,:], count_residuals[best_sys_weight,:], yerr=count_flux_err[best_sys_weight,:], fmt='.')
+    plt.errorbar(masked_phase[best_sys_weight,:], masked_residuals[best_sys_weight,:], yerr=masked_flux_err[best_sys_weight,:], fmt='.')
     plt.ylim(-1000, 1000)
     plt.xlabel('Planet phase')
     plt.ylabel('Best model residuals')
-    plt.hlines(0.0, xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
-    plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
-    plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(count_phase[best_sys_weight,:]), xmax=np.max(count_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
+    plt.hlines(0.0, xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
+    plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
+    plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
     plt.savefig(fig3_fname)
     if plotting:
         plt.show()
 
     ### Radius ratio - this one always gets calculated
-    marg_rl, marg_rl_err = marg.marginalization(count_depth, count_depth_err, w_q)
+    marg_rl, marg_rl_err = marg.marginalization(masked_rl, masked_rl_err, w_q)
     print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
 
     ### Center of transit time (epoch)
     marg_epoch = None
     marg_epoch_err = None
     if not tmodel.epoch.frozen:
-        marg_epoch, marg_epoch_err = marg.marginalization(count_epoch, count_epoch_err, w_q)
+        marg_epoch, marg_epoch_err = marg.marginalization(masked_epoch, masked_epoch_err, w_q)
         print('Epoch = {} +/- {}'.format(marg_epoch, marg_epoch_err))
 
     ### Inclination
@@ -547,12 +541,12 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     if not tmodel.inclin.frozen:
         # Inclication in radians
-        marg_inclin_rad, marg_inclin_rad_err = marg.marginalization(sys_params[:, 3], sys_params_err[:, 3], w_q)
+        marg_inclin_rad, marg_inclin_rad_err = marg.marginalization(masked_inclin, masked_inclin_err, w_q)
         print('inc (rads) = {} +/- {}'.format(marg_inclin_rad, marg_inclin_rad_err))
 
         # Inclination in degrees
-        conv1 = sys_params[:, 3] / (2 * np.pi / 360)
-        conv2 = sys_params_err[:, 3] / (2 * np.pi / 360)
+        conv1 = masked_inclin / (2 * np.pi / 360)
+        conv2 = masked_inclin_err / (2 * np.pi / 360)
         marg_inclin_deg, marg_inclin_deg_err = marg.marginalization(conv1, conv2, w_q)
         print('inc (deg) = {} +/- {}'.format(marg_inclin_deg, marg_inclin_deg_err))
 
@@ -563,7 +557,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     marg_aors_err = None
 
     if not tmodel.msmpr.frozen:
-        marg_msmpr, marg_msmpr_err = marg.marginalization(sys_params[:, 4], sys_params_err[:, 4], w_q)
+        marg_msmpr, marg_msmpr_err = marg.marginalization(masked_msmpr, masked_msmpr_err, w_q)
         print('MsMpR = {} +/- {}'.format(marg_msmpr, marg_msmpr_err))
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
@@ -601,7 +595,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         sdnr_top_five = np.zeros_like(best_five_index, dtype=float)
 
         for i in range(len(best_five_index)):
-            sdnr_top_five[i] = marg.calc_sdnr(count_residuals[best_five_index[i]])
+            sdnr_top_five[i] = marg.calc_sdnr(masked_residuals[best_five_index[i]])
 
         # Prepare variables that go into PDF report
         template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
