@@ -63,7 +63,10 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Copy the config.ini to the experiment folder.
     print('Saving the configfile to outputs folder.')
-    copy(os.path.join('config_local.ini'), outDir)
+    try:
+        copy('config_local.ini', outDir)
+    except IOError:
+        copy('config.ini', outDir)
 
     # READ THE CONSTANTS
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
