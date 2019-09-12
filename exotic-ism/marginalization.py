@@ -400,7 +400,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     # Print all the AIC values
     print('AIC for all systems: {}'.format(sys_evidenceAIC))
 
-    # REFORMAT all arrays, just including positive AIC values
+    # REFORMAT all arrays, masking all negative AIC values
     sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, 0.)
     np.ma.set_fill_value(sys_evidenceAIC_masked, np.nan)
 
@@ -419,10 +419,14 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Mask models numbers that have negative AIC
     masked_aic = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
-    masked_rl = np.ma.masked_array(sys_params[:, 0], mask=sys_evidenceAIC_masked.mask)
-    masked_rl_err = np.ma.masked_array(sys_params_err[:, 0], mask=sys_evidenceAIC_masked.mask)
-    masked_epoch = np.ma.masked_array(sys_params[:, 2], mask=sys_evidenceAIC_masked.mask)           # transit time
-    masked_epoch_err = np.ma.masked_array(sys_params_err[:, 2], mask=sys_evidenceAIC_masked.mask)   # transit time error
+    masked_rl = np.ma.masked_array(sys_params[:, 0], mask=sys_evidenceAIC_masked.mask)             # transit depth
+    masked_rl_err = np.ma.masked_array(sys_params_err[:, 0], mask=sys_evidenceAIC_masked.mask)     # transit depth error
+    masked_epoch = np.ma.masked_array(sys_params[:, 2], mask=sys_evidenceAIC_masked.mask)          # transit time
+    masked_epoch_err = np.ma.masked_array(sys_params_err[:, 2], mask=sys_evidenceAIC_masked.mask)  # transit time error
+    masked_inclin = np.ma.masked_array(sys_params[:, 3], mask=sys_evidenceAIC_masked.mask)         # inclination
+    masked_inclin_err = np.ma.masked_array(sys_params_err[:, 3], mask=sys_evidenceAIC_masked.mask) # inclination error
+    masked_msmpr = np.ma.masked_array(sys_params[:, 4], mask=sys_evidenceAIC_masked.mask)          # MsMpR
+    masked_msmpr_err = np.ma.masked_array(sys_params_err[:, 4], mask=sys_evidenceAIC_masked.mask)  # MsMpR error
 
     # Get equivalent masks for arrays with extra dimension.
     # If there is no bad AIC, the mask will just be a numpy boolean "False" as opposed to a bool array.
@@ -467,7 +471,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by model
     # complexity. This shows us how picking the "best" model differs between std alone and weighted result.
-    rl_sdnr = np.zeros(nsys)
+    rl_sdnr = np.zeros(nsys)    # this will also end up a masked array due to the statement two lines below
     for i in range(nsys):
         rl_sdnr[i] = marg.calc_sdnr(masked_residuals[i])
     best_sys_sdnr = np.nanargmin(rl_sdnr)   # argument of minimum, ignoring possible NaNs
@@ -537,12 +541,12 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     if not tmodel.inclin.frozen:
         # Inclication in radians
-        marg_inclin_rad, marg_inclin_rad_err = marg.marginalization(sys_params[:, 3], sys_params_err[:, 3], w_q)
+        marg_inclin_rad, marg_inclin_rad_err = marg.marginalization(masked_inclin, masked_inclin_err, w_q)
         print('inc (rads) = {} +/- {}'.format(marg_inclin_rad, marg_inclin_rad_err))
 
         # Inclination in degrees
-        conv1 = sys_params[:, 3] / (2 * np.pi / 360)
-        conv2 = sys_params_err[:, 3] / (2 * np.pi / 360)
+        conv1 = masked_inclin / (2 * np.pi / 360)
+        conv2 = masked_inclin_err / (2 * np.pi / 360)
         marg_inclin_deg, marg_inclin_deg_err = marg.marginalization(conv1, conv2, w_q)
         print('inc (deg) = {} +/- {}'.format(marg_inclin_deg, marg_inclin_deg_err))
 
@@ -553,7 +557,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     marg_aors_err = None
 
     if not tmodel.msmpr.frozen:
-        marg_msmpr, marg_msmpr_err = marg.marginalization(sys_params[:, 4], sys_params_err[:, 4], w_q)
+        marg_msmpr, marg_msmpr_err = marg.marginalization(masked_msmpr, masked_msmpr_err, w_q)
         print('MsMpR = {} +/- {}'.format(marg_msmpr, marg_msmpr_err))
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
