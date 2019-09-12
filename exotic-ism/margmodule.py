@@ -12,7 +12,7 @@ from sherpa.models import model
 from config import CONFIG_INI
 
 # Read planet parameters from configfile
-exoplanet = CONFIG_INI.get('data_paths', 'current_model')
+exoplanet = CONFIG_INI.get('setup', 'data_set')
 RL = CONFIG_INI.getfloat(exoplanet, 'rl')
 EPOCH = CONFIG_INI.getfloat(exoplanet, 'epoch')
 INCLIN = CONFIG_INI.getfloat(exoplanet, 'inclin')
