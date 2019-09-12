@@ -83,21 +83,21 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     MsMpR = (aor / constant1) ** 3.     # density of the system in kg/m^3 "(Mass of star (kg) + Mass of planet (kg))/(Radius of star (m)^3)"
 
     # LIMB DARKENING
-    M_H = CONFIG_INI.getfloat('limb_darkening', 'metallicity')    # stellar metallicity - limited ranges available
-    Teff = CONFIG_INI.getfloat('limb_darkening', 'Teff')   # stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
-    logg = CONFIG_INI.getfloat('limb_darkening', 'logg')   # log(g), stellar gravity - depends on whether 1D or 3D limb darkening models are used
+    M_H = CONFIG_INI.getfloat(exoplanet, 'metallicity')    # stellar metallicity - limited ranges available
+    Teff = CONFIG_INI.getfloat(exoplanet, 'Teff')   # stellar temperature - for 1D models: steps of 250 starting at 3500 and ending at 6500
+    logg = CONFIG_INI.getfloat(exoplanet, 'logg')   # log(g), stellar gravity - depends on whether 1D or 3D limb darkening models are used
 
     # Define limb darkening directory, which is inside this package
     limbDir = os.path.join('..', 'Limb-darkening')
-    ld_model = CONFIG_INI.get('limb_darkening', 'ld_model')
-    grat = CONFIG_INI.get('system_parameters', 'grating')
+    ld_model = CONFIG_INI.get('setup', 'ld_model')
+    grat = CONFIG_INI.get('setup', 'grating')
     _uLD, c1, c2, c3, c4, _cp1, _cp2, _cp3, _cp4, _aLD, _bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
                                                                       ld_model)
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
     # grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
-    grid_selection = CONFIG_INI.get('system_parameters', 'grid_selection')
+    grid_selection = CONFIG_INI.get('setup', 'grid_selection')
     grid = marg.wfc3_systematic_model_grid_selection(grid_selection)
     nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
 
@@ -586,7 +586,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
              allow_pickle=True)
 
     ### Save as PDF report
-    report = CONFIG_INI.get('technical_parameters', 'report')
+    report = CONFIG_INI.get('setup', 'report')
     if report:
 
         # Figure out best five models through the highest weights, and their SDNR
@@ -608,9 +608,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
                          'omega_in': CONFIG_INI.getfloat(exoplanet, 'omega'),
                          'period_in': CONFIG_INI.getfloat(exoplanet, 'Per'),
                          'aor_in': CONFIG_INI.getfloat(exoplanet, 'aor'),
-                         'metallicity': CONFIG_INI.getfloat('limb_darkening', 'metallicity'),
-                         'teff_in': CONFIG_INI.getfloat('limb_darkening', 'Teff'),
-                         'logg_in': CONFIG_INI.getfloat('limb_darkening', 'logg'),
+                         'metallicity': CONFIG_INI.getfloat(exoplanet, 'metallicity'),
+                         'teff_in': CONFIG_INI.getfloat(exoplanet, 'Teff'),
+                         'logg_in': CONFIG_INI.getfloat(exoplanet, 'logg'),
                          'c1': c1,
                          'c2': c2,
                          'c3': c3,
@@ -648,7 +648,7 @@ if __name__ == '__main__':
     start_time = time.time()
 
     # What data are we using?
-    exoplanet = CONFIG_INI.get('data_paths', 'current_model')
+    exoplanet = CONFIG_INI.get('setup', 'data_set')
     print('\nWORKING ON EXOPLANET {}\n'.format(exoplanet))
 
     # Set up the data paths
@@ -664,7 +664,7 @@ if __name__ == '__main__':
 
     # What to call the run and whether to turn plotting on
     run_name = CONFIG_INI.get('data_paths', 'run_name')
-    plotting = CONFIG_INI.getboolean('technical_parameters', 'plotting')
+    plotting = CONFIG_INI.getboolean('setup', 'plotting')
 
     # Run the main function
     total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting)
