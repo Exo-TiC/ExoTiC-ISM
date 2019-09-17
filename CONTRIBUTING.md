@@ -9,4 +9,4 @@ Leave a comment anywhere and we will be happy to assist. New contributions and c
 3) Pull requests, issues and commits should have a useful title.
 4) Give every PR a description.
 
-This package follows the Contributor Covenant Code of Conduct to provide a welcoming community to everybody.
+This package follows the Contributor Covenant [Code of Conduct](CODE_OF_CONDUCT.md) to provide a welcoming community to everybody.
