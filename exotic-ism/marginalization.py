@@ -136,6 +136,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     stat = Chi2()
     opt = LevMar()
     opt.config['epsfcn'] = np.finfo(float).eps
+    #opt.config['ftol'] = np.finfo(float).eps
+    #opt.config['xtol'] = np.finfo(float).eps
+    #opt.config['gtol'] = np.finfo(float).eps
 
     print('\nOptimizer used:')
     print(opt)
