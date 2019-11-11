@@ -7,6 +7,8 @@
 # ExoTiC-ISM
 **Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation**
 
+$f(x) = e^{\pi/x}$
+
 This code performs Levenberg-Marquardt least-squares minimization across a grid of stochastic systematic models to produce marginalised transit parameters given a lightcurve for a specified wavelength range.
 
 This was developed and tested for data from Wide Field Camera 3 (WFC3) on the Hubble Space Telescope (HST), specifically with the G141 spectroscopic grism, as published in Wakeford et al. (2016, ApJ, 819, 1). Future work includes plans to extend this to other WFC3 grids, STIS data, and eventually data from the James Webb Space Telescope (JWST).
