@@ -3,6 +3,8 @@ Helper module for transit marginalization.
 """
 
 import os
+import time
+import datetime
 import numpy as np
 from astropy.constants import G
 import astropy.units as u
@@ -577,3 +579,29 @@ if __name__ == '__main__':
     b0 = impact_param(per, msmpr, phase, inclin)
     print("b0 = {}".format(b0))
     print("Impact parameter in units of stellar radii")
+
+
+def create_data_path(initial_path, star_system, suffix=""):
+    """
+    Will create a timestamp and join it to the output_path found in the INI.
+    :param initial_path: output directory as defined in te configfile
+    :param exoplanet: the star system the code is running the analysis on
+    :param suffix: appends this to the end of the timestamp (ex: 2017-06-15T121212_suffix), also read from config
+    :return: A path with the final folder containing a timestamp of the current datetime.
+    """
+
+    # Create a string representation of the current timestamp.
+    time_stamp = time.time()
+    date_time_string = datetime.datetime.fromtimestamp(time_stamp).strftime("%Y-%m-%dT%H-%M-%S")
+
+    if suffix != "":
+        suffix = "_" + suffix
+
+    star_system = "_" + star_system
+
+    # Return the full path.
+    print(initial_path)
+    print(star_system)
+    print(suffix)
+    full_path = os.path.join(initial_path, date_time_string + star_system + suffix)
+    return full_path

@@ -34,7 +34,7 @@ from limb_darkening import limb_dark_fit
 import margmodule as marg
 
 
-def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=True):
+def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plotting=True):
     """
     Produce marginalized transit parameters from HST lightcurves over a specified wavelength range.
 
@@ -44,12 +44,12 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     - MANDEL & AGOL (2002) transit model (occultnl.py)
     - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (marg.wfc3_systematic_model_grid_selection() )
 
-    :param img_date: time array
+    :param x: time array
     :param y: array of normalised flux values equal to the length of the x array
     :param err: array of error values corresponding to the flux values in y
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err)
     :param wavelength: array of wavelengths covered to compute y
-    :param outDir: string of folder path to save the data to, e.g. '/Users/MyUser/data/'
+    :param output_dir: string of folder path to save the data to, e.g. '/Users/MyUser/data/'
     :param run_name: string of the individual run name, e.g. 'whitelight', or 'bin1', or '115-120micron'
     :param plotting: bool, default=True; whether or not interactive plots should be shown
     :return:
@@ -60,6 +60,11 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
         '50 systematic models to calculate the desired lightcurve parameters. This should only take a few minutes.\n'
         'Please hold.'
         '\n This is the version using SHERPA for fitting.\n')
+
+    # Create full output directory
+    outDir = marg.create_data_path(output_dir, exoplanet, run_name)
+    if not os.path.exists(outDir):
+        os.makedirs(outDir)
 
     # Copy the config.ini to the experiment folder.
     print('Saving the configfile to outputs folder.')
@@ -383,7 +388,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
 
     # Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
-    np.savez(os.path.join(outDir, 'full-fit_'+run_name), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
+    np.savez(os.path.join(outDir, 'full-fit'), sys_stats=sys_stats, sys_date=sys_date, sys_phase=sys_phase,
              sys_rawflux=sys_rawflux, sys_rawflux_err=sys_rawflux_err, sys_flux=sys_flux, sys_flux_err=sys_flux_err,
              sys_residuals=sys_residuals, sys_model=sys_model, sys_model_phase=sys_model_phase,
              sys_systematic_model=sys_systematic_model, sys_params=sys_params, sys_params_err=sys_params_err,
@@ -481,7 +486,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     print('SDNR best without the evidence (weights) = {} for model {}'.format(np.nanmin(rl_sdnr), best_sys_sdnr))
 
     # Marginalization plots
-    fig2_fname = os.path.join(outDir, 'weights-stdr-rl_'+run_name+'.png')
+    fig2_fname = os.path.join(outDir, 'weights-stdr-rl.png')
     plt.figure(2)
     plt.suptitle('Marginalization results')
     plt.subplot(3, 1, 1)
@@ -498,7 +503,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     if plotting:
         plt.show()
 
-    fig3_fname = os.path.join(outDir, 'residuals_best-model_'+run_name+'.png')
+    fig3_fname = os.path.join(outDir, 'residuals_best-model.png')
     plt.figure(3)
     plt.suptitle('First vs. best model')
 
@@ -573,7 +578,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
     # masked saves
-    np.savez(os.path.join(outDir, 'masked_marginalization_results'+run_name), w_q=np.ma.filled(w_q), best_sys=np.ma.filled(best_sys_weight),
+    np.savez(os.path.join(outDir, 'masked_marginalization_results'), w_q=np.ma.filled(w_q), best_sys=np.ma.filled(best_sys_weight),
              marg_rl=np.ma.filled(marg_rl), marg_rl_err=np.ma.filled(marg_rl_err), marg_epoch=np.ma.filled(marg_epoch), marg_epoch_err=np.ma.filled(marg_epoch_err),
              marg_inclin_rad=np.ma.filled(marg_inclin_rad), marg_inclin_rad_err=np.ma.filled(marg_inclin_rad_err), marg_inclin_deg=np.ma.filled(marg_inclin_deg),
              marg_inclin_deg_err=np.ma.filled(marg_inclin_deg_err), marg_msmpr=np.ma.filled(marg_msmpr), marg_msmpr_err=np.ma.filled(marg_msmpr_err),
@@ -581,7 +586,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting=
              allow_pickle=True)
 
     #unmasked saves
-    np.savez(os.path.join(outDir, 'unmasked_marginalization_results'+run_name), w_q=w_q, best_sys=best_sys_weight,
+    np.savez(os.path.join(outDir, 'unmasked_marginalization_results'), w_q=w_q, best_sys=best_sys_weight,
              marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
              marg_inclin_rad=marg_inclin_rad, marg_inclin_rad_err=marg_inclin_rad_err, marg_inclin_deg=marg_inclin_deg,
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
@@ -656,7 +661,7 @@ if __name__ == '__main__':
 
     # Set up the data paths
     localDir = CONFIG_INI.get('data_paths', 'local_path')
-    outDir = CONFIG_INI.get('data_paths', 'output_path')
+    output_dir = CONFIG_INI.get('data_paths', 'output_path')
     dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), exoplanet)
 
     # Read in the txt file for the lightcurve data
@@ -670,7 +675,7 @@ if __name__ == '__main__':
     plotting = CONFIG_INI.getboolean('setup', 'plotting')
 
     # Run the main function
-    total_marg(exoplanet, x, y, err, sh, wavelength, outDir, run_name, plotting)
+    total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plotting)
 
     end_time = time.time()
     print('\nTime it took to run the code:', (end_time-start_time)/60, 'min')
