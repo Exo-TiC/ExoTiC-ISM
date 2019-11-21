@@ -174,10 +174,10 @@ dtosec = 86400                    ; conversion factor from days to seconds
 HST_period = 0.06691666           ; Hubbe Space Telescope period in days
 ```
 
-## Contributing
+## Contributing and code of conduct
 
-We still need to create this file, but once it's there:  
-Please read [CONTRIBUTING.md]() for details on our code of conduct, and the process for submitting pull requests to us.
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines, and the process for submitting issues and pull requests to us.
+Please also see our [CODE OF CONDUCT](CODE_OF_CONDUCT.md).
 
 ## Authors
 
