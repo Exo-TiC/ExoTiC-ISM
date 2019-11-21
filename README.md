@@ -23,9 +23,7 @@ This package was built from the original IDL code used for the analysis in [Wake
 
 Note how this is not an installable package, but you will  always need to clone it if you want to work with it.
 
-## Getting Started
-
-###  Quickstart
+##  Quickstart
 
 This is not an installable package, so you will always need to clone it if you want to work with it.
 Sherpa is distributed for Mac and Linux, this means Windows users will have to use a Linux virtual machine or find an alternative solution. 
@@ -84,6 +82,8 @@ $ python marginalization.py
 The script takes a short while to run and will output messages to the terminal and save the final data to the path you 
 specified under `[data_paths][output_path]` in your `config_local.ini`!
 
+## Overall setup
+
 ### Prerequisites
 
 We highly recommend the usage of the package and environment manager [Conda](https://docs.conda.io/projects/conda/en/latest/index.html), 
@@ -123,7 +123,7 @@ The relevant data files and plots from your run will be saved to the directory y
 local configfile. The results of each new run will be saved in a subdirectory in under `[data_paths] -> output_path` that is labelled with a time stamp, the
 name of the stellar system data and a custom suffix, which you set in the configfile.
 
-### Changing data or the parameters
+### Changing data or the input parameters
 
 We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract).
 Currently we only support the marginalisation of WFC3/G141 datasets. If you want to perform the marginalization on a different 
@@ -174,22 +174,24 @@ dtosec = 86400                    ; conversion factor from days to seconds
 HST_period = 0.06691666           ; Hubbe Space Telescope period in days
 ```
 
-## Contributing and code of conduct
+## About this repository
+
+### Contributing and code of conduct
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines, and the process for submitting issues and pull requests to us.
 Please also see our [CODE OF CONDUCT](CODE_OF_CONDUCT.md).
 
-## Authors
+### Authors
 
 * **Hannah R. Wakeford** - *Method author* - [@hrwakeford](https://github.com/hrwakeford)
 * **Iva Laginja** - *Turning the code into a functional Python repository* - [@ivalaginja](https://github.com/ivalaginja)
 * **Matthew Hill** - *Translation from IDL to Python* - [@mattjhill](https://github.com/mattjhill)
 
-## License
+### License
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.txt) file for details.
 
-## Acknowledgments
+### Acknowledgments
 
 * Matthew Hill for a functional translation from IDL to Python
 * Iva Laginja for finding `Sherpa`, making the clunky `mpfit` dispensable
