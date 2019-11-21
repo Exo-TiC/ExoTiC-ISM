@@ -182,7 +182,7 @@ Please also see our [CODE OF CONDUCT](CODE_OF_CONDUCT.md).
 ## Authors
 
 * **Hannah R. Wakeford** - *Method author* - [@hrwakeford](https://github.com/hrwakeford)
-* **Iva Laginja** - *Upgrades and builds leading up to release 1.0.0* - [@ivalaginja](https://github.com/ivalaginja)
+* **Iva Laginja** - *Turning the code into a functional Python repository* - [@ivalaginja](https://github.com/ivalaginja)
 * **Matthew Hill** - *Translation from IDL to Python* - [@mattjhill](https://github.com/mattjhill)
 
 ## License
