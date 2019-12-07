@@ -25,14 +25,13 @@ Note how this is not an installable package, but you will  always need to clone 
 
 ##  Quickstart
 
-This is not an installable package, so you will always need to clone it if you want to work with it.
-Sherpa is distributed for Mac and Linux, this means Windows users will have to use a Linux virtual machine or find an alternative solution. 
-
-This section will you give all the necessary terminal commands to go from opening our GitHub page in the browser to having 
-reduced results on your local machine. For a more thorough description of the individual steps, please continue to the section 
-**Prerequisites** and beyond.
+*This section will you give all the necessary terminal commands to go from opening our GitHub page in the browser to having 
+reduced results of the template data on your local machine. For a more thorough description of the individual steps, please continue to the section 
+**Prerequisites** and beyond.*
 
 We assume that you have `conda` and `git` installed and that you're using `bash`.
+
+### Clone the repo and create conda environment
 
 - Navigate to the directory you want to clone the repository into:  
 ```bash
@@ -54,9 +53,16 @@ $ cd ExoTiC-ISM
 $ conda env create --file environment.yml
 ```
 
+### Set up local configfile
+
+- Go into the code directory:  
+```bash
+cd exotic-ism
+```
+
 - Copy the file `config.ini` and name the copy `config_local.ini`.
 
-- Open your local configfile `config_local.ini` and edit the entry `[data_paths][local_path]` to point to your local repo clone, e.g.:  
+- Open your local configfile `config_local.ini` and edit the entry `[data_paths][local_path]` to point to your local repo clone that you just created, e.g.:  
 ```ini
 [data_paths]
 local_path = /Users/<YourUser>/repos/ExoTiC-ISM
@@ -69,10 +75,7 @@ local_path = /Users/<YourUser>/repos/ExoTiC-ISM
 output_path = /Users/<YourUser>/<path-to-data>
 ```
 
-- Navigate to inside the actual package:  
-```bash
-$ cd exotic-ism
-```
+### Run the main script
 
 - Run the marginalization on the demo data from the template:  
 ```bash
@@ -82,18 +85,19 @@ $ python marginalization.py
 The script takes a short while to run and will output messages to the terminal and save the final data to the path you 
 specified under `[data_paths][output_path]` in your `config_local.ini`!
 
-## Overall setup
+## Full setup
 
 ### Prerequisites
+
+This is not an installable package (yet), so you will need to clone it if you want to work with it.
+Sherpa is distributed for Mac and Linux, this means Windows users will have to use a Linux virtual machine or find an alternative solution. 
 
 We highly recommend the usage of the package and environment manager [Conda](https://docs.conda.io/projects/conda/en/latest/index.html), 
 which is free and runs on Windows, macOS and Linux. We have included an [environment](environment.yml) file in our repository 
 from which you can directly build a new conda environment in which we have tested our package. We developed and tested our 
  package with **Python 3.7.3** in **conda 4.6.7**.
  
-Sherpa is distributed for Mac and Linux, this means Windows users will have to use a Linux virtual machine or find an alternative solution. 
- 
-Run
+After cloning the repository, run
 
 ```bash
 $ conda env create --file environment.yml
@@ -109,25 +113,26 @@ to give the environment your own name.
 
 ### Configuration file
 
-The main configuration file is config.ini, which holds all of your simulation parameters. This specific file,
+The main configuration file is `config.ini`, which holds all of your simulation parameters. This specific file,
 however, is version controlled, and the paths to local directories will get messed up if you push or pull this
-file; you might also lose the changes you made to the parameters. This is why config.ini is initially supposed to be used as a **template**.
+file; you might also lose the changes you made to the parameters. This is why `config.ini` is initially supposed to be used as a **template**.
 
 In order to make it work for you, copy `config.ini` and rename the copy to `config_local.ini`. In this **local configfile**, 
-you can set all your parameters, and it will override the config.ini at runtime. In the case you want to version control the configfile you use,
-we recommend that you **fork** the repository and simply use the `config.ini` file directly.
+you can set all your parameters, and it will override the `config.ini` at runtime. Whichever configfile is used in the end, 
+the version controlled one or the local one, a copy of it is always saved together with the output data. In the case you 
+want to version control the configfile you use, we recommend that you **fork** the repository and simply use the `config.ini` file directly.
 
 ### Output data
 
-The relevant data files and plots from your run will be saved to the directory you specify under **`output_path`** in your 
-local configfile. The results of each new run will be saved in a subdirectory in under `[data_paths] -> output_path` that is labelled with a time stamp, the
+The relevant data files and plots from your run, together with the used configfile, will be saved to the directory you specify under **`output_path`** in your 
+local configfile. The results of each new run will be saved in a subdirectory under `[data_paths] -> output_path` that is labelled with a time stamp, the
 name of the stellar system data and a custom suffix, which you set in the configfile.
 
-### Changing data or the input parameters
+### Changing input data and/or input parameters
 
 We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract).
-Currently we only support the marginalisation of WFC3/G141 datasets. If you want to perform the marginalization on a different 
-transit dataset, you have to add it to the data folder and update the planetary parameters in your local configfile.
+Currently, we only support the marginalisation of WFC3/G141 datasets. If you want to perform the marginalization on a different 
+transit dataset, you have to add it to point the configfile to your input data folder and also update the planetary parameters by adding a new section.
 
 **The configfile** has the following structure, except here we added some extra comments for clarity:
 ```ini
