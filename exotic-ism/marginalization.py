@@ -662,7 +662,7 @@ if __name__ == '__main__':
     # Set up the data paths
     localDir = CONFIG_INI.get('data_paths', 'local_path')
     output_dir = CONFIG_INI.get('data_paths', 'output_path')
-    dataDir = os.path.join(localDir, os.path.join(localDir, CONFIG_INI.get('data_paths', 'data_path')), exoplanet)
+    dataDir = os.path.join(CONFIG_INI.get('data_paths', 'input_path'), exoplanet)
 
     # Read in the txt file for the lightcurve data
     get_timeseries = CONFIG_INI.get(exoplanet, 'lightcurve_file')
