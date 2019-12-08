@@ -132,13 +132,13 @@ name of the stellar system data and a custom suffix, which you set in the config
 
 We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract).
 Currently, we only support the marginalisation of WFC3/G141 datasets. If you want to perform the marginalization on a different 
-transit dataset, you have to add it to point the configfile to your input data folder and also update the planetary parameters by adding a new section.
+transit dataset, you have to point the configfile to your input data folder and also update the planetary parameters by adding a new section to the configfile.
 
 **The configfile** has the following structure, except here we added some extra comments for clarity:
 ```ini
 [data_paths]
 local_path = /Users/MyUser/repos/ExoTiC-ISM           ; your global path to the repo clone
-data_path = data                                      ; local path to the input data
+input_path = ${local_path}/data                       ; global path to the input data, defaults to template data in repo
 output_path = /Users/MyUser/outputs                   ; global path ot the output directory 
 run_name = testing                                    ; suffix for output data directory
 
