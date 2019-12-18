@@ -157,7 +157,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
 
     start_first_fit = time.time()
     # Loop over all systems (= parameter combinations)
-    for i, sys in enumerate(grid):
+    for i, system in enumerate(grid):
 
         start_one_first_loop = time.time()
 
@@ -165,11 +165,11 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         print('SYSTEMATIC MODEL {} of {}'.format(i+1, nsys))
 
         print('Systematics - fixed and free parameters:')
-        print(sys)
+        print(system)
         print('  ')
 
         # Set up systematics for current run
-        for k, select in enumerate(sys):
+        for k, select in enumerate(system):
             if select == 0:
                 tmodel.pars[k].thaw()
             elif select == 1:
@@ -235,17 +235,17 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     sys_evidenceBIC = np.zeros(nsys)                # evidence BIC
 
     start_second_fit = time.time()
-    for i, sys in enumerate(grid):
+    for i, system in enumerate(grid):
         print('\n################################')
         print('SYSTEMATIC MODEL {} of {}'.format(i+1, nsys))
-        print(sys)
+        print(system)
         print('  ')
 
         # The errors at this point got rescaled to unity chi squared in the previous fit and were not reset
         # by model.reset()
 
         # Set up systematics for current run
-        for k, select in enumerate(sys):
+        for k, select in enumerate(system):
             if select == 0:
                 tmodel.pars[k].thaw()
             elif select == 1:
@@ -288,7 +288,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         print('\nTRANSIT DEPTH rl in model {} of {} = {} +/- {}, centered at {}'.format(i+1, nsys, tmodel.rl.val, rl_err, tmodel.epoch.val))
 
         # Count free parameters by figuring out how many zeros we have in the current systematics
-        nfree = np.count_nonzero(sys == 0)
+        nfree = np.count_nonzero(system == 0)
 
         # From the fit define the DOF, BIC, AIC & CHI
         CHI = tres.statval  # chi squared of resulting fit
@@ -510,7 +510,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     plt.subplot(3, 1, 1)
     plt.scatter(sys_phase[0,:], sys_flux[0,:])
     plt.ylim(np.min(sys_flux[0,:]) - 0.001, np.max(sys_flux[0,:]) + 0.001)
-    plt.ylabel('Fitted norm. flux of first sys model')
+    plt.ylabel('Fitted norm. flux of first system model')
 
     plt.subplot(3, 1, 2)
     plt.scatter(masked_phase[best_sys_weight,:], masked_flux[best_sys_weight,:], label='Fit of best model')
@@ -519,7 +519,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     plt.ylabel('Best model norm. flux')
 
     plt.subplot(3, 1, 3)
-    plt.errorbar(masked_phase[best_sys_weight,:], masked_residuals[best_sys_weight,:], yerr=masked_flux_err[best_sys_weight,:], fmt='.')
+    plt.errorbar(masked_phase[best_sys_weight,:], masked_residuals[best_sys_weight,:], yerr=masked_flux_err[best_sys_weight,:], fmt='.')   #TODO: multiply residuals by 1e6 to get to ppm
     plt.ylim(-1000, 1000)
     plt.xlabel('Planet phase')
     plt.ylabel('Best model residuals')
