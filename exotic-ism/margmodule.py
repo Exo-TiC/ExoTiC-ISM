@@ -61,6 +61,10 @@ def _transit_model(pars, x, sh):
     per *= u.d
     tzero *= u.d
 
+    if sh is None:
+        temp = x.shape[0]
+        sh = np.zeros(temp)
+
     phase = phase_calc(x, epoch, per)  # Per in days here
     HSTphase = phase_calc(x, tzero, HSTper)
 
