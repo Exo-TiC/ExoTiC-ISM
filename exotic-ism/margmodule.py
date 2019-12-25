@@ -126,17 +126,17 @@ class Transit(model.RegriddableModel1D):
 def occultnl(rl, c1, c2, c3, c4, b0):
     """
     MANDEL & AGOL (2002) transit model.
-    :param rl: transit depth (Rp/R*)
-    :param c1: limb darkening parameter 1
-    :param c2: limb darkening parameter 2
-    :param c3: limb darkening parameter 3
-    :param c4: limb darkening parameter 4
+    :param rl: float, transit depth (Rp/R*)
+    :param c1: float, limb darkening parameter 1
+    :param c2: float, limb darkening parameter 2
+    :param c3: float, limb darkening parameter 3
+    :param c4: float, limb darkening parameter 4
     :param b0: impact parameter in stellar radii
     :return: mulimb0: limb-darkened transit model, mulimbf: lightcurves for each component that you put in the model
     """
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
-    fac = np.max(abs(mulimb0 - 1))
+    fac = np.max(np.abs(mulimb0 - 1))
     if fac == 0:
         fac = 1e-6  # DKS edit
 
@@ -185,7 +185,7 @@ def occultnl(rl, c1, c2, c3, c4, b0):
 
         #print(ix1)
         # python cannot index on single values so you need to use atlest_1d for the below to work when mulimb is a single value
-        dmumax = np.max(abs(np.atleast_1d(mulimb)[ix1] - np.atleast_1d(mulimbp)[ix1]) / (
+        dmumax = np.max(np.abs(np.atleast_1d(mulimb)[ix1] - np.atleast_1d(mulimbp)[ix1]) / (
                 np.atleast_1d(mulimb)[ix1] + np.atleast_1d(mulimbp)[ix1]))
 
     mulimbf[0, indx] = np.atleast_1d(mulimb0)[indx]
@@ -208,7 +208,7 @@ def occultuniform(b0, w):
     :return: muo1: float; fraction of flux at each b0 for a uniform source
     """
 
-    if abs(w - 0.5) < 1.0e-3:
+    if np.abs(w - 0.5) < 1.0e-3:
         w = 0.5
 
     nb = len(np.atleast_1d(b0))
@@ -227,7 +227,7 @@ def occultuniform(b0, w):
             muo1[i] = 0.0
             continue
 
-        if z >= abs(1-w) and z <= 1+w:
+        if z >= np.abs(1-w) and z <= 1+w:
             kap1 = np.arccos(np.min(np.append((1 - w ** 2 + z ** 2) / 2 / z, 1.)))
             kap0 = np.arccos(np.min(np.append((w ** 2 + z ** 2 - 1) / 2 / w / z, 1.)))
             lambdae = w ** 2 * kap0 + kap1
@@ -369,11 +369,10 @@ def marginalization(array, error, weight):
 def impact_param(per, msmpr, phase, incl):
     """
     Calculate impact parameter.
-    :param per: period in seconds
-    :param msmpr: MsMpR
-    :param phase: phase
-    :param incl: inclination in radians
-    :return: array; impact parameter b0 in stellar radii
+    :param per: float, period in seconds
+    :param msmpr: float, MsMpR
+    :param phase: array, phase
+    :param incl: float, inclination in radians
     """
 
     b0 = (G * per * per / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
