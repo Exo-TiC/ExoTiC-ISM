@@ -16,5 +16,6 @@ dependencies:
   - scipy>1.2
   - sherpa>4.11
   - pango
+  - jupyter
   - pip:
     - weasyprint
