@@ -85,7 +85,19 @@ def _transit_model(pars, x, sh):
 
 
 class Transit(model.RegriddableModel1D):
-    """Transit model"""
+    """Transit model
+
+    Params below as inputs, all other params read from configfile:
+    rl, epoch, inclin, ecc, omega, per, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4.
+    The x-data array is read from disk as specified in the configfile.
+    --------
+    Params:
+    tzero: first x-array data entry in days (MJD)
+    msmpr: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
+           constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
+    c1, c2, c3, c4: limb darkening parameters (quadratic)
+    flux0: flux at tzero
+    sh: array, input shifts"""
 
     def __init__(self, tzero, msmpr, c1, c2, c3, c4, flux0=1., name='transit', sh=None):
         self.rl = model.Parameter(name, 'rl', RL)
