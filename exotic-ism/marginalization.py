@@ -311,15 +311,16 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         # ...........................................
         # TRANSIT MODEL fit to the data           # Issue #36
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
-        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)
+        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, phase, tmodel.inclin.val*u.rad)   # recalculated impact parameter after fit
         mulimb01, _mulimbf1 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)  # recalculated model at data resolution
 
         # ...........................................
         # SMOOTH TRANSIT MODEL across all phase    # Issue #35
         # Calculate the impact parameter based on the eccentricity function - b0 in stellar radii
-        x2 = np.arange(-half_range, half_range, resolution)   # this is the x-array for the smooth model
-        b0 = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, x2, tmodel.inclin.val*u.rad)
-        mulimb02, _mulimbf2 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0)
+        x_smooth = np.arange(-half_range, half_range, resolution)   # this is the x-array for the smooth model
+        b0_smooth = marg.impact_param((tmodel.period.val*u.d).to(u.s), tmodel.msmpr.val, x_smooth, tmodel.inclin.val*u.rad)
+        mulimb0_smooth, _mulimbf2 = marg.occultnl(tmodel.rl.val, tmodel.c1.val, tmodel.c2.val, tmodel.c3.val, tmodel.c4.val, b0_smooth)   # recalculated model at smooth resolution
+        # ..... smooth model end .....
 
         systematic_model = marg.sys_model(phase, HSTphase, sh, tmodel.m_fac.val, tmodel.hstp1.val, tmodel.hstp2.val,
                                           tmodel.hstp3.val, tmodel.hstp4.val, tmodel.xshift1.val, tmodel.xshift2.val,
@@ -336,7 +337,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
             plt.figure(1)
             plt.clf()
             plt.scatter(phase, img_flux, s=5, label='Data')
-            plt.plot(x2, mulimb02, 'k', label='Smooth model')
+            plt.plot(x_smooth, mulimb0_smooth, 'k', label='Smooth model')
             plt.errorbar(phase, fit_data, yerr=tdata.staterror, fmt='m.', label='Fit')
             plt.xlim(-0.03, 0.03)
             plt.title('Model ' + str(i+1) + '/' + str(nsys))
@@ -359,8 +360,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         sys_residuals[i, :] = residuals                         # residuals   - REUSED! also for plotting
         sys_systematic_model[i, :] = systematic_model           # systematic model  - just saving
 
-        sys_model[i, :] = mulimb02                              # smooth model  - used for plotting
-        sys_model_phase[i, :] = x2                              # smooth phase  - used for plotting
+        sys_model[i, :] = mulimb0_smooth                              # smooth model  - used for plotting
+        sys_model_phase[i, :] = x_smooth                              # smooth phase  - used for plotting
 
         sys_params[i, :] = [par.val for par in tmodel.pars]     # parameters  - REUSED!
         # We only really need the errors on rl, epoch, inclination, MsMpR and ecc, so I only save those. The rest

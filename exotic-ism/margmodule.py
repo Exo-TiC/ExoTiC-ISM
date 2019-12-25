@@ -23,15 +23,15 @@ OMEGA = CONFIG_INI.getfloat(exoplanet, 'omega')
 PERIOD = CONFIG_INI.getfloat(exoplanet, 'Per')
 
 
-def _transit_model(pars, x, sh):
+def _transit_model(pars, x, sh, x_in_phase=False):
     """
-    Transit model by Mandel & Agol (2002).
+    Transit model by Mandel & Agol (2002). If x_in_phase=True, the data input is already in units of phase as opposed to
+    MJD or other.
     --------
     Params:
-
     rl: transit depth in Rp/R_star, unitless
     flux:
-    epoch: center of transit in days (MJD)
+    epoch: center of transit in days (MJD) or phase if x_in_phase=True
     inclin: inclination of system in radians
     MsMpR: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
            constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
@@ -61,8 +61,16 @@ def _transit_model(pars, x, sh):
     per *= u.d
     tzero *= u.d
 
-    phase = phase_calc(x, epoch, per)  # Per in days here
-    HSTphase = phase_calc(x, tzero, HSTper)
+    if sh is None:
+        temp = x.shape[0]
+        sh = np.zeros(temp)
+
+    if not x_in_phase:
+        phase = phase_calc(x, epoch, per)  # Per in days here
+        HSTphase = phase_calc(x, tzero, HSTper)
+    else:
+        phase = x.value
+        HSTphase = x.value
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
     b0 = impact_param(per.to(u.second), MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
@@ -81,9 +89,21 @@ def _transit_model(pars, x, sh):
 
 
 class Transit(model.RegriddableModel1D):
-    """Transit model"""
+    """Transit model
 
-    def __init__(self, tzero, msmpr, c1, c2, c3, c4, flux0=1., name='transit', sh=None):
+    Params below as inputs, all other params read from configfile:
+    rl, epoch, inclin, ecc, omega, per, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4.
+    The x-data array is read from disk as specified in the configfile.
+    --------
+    Params:
+    tzero: first x-array data entry in days (MJD)
+    msmpr: density of the system where MsMpR = (Ms+Mp)/(R*^3D0) this can also be calculated from the a/R* following
+           constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
+    c1, c2, c3, c4: limb darkening parameters (quadratic)
+    flux0: flux at tzero
+    sh: array, input shifts"""
+
+    def __init__(self, tzero, msmpr, c1, c2, c3, c4, flux0=1., x_in_phase=False, name='transit', sh=None):
         self.rl = model.Parameter(name, 'rl', RL)
         self.flux0 = model.Parameter(name, 'flux0', flux0)
         self.epoch = model.Parameter(name, 'epoch', EPOCH, units='days [MJD]')
@@ -107,6 +127,7 @@ class Transit(model.RegriddableModel1D):
         self.xshift3 = model.Parameter(name, 'xshift3', 0)
         self.xshift4 = model.Parameter(name, 'xshift4', 0)
 
+        self.x_in_phase = x_in_phase
         self.sh_array = sh   # This is not a model parameter but an extra input to the model, like x is
 
         model.RegriddableModel1D.__init__(self, name,
@@ -120,23 +141,23 @@ class Transit(model.RegriddableModel1D):
 
     def calc(self, pars, x, *args, **kwargs):
         """Evaluate the model"""
-        return _transit_model(pars, x, self.sh_array)
+        return _transit_model(pars, x, self.sh_array, x_in_phase=self.x_in_phase)
 
 
 def occultnl(rl, c1, c2, c3, c4, b0):
     """
     MANDEL & AGOL (2002) transit model.
-    :param rl: transit depth (Rp/R*)
-    :param c1: limb darkening parameter 1
-    :param c2: limb darkening parameter 2
-    :param c3: limb darkening parameter 3
-    :param c4: limb darkening parameter 4
+    :param rl: float, transit depth (Rp/R*)
+    :param c1: float, limb darkening parameter 1
+    :param c2: float, limb darkening parameter 2
+    :param c3: float, limb darkening parameter 3
+    :param c4: float, limb darkening parameter 4
     :param b0: impact parameter in stellar radii
     :return: mulimb0: limb-darkened transit model, mulimbf: lightcurves for each component that you put in the model
     """
     mulimb0 = occultuniform(b0, rl)
     bt0 = b0
-    fac = np.max(abs(mulimb0 - 1))
+    fac = np.max(np.abs(mulimb0 - 1))
     if fac == 0:
         fac = 1e-6  # DKS edit
 
@@ -185,7 +206,7 @@ def occultnl(rl, c1, c2, c3, c4, b0):
 
         #print(ix1)
         # python cannot index on single values so you need to use atlest_1d for the below to work when mulimb is a single value
-        dmumax = np.max(abs(np.atleast_1d(mulimb)[ix1] - np.atleast_1d(mulimbp)[ix1]) / (
+        dmumax = np.max(np.abs(np.atleast_1d(mulimb)[ix1] - np.atleast_1d(mulimbp)[ix1]) / (
                 np.atleast_1d(mulimb)[ix1] + np.atleast_1d(mulimbp)[ix1]))
 
     mulimbf[0, indx] = np.atleast_1d(mulimb0)[indx]
@@ -208,7 +229,7 @@ def occultuniform(b0, w):
     :return: muo1: float; fraction of flux at each b0 for a uniform source
     """
 
-    if abs(w - 0.5) < 1.0e-3:
+    if np.abs(w - 0.5) < 1.0e-3:
         w = 0.5
 
     nb = len(np.atleast_1d(b0))
@@ -227,7 +248,7 @@ def occultuniform(b0, w):
             muo1[i] = 0.0
             continue
 
-        if z >= abs(1-w) and z <= 1+w:
+        if z >= np.abs(1-w) and z <= 1+w:
             kap1 = np.arccos(np.min(np.append((1 - w ** 2 + z ** 2) / 2 / z, 1.)))
             kap0 = np.arccos(np.min(np.append((w ** 2 + z ** 2 - 1) / 2 / w / z, 1.)))
             lambdae = w ** 2 * kap0 + kap1
@@ -369,11 +390,10 @@ def marginalization(array, error, weight):
 def impact_param(per, msmpr, phase, incl):
     """
     Calculate impact parameter.
-    :param per: period in seconds
-    :param msmpr: MsMpR
-    :param phase: phase
-    :param incl: inclination in radians
-    :return: array; impact parameter b0 in stellar radii
+    :param per: float, period in seconds
+    :param msmpr: float, MsMpR
+    :param phase: array, phase
+    :param incl: float, inclination in radians
     """
 
     b0 = (G * per * per / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
