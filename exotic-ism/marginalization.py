@@ -334,16 +334,17 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         white_noise, red_noise, beta = marg.noise_calculator(residuals)
 
         if plotting:
-            plt.figure(1)
+            plt.figure(1, figsize=(14, 6))
             plt.clf()
-            plt.scatter(phase, img_flux, s=5, label='Data')
-            plt.plot(x_smooth, mulimb0_smooth, 'k', label='Smooth model')
-            plt.errorbar(phase, fit_data, yerr=tdata.staterror, fmt='m.', label='Fit')
+            plt.scatter(phase, img_flux, s=7, label='Data')
+            plt.plot(x_smooth, mulimb0_smooth, c='#ff7f0e', lw=2, label='Smooth model')
+            plt.errorbar(phase, fit_data, yerr=tdata.staterror, fmt='m.', markersize=7, label='Fit')
             plt.xlim(-0.03, 0.03)
-            plt.title('Model ' + str(i+1) + '/' + str(nsys))
-            plt.xlabel('Planet Phase')
-            plt.ylabel('Normalized flux')
-            plt.legend()
+            plt.title('Model ' + str(i+1) + '/' + str(nsys), size=20)
+            plt.xlabel('Planet Phase', size=15)
+            plt.ylabel('Normalized flux', size=15)
+            plt.tick_params(axis='both', which='both', length=6, width=2, labelsize=13)
+            plt.legend(loc='upper center', prop={'size': 14})
             plt.draw()
             plt.pause(0.05)
 
@@ -486,58 +487,78 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     best_sys_sdnr = np.nanargmin(rl_sdnr)   # argument of minimum, ignoring possible NaNs
     print('SDNR best without the evidence (weights) = {} for model {}'.format(np.nanmin(rl_sdnr), best_sys_sdnr))
 
-    # Marginalization plots
-    fig1_fname = os.path.join(outDir, 'weights-stdr-rl.png')
-    plt.figure(1)
-    plt.suptitle('Marginalization results')
-    plt.subplot(3, 1, 1)
-    plt.plot(w_q, '.', linestyle='-')
-    plt.ylabel('Weight')
-    plt.subplot(3, 1, 2)
-    plt.plot(rl_sdnr, '.', linestyle='-')
-    plt.ylabel('Resid STDev')
-    plt.subplot(3, 1, 3)
-    plt.errorbar(np.arange(1, len(masked_rl)+1), masked_rl, yerr=masked_rl_err, fmt='.')
-    plt.ylabel('$R_P/R_*$')
-    plt.xlabel('Systematic model number')
-    plt.savefig(fig1_fname)
-    if plotting:
-        plt.show()
-
-    fig2_fname = os.path.join(outDir, 'residuals_best-model.png')
-    plt.figure(2)
-    plt.suptitle('First vs. best model')
-
+    #  Plotting parameters
     xlim_min = np.min(sys_phase[0,:]) - 0.005
     xlim_max = np.max(sys_phase[0,:]) + 0.005
     ylim_min = np.min(sys_flux[0,:]) - 0.001
     ylim_max = np.max(sys_flux[0,:]) + 0.001
+    legend_font = 8
+    ax_label_font = 10
+    tick_label_font = 8
+    linewidths = 1
+    ticklen = 4
+    tickwid = 1
+    markers = 4
+
+    # Marginalization plots
+    fig1_fname = os.path.join(outDir, 'weights-stdr-rl.png')
+    plt.figure(2, figsize=(7, 5))
+    plt.suptitle('Marginalization results', fontsize=12)
 
     plt.subplot(3, 1, 1)
-    plt.scatter(sys_phase[0,:], sys_flux[0,:], label='First system model fit')
-    plt.xlim(xlim_min, xlim_max)
-    plt.ylim(ylim_min, ylim_max)
-    plt.ylabel('Flux')
-    plt.legend()
+    plt.plot(w_q, '.', markersize=markers, linestyle='-', lw=linewidths)
+    plt.ylabel('Weight', size=ax_label_font)
+    plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
 
     plt.subplot(3, 1, 2)
-    plt.scatter(masked_phase[best_sys_weight,:], masked_flux[best_sys_weight,:], label='Best model fit')
-    plt.plot(masked_model_x[best_sys_weight,:], masked_model_y[best_sys_weight,:], label='Smooth best model fit')
-    plt.xlim(xlim_min, xlim_max)
-    plt.ylim(ylim_min, ylim_max)
-    plt.ylabel('Flux')
-    plt.legend()
+    plt.plot(rl_sdnr, '.', markersize=markers, linestyle='-', lw=linewidths)
+    plt.ylabel('Resid STDev', size=ax_label_font)
+    plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
 
     plt.subplot(3, 1, 3)
-    plt.errorbar(masked_phase[best_sys_weight,:], masked_residuals[best_sys_weight,:]*1e6, yerr=masked_flux_err[best_sys_weight,:], fmt='.', label='Best model residuals')   # multiply residuals by 1e6 to get to ppm
+    plt.errorbar(np.arange(1, len(masked_rl)+1), masked_rl, yerr=masked_rl_err, fmt='.', markersize=markers)
+    plt.ylabel('$R_P/R_*$', size=ax_label_font)
+    plt.xlabel('Systematic model number', size=ax_label_font)
+    plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
+
+    plt.savefig(fig1_fname)
+    if plotting:
+        plt.show()
+
+    # Model plots
+    fig2_fname = os.path.join(outDir, 'residuals_best-model.png')
+    plt.figure(3, figsize=(7, 5))
+    plt.suptitle('First vs. best model', fontsize=12)
+
+    plt.subplot(3, 1, 1)
+    plt.scatter(sys_phase[0,:], sys_flux[0,:], s=markers, label='First system model fit')
+    plt.xlim(xlim_min, xlim_max)
+    plt.ylim(ylim_min, ylim_max)
+    plt.ylabel('Flux', size=ax_label_font)
+    plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
+    plt.legend(loc='upper center', prop={'size': legend_font})
+
+    plt.subplot(3, 1, 2)
+    plt.plot(masked_model_x[best_sys_weight,:], masked_model_y[best_sys_weight,:], c='#ff7f0e', lw=linewidths, zorder=1, label='Smooth best model fit')
+    plt.scatter(masked_phase[best_sys_weight,:], masked_flux[best_sys_weight,:], c='#1f77b4', s=markers, zorder=2, label='Best model fit')
+    plt.xlim(xlim_min, xlim_max)
+    plt.ylim(ylim_min, ylim_max)
+    plt.ylabel('Flux', size=ax_label_font)
+    plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
+    plt.legend(loc='upper center', prop={'size': legend_font})
+
+    plt.subplot(3, 1, 3)
+    plt.errorbar(masked_phase[best_sys_weight,:], masked_residuals[best_sys_weight,:]*1e6, yerr=masked_flux_err[best_sys_weight,:], markersize=markers, fmt='.', label='Best model residuals')   # multiply residuals by 1e6 to get to ppm
     plt.xlim(xlim_min, xlim_max)
     plt.ylim(-1000, 1000)
-    plt.xlabel('Planet phase')
-    plt.ylabel('ppm')
-    plt.hlines(0.0, xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
-    plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
-    plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
-    plt.legend()
+    plt.xlabel('Planet phase', size=ax_label_font)
+    plt.ylabel('ppm', size=ax_label_font)
+    plt.hlines(0.0, xmin=xlim_min, xmax=xlim_max, colors='r', linestyles='dashed', lw=linewidths)
+    plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=xlim_min, xmax=xlim_max, colors='r', linestyles='dotted', lw=linewidths, label='sdnr')
+    plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=xlim_min, xmax=xlim_max, colors='r', linestyles='dotted', lw=linewidths)
+    plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
+    plt.legend(loc='upper right', prop={'size': legend_font})
+
     plt.savefig(fig2_fname)
     if plotting:
         plt.show()
