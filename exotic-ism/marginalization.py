@@ -491,11 +491,11 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     plt.figure(2)
     plt.suptitle('Marginalization results')
     plt.subplot(3, 1, 1)
-    plt.plot(w_q)
+    plt.plot(w_q, '.', linestyle='-')
     plt.ylabel('Weight')
     plt.subplot(3, 1, 2)
-    plt.plot(rl_sdnr)
-    plt.ylabel('Standard deviation of residuals')
+    plt.plot(rl_sdnr, '.', linestyle='-')
+    plt.ylabel('Resid STDev')
     plt.subplot(3, 1, 3)
     plt.errorbar(np.arange(1, len(masked_rl)+1), masked_rl, yerr=masked_rl_err, fmt='.')
     plt.ylabel('$R_P/R_*$')
@@ -508,25 +508,36 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     plt.figure(3)
     plt.suptitle('First vs. best model')
 
+    xlim_min = np.min(sys_phase[0,:]) - 0.005
+    xlim_max = np.max(sys_phase[0,:]) + 0.005
+    ylim_min = np.min(sys_flux[0,:]) - 0.001
+    ylim_max = np.max(sys_flux[0,:]) + 0.001
+
     plt.subplot(3, 1, 1)
-    plt.scatter(sys_phase[0,:], sys_flux[0,:])
-    plt.ylim(np.min(sys_flux[0,:]) - 0.001, np.max(sys_flux[0,:]) + 0.001)
-    plt.ylabel('Fitted norm. flux of first system model')
+    plt.scatter(sys_phase[0,:], sys_flux[0,:], label='First system model fit')
+    plt.xlim(xlim_min, xlim_max)
+    plt.ylim(ylim_min, ylim_max)
+    plt.ylabel('Flux')
+    plt.legend()
 
     plt.subplot(3, 1, 2)
-    plt.scatter(masked_phase[best_sys_weight,:], masked_flux[best_sys_weight,:], label='Fit of best model')
-    plt.plot(masked_model_x[best_sys_weight,:], masked_model_y[best_sys_weight,:], label='Smooth best model')
-    plt.ylim(np.min(masked_flux[0,:]) - 0.001, np.max(masked_flux[0,:]) + 0.001)
-    plt.ylabel('Best model norm. flux')
+    plt.scatter(masked_phase[best_sys_weight,:], masked_flux[best_sys_weight,:], label='Best model fit')
+    plt.plot(masked_model_x[best_sys_weight,:], masked_model_y[best_sys_weight,:], label='Smooth best model fit')
+    plt.xlim(xlim_min, xlim_max)
+    plt.ylim(ylim_min, ylim_max)
+    plt.ylabel('Flux')
+    plt.legend()
 
     plt.subplot(3, 1, 3)
-    plt.errorbar(masked_phase[best_sys_weight,:], masked_residuals[best_sys_weight,:], yerr=masked_flux_err[best_sys_weight,:], fmt='.')   #TODO: multiply residuals by 1e6 to get to ppm
+    plt.errorbar(masked_phase[best_sys_weight,:], masked_residuals[best_sys_weight,:]*1e6, yerr=masked_flux_err[best_sys_weight,:], fmt='.', label='Best model residuals')   # multiply residuals by 1e6 to get to ppm
+    plt.xlim(xlim_min, xlim_max)
     plt.ylim(-1000, 1000)
     plt.xlabel('Planet phase')
-    plt.ylabel('Best model residuals')
+    plt.ylabel('ppm')
     plt.hlines(0.0, xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dashed')
     plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
     plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
+    plt.legend()
     plt.savefig(fig3_fname)
     if plotting:
         plt.show()
