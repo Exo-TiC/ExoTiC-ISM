@@ -680,7 +680,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
                          'lightcurve_figure': fig2_fname}
 
         # Create PDf report
-        marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+run_name+'.pdf'))
+        marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+exoplanet+'_'+grat+'_'+run_name+'.pdf'))
 
 
 if __name__ == '__main__':
