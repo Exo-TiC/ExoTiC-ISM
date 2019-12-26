@@ -23,6 +23,11 @@ This package was built from the original IDL code used for the analysis in [Wake
 
 Note how this is not an installable package, but you will  always need to clone it if you want to work with it.
 
+## Supported instruments and gratings
+Current supported instruments and gratings are:  
+**HST** *WFC3* IR/G102, IR/G141 grisms
+
+
 ##  Quickstart
 
 *This section will you give all the necessary terminal commands to go from opening our GitHub page in the browser to having 
@@ -176,13 +181,13 @@ name of the stellar system data and a custom suffix, which you set in the config
 ### Changing input data and/or input parameters
 
 We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract).
-Currently, we support the marginalisation of WFC3/G141 and WFC3/G102 datasets. If you want to perform the marginalization on a different 
+Please refer to section "Supported instruments and gratings" for a list of currently supported instruments and gratings. If you want to perform the marginalization on a different 
 transit dataset, you have to point the configfile to your input data folder and also update the planetary parameters by adding a new section to the configfile.
 
 #### Input filenames
 
 Due to the structure of the configfile (see above), we follow this naming convention for input files:  
-star + grating + arbiatrary string + .txt  
+star + grating + arbitrary string + .txt  
 *E.g.: "W17_G141_lightcurve_test_data.txt"*
 
 The star and grating can then be set once in the config section '[setup]', while the full filename needs to be added in 
