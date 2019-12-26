@@ -487,8 +487,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     print('SDNR best without the evidence (weights) = {} for model {}'.format(np.nanmin(rl_sdnr), best_sys_sdnr))
 
     # Marginalization plots
-    fig2_fname = os.path.join(outDir, 'weights-stdr-rl.png')
-    plt.figure(2)
+    fig1_fname = os.path.join(outDir, 'weights-stdr-rl.png')
+    plt.figure(1)
     plt.suptitle('Marginalization results')
     plt.subplot(3, 1, 1)
     plt.plot(w_q, '.', linestyle='-')
@@ -500,12 +500,12 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     plt.errorbar(np.arange(1, len(masked_rl)+1), masked_rl, yerr=masked_rl_err, fmt='.')
     plt.ylabel('$R_P/R_*$')
     plt.xlabel('Systematic model number')
-    plt.savefig(fig2_fname)
+    plt.savefig(fig1_fname)
     if plotting:
         plt.show()
 
-    fig3_fname = os.path.join(outDir, 'residuals_best-model.png')
-    plt.figure(3)
+    fig2_fname = os.path.join(outDir, 'residuals_best-model.png')
+    plt.figure(2)
     plt.suptitle('First vs. best model')
 
     xlim_min = np.min(sys_phase[0,:]) - 0.005
@@ -538,7 +538,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     plt.hlines(0.0 - (rl_sdnr[best_sys_weight]), xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
     plt.hlines(0.0 + (rl_sdnr[best_sys_weight]), xmin=np.min(masked_phase[best_sys_weight,:]), xmax=np.max(masked_phase[best_sys_weight,:]), colors='r', linestyles='dotted')
     plt.legend()
-    plt.savefig(fig3_fname)
+    plt.savefig(fig2_fname)
     if plotting:
         plt.show()
 
@@ -655,8 +655,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
                          'msmpr_marg_err': marg_msmpr_err,
                          'aor_marg': marg_aors,
                          'aor_marg_err': marg_aors_err,
-                         'systematics_figure': fig2_fname,
-                         'lightcurve_figure': fig3_fname}
+                         'systematics_figure': fig1_fname,
+                         'lightcurve_figure': fig2_fname}
 
         # Create PDf report
         marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+run_name+'.pdf'))
