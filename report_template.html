@@ -2,7 +2,7 @@
 <html>
     <header lang="en">
         
-        <title> Report page ExoTIC-ISM </title>
+        <title> Report page ExoTiC-ISM </title>
         
     </header>
     
@@ -66,7 +66,7 @@
             </p>
             
             <p>
-            (If uncertainty = 0, then the value is frozen.)<br>
+            If None, parameter was not fit for.<br>
             <br>
             Rp/R* = {{ rl_marg }} +/- {{ rl_marg_err }}<br>
             Epoch (MJD) = {{ epoch_marg }} +/- {{ epoch_marg_err }}<br>
@@ -89,7 +89,7 @@
             <p>
             <img src="{{ lightcurve_figure }}" alt="lightcurve" width="900" height="650"><br>
             <br>
-            Top: Input lightcurve with no systematic correction. Middle: Lightcurve corrected by highest weight systematic model, the planetary transit model is shown in red. Bottom: Residuals and uncertainties associated with the middle panel.
+            Top: Input lightcurve with no systematic correction. Middle: Lightcurve corrected by highest weight systematic model and the smooth planetary transit model. Bottom: Residuals and uncertainties associated with the middle panel.
             </p>
         
     </body>
