@@ -509,17 +509,20 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     plt.plot(w_q, '.', markersize=markers, linestyle='-', lw=linewidths)
     plt.ylabel('Weight', size=ax_label_font)
     plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
+    plt.gca().xaxis.set_major_locator(plt.MultipleLocator(5))
 
     plt.subplot(3, 1, 2)
     plt.plot(rl_sdnr, '.', markersize=markers, linestyle='-', lw=linewidths)
     plt.ylabel('Resid STDev', size=ax_label_font)
     plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
+    plt.gca().xaxis.set_major_locator(plt.MultipleLocator(5))
 
     plt.subplot(3, 1, 3)
     plt.errorbar(np.arange(1, len(masked_rl)+1), masked_rl, yerr=masked_rl_err, fmt='.', markersize=markers)
     plt.ylabel('$R_P/R_*$', size=ax_label_font)
     plt.xlabel('Systematic model number', size=ax_label_font)
     plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
+    plt.gca().xaxis.set_major_locator(plt.MultipleLocator(5))
 
     plt.savefig(fig1_fname)
     if plotting:
