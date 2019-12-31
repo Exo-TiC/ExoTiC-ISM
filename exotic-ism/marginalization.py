@@ -456,7 +456,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         bigmasksmooth = np.transpose(bigmasksmooth)
 
     masked_residuals = np.ma.masked_array(sys_residuals, mask=bigmask)
-    masked_date = np.ma.masked_array(sys_date, mask=bigmask)            # not reused - maybe useful for plotting though?
     masked_flux = np.ma.masked_array(sys_flux, mask=bigmask)
     masked_flux_err = np.ma.masked_array(sys_flux_err, mask=bigmask)
     masked_phase = np.ma.masked_array(sys_phase, mask=bigmask)
@@ -481,11 +480,12 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
 
     # Best_sys_sdnr identifies best system based purely on std of residuals, ignoring a penalization by model
     # complexity. This shows us how picking the "best" model differs between std alone and weighted result.
-    rl_sdnr = np.zeros(nsys)    # this will also end up a masked array due to the statement two lines below
+    rl_sdnr = np.zeros(nsys)
     for i in range(nsys):
-        rl_sdnr[i] = marg.calc_sdnr(masked_residuals[i])
-    best_sys_sdnr = np.nanargmin(rl_sdnr)   # argument of minimum, ignoring possible NaNs
-    print('SDNR best without the evidence (weights) = {} for model {}'.format(np.nanmin(rl_sdnr), best_sys_sdnr))
+        rl_sdnr[i] = marg.calc_sdnr(sys_residuals[i])   # not using the masked residual array on purpose
+    masked_rl_sdnr = np.ma.masked_array(rl_sdnr, mask=sys_evidenceAIC_masked.mask)
+    best_sys_sdnr = np.nanargmin(masked_rl_sdnr)   # argument of minimum, ignoring possible NaNs
+    print('SDNR best without the evidence (weights) = {} for model {}'.format(np.nanmin(masked_rl_sdnr), best_sys_sdnr))
 
     #  Plotting parameters
     xlim_min = np.min(sys_phase[0,:]) - 0.005
@@ -505,20 +505,29 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     plt.figure(2, figsize=(7, 5))
     plt.suptitle('Marginalization results', fontsize=12)
 
+    # Create arrays with inverted masks so that we can also plot masked values
+    w_q_invertedmask = np.ma.masked_array(w_q.data, mask=~w_q.mask)
+    rl_sdnr_invertedmask = np.ma.masked_array(masked_rl_sdnr.data, mask=~masked_rl_sdnr.mask)
+    masked_rl_invertedmask = np.ma.masked_array(masked_rl.data, mask=~masked_rl.mask)
+    masked_rl_err_invertedmask = np.ma.masked_array(masked_rl_err.data, mask=~masked_rl_err.mask)
+
     plt.subplot(3, 1, 1)
     plt.plot(w_q, '.', markersize=markers, linestyle='-', lw=linewidths)
+    plt.plot(w_q_invertedmask, '.', markersize=markers, linestyle='-', lw=linewidths, alpha=0.2)
     plt.ylabel('Weight', size=ax_label_font)
     plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
     plt.gca().xaxis.set_major_locator(plt.MultipleLocator(5))
 
     plt.subplot(3, 1, 2)
-    plt.plot(rl_sdnr, '.', markersize=markers, linestyle='-', lw=linewidths)
+    plt.plot(masked_rl_sdnr, '.', markersize=markers, linestyle='-', lw=linewidths)
+    plt.plot(rl_sdnr_invertedmask, '.', markersize=markers, linestyle='-', lw=linewidths, alpha=0.2)
     plt.ylabel('Resid STDev', size=ax_label_font)
     plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
     plt.gca().xaxis.set_major_locator(plt.MultipleLocator(5))
 
     plt.subplot(3, 1, 3)
     plt.errorbar(np.arange(1, len(masked_rl)+1), masked_rl, yerr=masked_rl_err, fmt='.', markersize=markers)
+    plt.errorbar(np.arange(1, len(masked_rl) + 1), masked_rl_invertedmask, yerr=masked_rl_err_invertedmask, fmt='.', markersize=markers, alpha=0.2)
     plt.ylabel('$R_P/R_*$', size=ax_label_font)
     plt.xlabel('Systematic model number', size=ax_label_font)
     plt.tick_params(axis='both', which='both', length=ticklen, width=tickwid, labelsize=tick_label_font)
