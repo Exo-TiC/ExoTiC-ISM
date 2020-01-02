@@ -2,7 +2,7 @@
 <html>
     <header lang="en">
         
-        <title> Report page ExoTIC-ISM </title>
+        <title> Report page ExoTiC-ISM </title>
         
     </header>
     
@@ -61,12 +61,12 @@
             
             <p>
             {{ num_rejected }} models do not satisfy the positive AIC condition and were removed
-            from the marginalisation. Their model numbers are:<br>
+            from the marginalisation. Their model numbers are (numbering starts at 0):<br>
             {{ indices_rejected }}
             </p>
             
             <p>
-            (If uncertainty = 0, then the value is frozen.)<br>
+            If None, parameter was not fit for.<br>
             <br>
             Rp/R* = {{ rl_marg }} +/- {{ rl_marg_err }}<br>
             Epoch (MJD) = {{ epoch_marg }} +/- {{ epoch_marg_err }}<br>
@@ -81,7 +81,10 @@
             <p>
             <img src="{{ systematics_figure }}" alt="systematics" width="900" height="650"><br>
             <br>
-            Top: Weight associated with each systematic model applied to the data. Middle: Radius ratio measured for each systematic correction. Bottom: Center of transit time measured for each systematic correction.
+            <i>Top:</i> Evidence-based weight associated with each systematic model when fit with the data.
+                <i>Middle:</i> Standard deviation of the residuals after correcting for each systematic model.
+                <i>Bottom:</i> Radius ratio measured from the transit depth when the light curve has been corrected
+                using each systematic model. <i>If present, grey crosses mark discarded systematic models (negative AIC).</i>
             </p>
             
             <h3> Lightcurves </h3>
@@ -89,7 +92,11 @@
             <p>
             <img src="{{ lightcurve_figure }}" alt="lightcurve" width="900" height="650"><br>
             <br>
-            Top: Input lightcurve with no systematic correction. Middle: Lightcurve corrected by highest weight systematic model, the planetary transit model is shown in red. Bottom: Residuals and uncertainties associated with the middle panel.
+                <i>Top:</i> Input lightcurve with no systematic model correction applied.
+                <i>Middle:</i> Lightcurve corrected by highest weight systematic model plotted with the smooth
+                planetary transit model centred on the mid-transit time.
+                <i>Bottom:</i> Residuals and uncertainties associated with the middle panel lightcurve. The upper and
+                lower standard deviation bounds are shown in dotted lines relative to zero.
             </p>
         
     </body>
