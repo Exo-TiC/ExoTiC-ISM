@@ -23,6 +23,11 @@ This package was built from the original IDL code used for the analysis in [Wake
 
 Note how this is not an installable package, but you will  always need to clone it if you want to work with it.
 
+## Supported instruments and gratings
+Current supported instruments and gratings are:  
+**HST** *WFC3* IR/G102, IR/G141 grisms
+
+
 ##  Quickstart
 
 *This section will you give all the necessary terminal commands to go from opening our GitHub page in the browser to having 
@@ -122,18 +127,6 @@ you can set all your parameters, and it will override the `config.ini` at runtim
 the version controlled one or the local one, a copy of it is always saved together with the output data. In the case you 
 want to version control the configfile you use, we recommend that you **fork** the repository and simply use the `config.ini` file directly.
 
-### Output data
-
-The relevant data files and plots from your run, together with the used configfile, will be saved to the directory you specify under **`output_path`** in your 
-local configfile. The results of each new run will be saved in a subdirectory under `[data_paths] -> output_path` that is labelled with a time stamp, the
-name of the stellar system data and a custom suffix, which you set in the configfile.
-
-### Changing input data and/or input parameters
-
-We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract).
-Currently, we only support the marginalisation of WFC3/G141 datasets. If you want to perform the marginalization on a different 
-transit dataset, you have to point the configfile to your input data folder and also update the planetary parameters by adding a new section to the configfile.
-
 **The configfile** has the following structure, except here we added some extra comments for clarity:
 ```ini
 [data_paths]
@@ -156,11 +149,11 @@ resolution = 0.0001
 half_range = 0.2
 
 
-;[planet_system_parameters] - make a new section for each new data set
+; Stellar and planet system parameters - make a new section for each new data set
 
 [W17]
-lightcurve_file = W17_G141_lightcurve_test_data.txt         ; lightcurve data file
-wvln_file = W17_G141_wavelength_test_data.txt               ; wavelength data file
+lightcurve_file = W17_${setup:grating}_lightcurve_test_data.txt         ; lightcurve data file
+wvln_file = W17_${setup:grating}_wavelength_test_data.txt               ; wavelength data file
 rl = 0.12169232                                             ; Rp/R* estimate - the transit depth
 epoch = 57957.970153390                                     ; in MJD
 inclin = 87.34635                                           ; inclination in deg
@@ -178,6 +171,28 @@ logg = 4.5                        ; log gravity of star
 dtosec = 86400                    ; conversion factor from days to seconds
 HST_period = 0.06691666           ; Hubbe Space Telescope period in days
 ```
+
+### Output data
+
+The relevant data files and plots from your run, together with the used configfile, will be saved to the directory you specify under **`output_path`** in your 
+local configfile. The results of each new run will be saved in a subdirectory under `[data_paths] -> output_path` that is labelled with a time stamp, the
+name of the stellar system data and a custom suffix, which you set in the configfile.
+
+### Changing input data and/or input parameters
+
+We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract).
+Please refer to section "Supported instruments and gratings" for a list of currently supported instruments and gratings. If you want to perform the marginalization on a different 
+transit dataset, you have to point the configfile to your input data folder and also update the planetary parameters by adding a new section to the configfile.
+
+#### Input filenames
+
+Due to the structure of the configfile (see above), we follow this naming convention for input files:  
+star + grating + arbitrary string + .txt  
+*E.g.: "W17_G141_lightcurve_test_data.txt"*
+
+The star and grating can then be set once in the config section '[setup]', while the full filename needs to be added in 
+the respective stellar and planetary parameters section, with a placeholder for the grating name.  
+*E.g.: "W17_${setup:grating}_lightcurve_test_data.txt"*
 
 ## About this repository
 
