@@ -12,7 +12,7 @@ This code performs Levenberg-Marquardt least-squares minimization across a grid 
 This was developed and tested for data from Wide Field Camera 3 (WFC3) on the Hubble Space Telescope (HST), specifically with the G141 spectroscopic grism, as published in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract). This method can also be applied to the WFC3 IR G102 grism, and UVIS G280 grism by selecting the correct parameters.
 Future work includes plans to extend this to Space Telescope Imaging Spectrograph (STIS) instrument data, and eventually data from the James Webb Space Telescope (JWST).
 
-This code follows the method outlined in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract), using marginalisation across a stochastic grid of 50 polynomial models. 
+This code follows the method outlined in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract), using marginalisation across a stochastic grid of 50 polynomial models (see bottom for full grid). 
 These 50 instrument systematic models contain a combination of corrective factors for likely HST systematics. These include a linear trend in time across the whole lightcurve, accounting for HST breathing effects caused by thermal changes in the telescope with up to a 4th order polynomial, and correcting for positional shifts of the target spectrum on the detector fitting up to a 4th order polynomial. See [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract) section 2.2 for details and Table 2 therein for the full grid of systematic models included. 
 
 The evidence (marginal liklihood) is calculated from the AIC for each model when fit with the data and converted to a normalised weighting that is used to marginalise each of the global fit parameters. See equations 15 and 16 in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract) to marginalise over the parameters and their uncertainties.
@@ -193,6 +193,10 @@ star + grating + arbitrary string + .txt
 The star and grating can then be set once in the config section '[setup]', while the full filename needs to be added in 
 the respective stellar and planetary parameters section, with a placeholder for the grating name.  
 *E.g.: "W17_${setup:grating}_lightcurve_test_data.txt"*
+
+
+### The Systematic Model Grid
+<img src="Systematic_model_tabel.png" align="left" />
 
 ## About this repository
 
