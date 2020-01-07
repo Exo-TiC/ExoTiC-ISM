@@ -197,6 +197,9 @@ the respective stellar and planetary parameters section, with a placeholder for 
 
 ### The Systematic Model Grid
 <img src="Systematic_model_tabel.png" align="left" />
+This table shows the functional form of the systematic models as presented in Wakeford et al. (2016). Each check mark shows which of the parameters are thawed in the model and fit to the data in combination. The grid contains corrections for a linear trend in time across the whole observation, corrections for thermal variations on the time scale of a HST orbit around the Earth, and positional shifts of the observed spectrum on the detector.
+
+
 
 ## About this repository
 
