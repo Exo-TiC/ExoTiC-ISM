@@ -62,7 +62,7 @@ $ conda env create --file environment.yml
 
 - Go into the code directory:  
 ```bash
-cd exotic-ism
+$ cd exotic-ism
 ```
 
 - Copy the file `config.ini` and name the copy `config_local.ini`.
@@ -81,6 +81,11 @@ output_path = /Users/<YourUser>/<path-to-data>
 ```
 
 ### Run the main script
+
+- Activate the conda environment you just created:
+```bash
+$ conda activate exoticism
+```
 
 - Run the marginalization on the demo data from the template:  
 ```bash
