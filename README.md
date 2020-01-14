@@ -228,6 +228,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.tx
 * Matthew Hill for a functional translation from IDL to Python
 * Iva Laginja for finding `Sherpa`, making the clunky `mpfit` dispensable
 * The [`Sherpa` team](https://github.com/sherpa/sherpa), providing a fantastic package and answering fast to GitHub issues
+* This work is  based  on  observations  made  with  the  NASA/ESA Hubble Space Telescope, HST-GO-14918, that were obtained at the Space Telescope Science Institute, which isoperated by the Association of Universities for Research in Astronomy, Inc.  
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
