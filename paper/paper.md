@@ -4,7 +4,7 @@ tags:
   - Python
   - astronomy
   - exoplanets
-  - transits
+  - transit spectroscopy
   - marginalisation
   - instrument systematics
 authors:
