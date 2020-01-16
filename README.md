@@ -34,6 +34,8 @@ Current supported instruments and gratings are:
 reduced results of the template data on your local machine. For a more thorough description of the individual steps, please continue to the section 
 **Prerequisites** and beyond.*
 
+For a tutorial on ExoTiC-ISM, please see `notebooks` --> `tutorials` --> `1_Intro-tutorial.ipynb`.
+
 We assume that you have `conda` and `git` installed and that you're using `bash`.
 
 ### Clone the repo and create conda environment
