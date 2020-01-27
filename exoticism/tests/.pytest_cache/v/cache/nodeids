@@ -1,8 +1,0 @@
-[
-  "test_configfile.py::test_main_sections",
-  "test_configfile.py::test_data_paths",
-  "test_configfile.py::test_setup",
-  "test_configfile.py::test_smooth_model",
-  "test_configfile.py::test_constants",
-  "test_limb_darkening.py::test_limb_dark_fit"
-]
