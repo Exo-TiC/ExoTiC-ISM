@@ -12,7 +12,7 @@ def test_limb_dark_fit():
     dataDir = os.path.join(CONFIG_INI.get('data_paths', 'input_path'), planet_system)
     get_wvln = CONFIG_INI.get(planet_system, 'wvln_file')
 
-    dirsen = os.path.join('..', 'Limb-darkening')   # Directory for sensitivity files
+    dirsen = os.path.join(CONFIG_INI.get('data_paths', 'local_path'), 'Limb-darkening')   # Directory for sensitivity files
     wavelength = np.loadtxt(os.path.join(dataDir, get_wvln), skiprows=3)
 
     # Chose your parameters
