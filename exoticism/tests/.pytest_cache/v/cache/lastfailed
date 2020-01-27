@@ -1,0 +1,9 @@
+{
+  "test_configfile.py::test_constants": true,
+  "test_configfile.py::test_data_paths": true,
+  "test_configfile.py::test_main_sections": true,
+  "test_configfile.py::test_setup": true,
+  "test_configfile.py::test_smooth_model": true,
+  "test_limb_darkening.py::test_limb_dark_fit": true,
+  "test_margmodule.py": true
+}

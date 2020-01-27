@@ -1,14 +1,14 @@
 import os
 import numpy as np
-import pytest
 import astropy.units as u
 from astropy.constants import G
 
-from config import CONFIG_INI
-import margmodule as marg
+from exoticism.config import CONFIG_INI
+import exoticism.margmodule as marg
+
 
 # Global star and planet parameters to test on
-exoplanet = CONFIG_INI.get('setup', 'W17')
+exoplanet = CONFIG_INI.get('setup', 'data_set')
 RL = CONFIG_INI.getfloat(exoplanet, 'rl')
 EPOCH = CONFIG_INI.getfloat(exoplanet, 'epoch') * u.d
 INCLIN = CONFIG_INI.getfloat(exoplanet, 'inclin') * u.deg
