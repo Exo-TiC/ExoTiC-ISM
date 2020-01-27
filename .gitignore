@@ -3,3 +3,4 @@ config_local.ini
 outputs/
 .ipynb_checkpoints/
 .idea/
+.pytest_cache/

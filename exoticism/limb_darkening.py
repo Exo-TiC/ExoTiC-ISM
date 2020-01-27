@@ -387,22 +387,3 @@ def quadratic_limb_darkening(x, aLD=0.0, bLD=0.0):
     """
     model = 1. - aLD * (1. - x) - bLD * (1. - x) ** (4. / 2.)
     return model
-
-
-if __name__ == '__main__':
-
-    datapath = 'W17'
-
-    dirsen = os.path.join('..', 'Limb-darkening')   # Directory for sensitivity files
-    wavelength = np.loadtxt(os.path.join('..', 'data', datapath, 'W17_G141_wavelength_test_data.txt'), skiprows=3)
-
-    # Chose your parameters
-    ld_model = '3D'
-    FeH = 0.0
-    Teff = 5000
-    logg = 4.2    # choice of logg depends on Teff in 3D models
-    grating = 'G141'
-
-    result = limb_dark_fit(grating, wavelength, FeH, Teff, logg, dirsen, ld_model)
-
-    print('\n Full result: ', result)
