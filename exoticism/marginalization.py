@@ -29,9 +29,9 @@ from sherpa.stats import Chi2
 from sherpa.fit import Fit
 from sherpa.estmethods import Confidence
 
-from config import CONFIG_INI
-from limb_darkening import limb_dark_fit
-import margmodule as marg
+from exoticism.config import CONFIG_INI
+from exoticism.limb_darkening import limb_dark_fit
+import exoticism.margmodule as marg
 
 
 def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plotting=True):

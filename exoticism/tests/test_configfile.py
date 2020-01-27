@@ -1,5 +1,4 @@
-import pytest
-from config import CONFIG_INI
+from exoticism.config import CONFIG_INI
 
 
 def test_main_sections():

@@ -11,7 +11,7 @@ import astropy.units as u
 
 from sherpa.models import model
 
-from config import CONFIG_INI
+from exoticism.config import CONFIG_INI
 
 # Read planet parameters from configfile
 exoplanet = CONFIG_INI.get('setup', 'data_set')

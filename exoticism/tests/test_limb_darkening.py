@@ -1,9 +1,8 @@
 import os
 import numpy as np
-import pytest
 
-from config import CONFIG_INI
-import limb_darkening as ld
+from exoticism.config import CONFIG_INI
+import exoticism.limb_darkening as ld
 
 
 def test_limb_dark_fit():
