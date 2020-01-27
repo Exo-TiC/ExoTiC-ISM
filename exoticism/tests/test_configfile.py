@@ -1,10 +1,13 @@
 from exoticism.config import CONFIG_INI
 
 
+STANDARD_SECTIONS = ['data_paths', 'setup', 'smooth_model', 'W17', 'constants']
+
+
 def test_main_sections():
     """ Check that all main sections exist. """
 
-    for section in ['setup', 'data_paths', 'smooth_model']:
+    for section in STANDARD_SECTIONS:
         exists = section in CONFIG_INI
         assert exists
 
@@ -12,7 +15,7 @@ def test_main_sections():
 def test_data_paths():
     """ Check that all required data paths exist. """
 
-    data_keys = ['local_path', 'data_path', 'output_path', 'run_name']
+    data_keys = ['local_path', 'input_path', 'output_path', 'run_name']
     for key in data_keys:
         assert CONFIG_INI.has_option('data_paths', key)
 
@@ -38,4 +41,18 @@ def test_constants():
 
     constants_keys = ['dtosec', 'HST_period']
     for key in constants_keys:
-        assert CONFIG_INI.has_option('smooth_model', key)
+        assert CONFIG_INI.has_option('constants', key)
+
+
+def test_planet_parameters():
+    """Check that all planetary system sections have all necessary keys."""
+
+    planet_params = ['lightcurve_file', 'wvln_file', 'rl', 'epoch', 'inclin', 'ecc',
+                     'omega', 'Per', 'aor', 'metallicity', 'Teff', 'logg']
+    all_sections = CONFIG_INI.sections()
+    for sec in all_sections:
+        if sec in STANDARD_SECTIONS:
+            pass
+        else:
+            for key in planet_params:
+                assert CONFIG_INI.has_option(sec, key)

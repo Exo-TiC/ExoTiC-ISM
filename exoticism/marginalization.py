@@ -96,7 +96,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     logg = CONFIG_INI.getfloat(exoplanet, 'logg')   # log(g), stellar gravity - depends on whether 1D or 3D limb darkening models are used
 
     # Define limb darkening directory, which is inside this package
-    limbDir = os.path.join('..', 'Limb-darkening')
+    limbDir = os.path.join(CONFIG_INI.get('data_paths', 'local_path'), 'Limb-darkening')
     ld_model = CONFIG_INI.get('setup', 'ld_model')
     grat = CONFIG_INI.get('setup', 'grating')
     _uLD, c1, c2, c3, c4, _cp1, _cp2, _cp3, _cp4, _aLD, _bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
