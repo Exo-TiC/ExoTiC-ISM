@@ -3,6 +3,8 @@ Helper module for transit marginalization.
 """
 
 import os
+from os import listdir
+from os.path import join, isdir, dirname, basename
 import time
 import datetime
 import numpy as np
@@ -567,3 +569,28 @@ def create_data_path(initial_path, star_system, suffix=""):
     print(suffix)
     full_path = os.path.join(initial_path, date_time_string + star_system + suffix)
     return full_path
+
+
+def find_data_parent(searchfor):
+    """
+    Find absolute path of a directory or file.
+
+    Taken from:
+    https://stackoverflow.com/a/49034944/10112569
+    :param searchfor, string: name of directory or file to find the path for
+    :return: filepath, string: absolute path to desired directory or file
+    """
+    filepath = None
+    # get parent of the .py running
+    par_dir = dirname(__file__)
+    while True:
+        # get basenames of all the directories in that parent
+        dirs = [basename(join(par_dir, d)) for d in listdir(par_dir) if isdir(join(par_dir, d))]
+        # the parent contains desired directory
+        if searchfor in dirs:
+            filepath = par_dir
+            break
+        # back it out another parent otherwise
+        par_dir = dirname(par_dir)
+
+    return filepath
