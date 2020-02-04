@@ -57,7 +57,8 @@ def test_planet_parameters():
     all_sections = CONFIG_INI.sections()
 
     # First test the planet sections that are included by default
-    for sec in ['W17', 'simple_transit']:
+    # Leaving simple_transit out since that has no associated data files for keys lightcurve_file and wvln_file
+    for sec in ['W17']:
         for key in planet_params:
             assert CONFIG_INI.has_option(sec, key)
 
