@@ -3,16 +3,21 @@ import numpy as np
 
 from exoticism.config import CONFIG_INI
 import exoticism.limb_darkening as ld
+import exoticism.margmodule as marg
+
+
+# Find the local path of the repository so that we can access the data
+LOCAL_PATH = marg.find_data_parent('data')
 
 
 def test_limb_dark_fit():
 
     planet_system = 'W17'
 
-    dataDir = os.path.join(CONFIG_INI.get('data_paths', 'input_path'), planet_system)
+    dataDir = os.path.join(LOCAL_PATH, 'data', planet_system)
     get_wvln = CONFIG_INI.get(planet_system, 'wvln_file')
 
-    dirsen = os.path.join(CONFIG_INI.get('data_paths', 'local_path'), 'Limb-darkening')   # Directory for sensitivity files
+    dirsen = os.path.join(LOCAL_PATH, 'Limb-darkening')   # Directory for sensitivity files
     wavelength = np.loadtxt(os.path.join(dataDir, get_wvln), skiprows=3)
 
     # Chose your parameters

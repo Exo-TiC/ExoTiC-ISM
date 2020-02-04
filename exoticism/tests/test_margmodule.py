@@ -7,6 +7,9 @@ from exoticism.config import CONFIG_INI
 import exoticism.margmodule as marg
 
 
+# Find the local path of the repository so that we can access the data
+LOCAL_PATH = marg.find_data_parent('data')
+
 # Global star and planet parameters to test on
 exoplanet = CONFIG_INI.get('setup', 'data_set')
 RL = CONFIG_INI.getfloat(exoplanet, 'rl')
@@ -22,8 +25,8 @@ constant1 = ((G * np.square(PERIOD)) / (4 * np.square(np.pi))) ** (1 / 3)
 MSMPR = (AOR / constant1) ** 3.
 
 # Import data
-localDir = CONFIG_INI.get('data_paths', 'local_path')
-dataDir = os.path.join(CONFIG_INI.get('data_paths', 'input_path'), 'W17')
+localDir = LOCAL_PATH
+dataDir = os.path.join(LOCAL_PATH, 'data', 'W17')
 x_data, y_data, err, sh = np.loadtxt(os.path.join(dataDir, 'W17_G141_lightcurve_test_data.txt'),
                            skiprows=7, unpack=True) * u.d
 #wavelength = np.loadtxt(os.path.join(dataDir, 'W17_G141_wavelength_test_data.txt'), skiprows=3) * u.Angstrom
