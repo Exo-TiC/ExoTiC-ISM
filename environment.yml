@@ -16,6 +16,7 @@ dependencies:
   - scipy>1.2
   - sherpa>4.11
   - pango
+  - pip
   - pytest
   - jupyter
   - pip:
