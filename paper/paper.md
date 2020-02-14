@@ -69,7 +69,7 @@ evaluated statistically for each data set, expanding the ability to make true an
 exoplanet atmospheres.”
 
 ``ExoTiC-ISM`` is written in Python and makes use of the packages numpy [@numpy1; @numpy2], astropy 
-[@astropy:2013; astropy:2018], pandas [@pandas] as well as some custom functions, like an implementation of the 
+[@astropy2013; @astropy2018], pandas [@pandas] as well as some custom functions, like an implementation of the 
 transit function by @mandel2002 and a 4-parameter limb darkening law as outlined in @claret2000 and @sing2010. The 
 original code was written in IDL, which was used to publish marginalised transit parameters for five different 
 exoplanets [@wakeford2016] observed in the IR with the G141 grism on HST's WFC3. The ``ExoTiC-SIM`` package described 
