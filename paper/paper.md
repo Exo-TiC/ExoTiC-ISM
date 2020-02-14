@@ -40,11 +40,11 @@ absorption/transmission spectra, with the goal to identify the chemical composit
 A majority of the exoplanets studied via transmission spectroscopy are close-in, on several day orbits around their 
 stars, giant Jupiter- or Neptune-sized worlds. For these giant close-in exoplanets the most dominant source of 
 absorption will be from water vapour, which is expected to be well mixed throughout their atmosphere. H$_2$O has 
-strong absorption in the near-infrared (IR) with broad peaks at 0.9, 1.4, 1.9, and 2.7\,$\mu$m. However, these 
+strong absorption in the near-infrared (IR) with broad peaks at 0.9, 1.4, 1.9, and 2.7 $\mu$m. However, these 
 absorption features cannot be measured from the ground as the Earth's atmosphere, filled with water vapour, gets in 
 the way. To measure H$_2$O in the atmospheres of exoplanets, astronomers use the Hubble Space Telescope's Wide Field 
-Camera 3 (HST WFC3) infrared capabilities to detect the absorption signatures of H$_2$O at 0.9\,$\mu$m with the G102, 
-grism and 1.4\,$\mu$m with the G141 grism [e.g. @kreidberg2015; @sing2016; @wakeford2017; @wakeford2018; @spake2018].
+Camera 3 (HST WFC3) infrared capabilities to detect the absorption signatures of H$_2$O at 0.9 $\mu$m with the G102, 
+grism and 1.4 $\mu$m with the G141 grism [e.g. @kreidberg2015; @sing2016; @wakeford2017; @wakeford2018; @spake2018].
 
 # Package functionality
 
@@ -61,7 +61,7 @@ depth and other transit parameters selected to be fit (e.g., inclination, a/R$_*
 calculated using the weights by marginalising over the fit parameters using each systematic model. This can then be 
 performed for each lightcurve constructed at each wavelength from the measured spectrum, resulting in the measured 
 transmission spectrum of the exoplanet. This method is different from evaluating each systematic model independently 
-and selecting the ``best'' one purely by minimising the scatter of its residuals as that would not include a 
+and selecting the “best” one purely by minimising the scatter of its residuals as that would not include a 
 penalisation for increased model complexity nor information from similarly likely systematic corrections. As the 
 authors of the original method paper state [@wakeford2016]: “The use of marginalisation 
 allows for transparent interpretation and understanding of the instrument and the impact of each systematic [model] 
