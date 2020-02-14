@@ -1,5 +1,5 @@
 """
-This code is based on Hannah Wakeford's IDL code for lightcurve extraction with marginalization over a set of
+This code is based on Hannah Wakeford's IDL code for lightcurve extraction with marginalisation over a set of
 systematic models.
 
 Initially, the python code used a python translation of the IDL MPFIT library instead of built LM fitters because for
@@ -36,7 +36,7 @@ import exoticism.margmodule as marg
 
 def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plotting=True):
     """
-    Produce marginalized transit parameters from HST lightcurves over a specified wavelength range.
+    Produce marginalised transit parameters from HST lightcurves over a specified wavelength range.
 
     MAJOR PROGRAMS INCLUDED IN THIS ROUTINE:
     - LIMB-DARKENING (from limb_darkening.py)
@@ -500,10 +500,10 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     tickwid = 1
     markers = 4
 
-    # Marginalization plots
+    # Marginalisation plots
     fig1_fname = os.path.join(outDir, 'weights-stdr-rl.png')
     plt.figure(2, figsize=(7, 5))
-    plt.suptitle('Marginalization results', fontsize=12)
+    plt.suptitle('Marginalisation results', fontsize=12)
 
     # Create arrays with inverted masks so that we can also plot masked values
     w_q_invertedmask = np.ma.masked_array(w_q.data, mask=~w_q.mask)
@@ -576,14 +576,14 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         plt.show()
 
     ### Radius ratio - this one always gets calculated
-    marg_rl, marg_rl_err = marg.marginalization(masked_rl, masked_rl_err, w_q)
+    marg_rl, marg_rl_err = marg.marginalisation(masked_rl, masked_rl_err, w_q)
     print('Rp/R* = {} +/- {}'.format(marg_rl, marg_rl_err))
 
     ### Center of transit time (epoch)
     marg_epoch = None
     marg_epoch_err = None
     if not tmodel.epoch.frozen:
-        marg_epoch, marg_epoch_err = marg.marginalization(masked_epoch, masked_epoch_err, w_q)
+        marg_epoch, marg_epoch_err = marg.marginalisation(masked_epoch, masked_epoch_err, w_q)
         print('Epoch = {} +/- {}'.format(marg_epoch, marg_epoch_err))
 
     ### Inclination
@@ -594,13 +594,13 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
 
     if not tmodel.inclin.frozen:
         # Inclication in radians
-        marg_inclin_rad, marg_inclin_rad_err = marg.marginalization(masked_inclin, masked_inclin_err, w_q)
+        marg_inclin_rad, marg_inclin_rad_err = marg.marginalisation(masked_inclin, masked_inclin_err, w_q)
         print('inc (rads) = {} +/- {}'.format(marg_inclin_rad, marg_inclin_rad_err))
 
         # Inclination in degrees
         conv1 = masked_inclin / (2 * np.pi / 360)
         conv2 = masked_inclin_err / (2 * np.pi / 360)
-        marg_inclin_deg, marg_inclin_deg_err = marg.marginalization(conv1, conv2, w_q)
+        marg_inclin_deg, marg_inclin_deg_err = marg.marginalisation(conv1, conv2, w_q)
         print('inc (deg) = {} +/- {}'.format(marg_inclin_deg, marg_inclin_deg_err))
 
     ### MsMpR
@@ -610,7 +610,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     marg_aors_err = None
 
     if not tmodel.msmpr.frozen:
-        marg_msmpr, marg_msmpr_err = marg.marginalization(masked_msmpr, masked_msmpr_err, w_q)
+        marg_msmpr, marg_msmpr_err = marg.marginalisation(masked_msmpr, masked_msmpr_err, w_q)
         print('MsMpR = {} +/- {}'.format(marg_msmpr, marg_msmpr_err))
 
         # Recalculate a/R* (actually the constant for it) based on the new MsMpR value which may have been fit in the routine.
@@ -618,7 +618,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         marg_aors_err = constant1 * (marg_msmpr_err ** (1./3.)) / marg_aors
         print('a/R* = {} +/- {}'.format(marg_aors, marg_aors_err))
 
-    #TODO: add marginalization for eccentricity, see GitHub issue #56
+    #TODO: add marginalisation for eccentricity, see GitHub issue #56
 
     ### Save to file
     # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
