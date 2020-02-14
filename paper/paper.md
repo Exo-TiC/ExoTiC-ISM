@@ -1,5 +1,5 @@
 ---
-title: 'ExoTiC-ISM: A Python package for marginalised transit parameters across a grid of systematic instrument models'
+title: 'ExoTiC-ISM: A Python package for marginalised exoplanet transit parameters across a grid of systematic instrument models'
 tags:
   - Python
   - astronomy
