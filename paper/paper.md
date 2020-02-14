@@ -13,7 +13,7 @@ authors:
     affiliation: "1, 2"
   - name: Hannah R. Wakeford
     orcid: 0000-0003-4328-3867
-    affiliation: 3
+    affiliation: "3"
 affiliations:
  - name: Space Telescope Science Institute, Baltimore, USA
    index: 1
@@ -26,8 +26,6 @@ bibliography: paper.bib
 ---
 
 # Science background
-
-Summary to come. You can change the font ``by doing this``.
 
 The scientific context for the Python package presented herein is the characterization of exoplanet atmospheres. 
 There has been a slew of detections of planets outside our own solar system over the past two decades and several 
