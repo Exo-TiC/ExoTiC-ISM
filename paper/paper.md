@@ -74,7 +74,7 @@ transit function by @mandel2002 and a 4-parameter limb darkening law as outlined
 original code was written in IDL, which was used to publish marginalised transit parameters for five different 
 exoplanets [@wakeford2016] observed in the IR with the G141 grism on HST's WFC3. The ``ExoTiC-SIM`` package described 
 in this paper implements a marginalisation for that same grism and extends its functionality to the G102 grism, which 
-uses the same grid of systematic models [see results by @wakeford2017; @wakeford2018}]. The development in Python and 
+uses the same grid of systematic models [see results by @wakeford2017; @wakeford2018]. The development in Python and 
 hosting the repository on GitHub will facilitate the usage of the package by researchers, as well as further 
 functional development.
 
