@@ -28,9 +28,9 @@ bibliography: paper.bib
 
 # Science background
 
-The scientific context for the Python package presented herein is the characterization of exoplanet atmospheres. 
+The scientific context for the Python package presented herein is the characterisation of exoplanet atmospheres. 
 There has been a slew of detections of planets outside our own solar system over the past two decades and several 
-characterization methods can be used to determine their chemical compositions. One of them is transit spectroscopy. 
+characterisation methods can be used to determine their chemical compositions. One of them is transit spectroscopy. 
 With this technique, astronomers measure the star light passing through an exoplanet's atmosphere while it is 
 transiting in front of its host star. Imprinted on this light are the absorption signatures of different 
 materials - atoms and molecules in the gas phase, or solid or liquid aerosols - in the transiting planet's atmosphere. 
@@ -51,9 +51,9 @@ grism and 1.4 $\mu$m with the G141 grism [e.g. @kreidberg2015; @sing2016; @wakef
 ``ExoTiC-ISM`` (Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation) is a Python package that 
 computes the transit depth from a timeseries lightcurve, while sampling a grid of pseudo-stochastic models to account 
 for instrument based systematics that may impact the measurement, following the method proposed by @gibson2014. The 
-instrument systematic grid is composed of a series of 49  polynomial functions that are specifically designed to 
-account for systematics associated with the detectors on HST WFC3 [@wakeford2016], however, can be adapted to other 
-instruments.
+currently implemented instrument systematic grid is composed of a series of 49  polynomial functions that are 
+specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], however, 
+can be adapted to other instruments.
 The package performs a Levenberg-Marquardt least-squares minimization across all systematic models with the 
 Sherpa package [@sherpa.v4.11.0] for modeling and fitting data, and then uses the resulting Akaike Information 
 Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. The final transit 
