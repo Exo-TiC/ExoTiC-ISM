@@ -43,8 +43,8 @@ absorption will be from water vapour, which is expected to be well mixed through
 strong absorption in the near-infrared (IR) with broad peaks at 0.9, 1.4, 1.9, and 2.7 $\mu$m. However, these 
 absorption features cannot be measured from the ground as the Earth's atmosphere, filled with water vapour, gets in 
 the way. To measure H$_2$O in the atmospheres of exoplanets, astronomers use the Hubble Space Telescope's Wide Field 
-Camera 3 (HST WFC3) infrared capabilities to detect the absorption signatures of H$_2$O at 0.9 $\mu$m with the G102, 
-grism and 1.4 $\mu$m with the G141 grism [e.g. @kreidberg2015; @sing2016; @wakeford2017; @wakeford2018; @spake2018].
+Camera 3 (HST WFC3) infrared capabilities to detect the absorption signatures of H$_2$O at 0.9 $\mu$m with the G102 
+grism, and 1.4 $\mu$m with the G141 grism [e.g. @kreidberg2015; @sing2016; @wakeford2017; @wakeford2018; @spake2018].
 
 # Package functionality
 
@@ -57,7 +57,7 @@ can be adapted to other instruments.
 The package performs a Levenberg-Marquardt least-squares minimization across all systematic models with the 
 Sherpa package [@sherpa.v4.11.0] for modeling and fitting data, and then uses the resulting Akaike Information 
 Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. The final transit 
-depth and other transit parameters selected to be fit (e.g., inclination, a/R$_*$, center of transit time) are then 
+depth and other transit parameters selected to be fitted (e.g., inclination, a/R$_*$, center of transit time) are then 
 calculated using the weights by marginalising over the fit parameters using each systematic model. This can then be 
 performed for each lightcurve constructed at each wavelength from the measured spectrum, resulting in the measured 
 transmission spectrum of the exoplanet. This method is different from evaluating each systematic model independently 
