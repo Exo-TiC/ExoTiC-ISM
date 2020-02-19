@@ -44,7 +44,7 @@ strong absorption in the near-infrared (IR) with broad peaks at 0.9, 1.4, 1.9, a
 absorption features cannot be measured from the ground as the Earth's atmosphere, filled with water vapour, gets in 
 the way. To measure H$_2$O in the atmospheres of exoplanets, astronomers use the Hubble Space Telescope's Wide Field 
 Camera 3 (HST WFC3) infrared capabilities to detect the absorption signatures of H$_2$O at 0.9 $\mu$m with the G102 
-grism, and 1.4 $\mu$m with the G141 grism [e.g. @kreidberg2015; @sing2016; @wakeford2017; @wakeford2018; @spake2018].
+grism, and at 1.4 $\mu$m with the G141 grism [e.g. @kreidberg2015; @sing2016; @wakeford2017; @wakeford2018; @spake2018].
 
 # Package functionality
 
@@ -55,7 +55,7 @@ currently implemented instrument systematic grid is composed of a series of 49  
 specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], however, 
 can be adapted to other instruments.
 The package performs a Levenberg-Marquardt least-squares minimization across all systematic models with the 
-Sherpa package [@sherpa.v4.11.0] for modeling and fitting data, and then uses the resulting Akaike Information 
+``sherpa`` package [@sherpa.v4.11.0] for modeling and fitting data, and then uses the resulting Akaike Information 
 Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. The final transit 
 depth and other transit parameters selected to be fitted (e.g., inclination, a/R$_*$, center of transit time) are then 
 calculated using the weights by marginalising over the fit parameters using each systematic model. This can then be 
@@ -68,8 +68,9 @@ allows for transparent interpretation and understanding of the instrument and th
 evaluated statistically for each data set, expanding the ability to make true and comprehensive comparisons between 
 exoplanet atmospheres.”
 
-``ExoTiC-ISM`` is written in Python and makes use of the packages numpy [@numpy1; @numpy2], astropy 
-[@astropy2013; @astropy2018], pandas [@pandas] as well as some custom functions, like an implementation of the 
+``ExoTiC-ISM`` is written in Python and makes use of the packages ``numpy`` [@numpy1; @numpy2], ``astropy`` 
+[@astropy2013; @astropy2018], ``pandas`` [@pandas], ``matplotlib`` [@matplotlib; @matplotlib-zenodo], 
+``sherpa`` [@sherpa.v4.11.0] as well as some custom functions, like an implementation of the 
 transit function by @mandel2002 and a 4-parameter limb darkening law as outlined in @claret2000 and @sing2010. The 
 original code was written in IDL, which was used to publish marginalised transit parameters for five different 
 exoplanets [@wakeford2016] observed in the IR with the G141 grism on HST's WFC3. The ``ExoTiC-ISM`` package described 
