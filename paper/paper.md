@@ -72,12 +72,12 @@ the measured spectrum results in the measured transmission spectrum of the exopl
 
 # Package functionality
 
-``ExoTiC-ISM`` (Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation) is a Python package that 
-computes the transit depth from a timeseries lightcurve, while sampling a grid of pseudo-stochastic models to account 
-for instrument based systematics that may impact the measurement, following the method proposed by @gibson2014. The 
-currently implemented instrument systematic grid is composed of a series of 49  polynomial functions that are 
-specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], however, 
-can be adapted to other instruments.
+``ExoTiC-ISM`` (Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation) is an open-source Python 
+package that computes the transit depth from a timeseries lightcurve, while sampling a grid of pseudo-stochastic models 
+to account for instrument based systematics that may impact the measurement, following the method proposed by 
+@gibson2014. The currently implemented instrument systematic grid is composed of a series of 49  polynomial functions 
+that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], 
+however, can be adapted to other instruments.
 The package performs the Levenberg-Marquardt least-squares minimization across all models with the 
 ``sherpa`` package [@sherpa.v4.11.0] for modeling and fitting data, and then calculates the AIC and normalised weight to 
 marginalise over the fit parameters (e.g. transit depth $rl$, inclination $i$, a/R$_*$, center of transit time) using 
