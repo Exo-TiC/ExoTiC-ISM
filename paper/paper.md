@@ -28,17 +28,19 @@ bibliography: paper.bib
 
 # Science background
 
-The scientific context for the Python package presented herein is the characterisation of exoplanet atmospheres. 
-There has been a slew of detections of planets outside our own solar system over the past two decades and several 
+## Transit spectroscopy of exoplanets
+
+There has been a slew of planet detections outside our own solar system over the past two decades and several 
 characterisation methods can be used to determine their chemical compositions. One of them is transit spectroscopy. 
 With this technique, astronomers measure the star light passing through an exoplanet's atmosphere while it is 
 transiting in front of its host star. Imprinted on this light are the absorption signatures of different 
 materials - atoms and molecules in the gas phase, or solid or liquid aerosols - in the transiting planet's atmosphere. 
-Using a spectrograph the flux is recorded as a function of wavelength, allowing them to construct 
+Using a spectrograph the flux is recorded as a function of wavelength, allowing scientists to construct 
 absorption/transmission spectra, with the goal to identify the chemical composition of the atmosphere.
 
-A majority of the exoplanets studied via transmission spectroscopy are close-in, on several day orbits around their 
-stars, giant Jupiter- or Neptune-sized worlds. For these giant close-in exoplanets the most dominant source of 
+A majority of the exoplanets studied via transmission spectroscopy are on close-in orbits around their 
+stars lasting only several days, most of them giant Jupiter- or Neptune-sized worlds. For these giant, 
+close-in exoplanets the most dominant source of 
 absorption will be from water vapour, which is expected to be well mixed throughout their atmosphere. H$_2$O has 
 strong absorption in the near-infrared (IR) with broad peaks at 0.9, 1.4, 1.9, and 2.7 $\mu$m. However, these 
 absorption features cannot be measured from the ground as the Earth's atmosphere, filled with water vapour, gets in 
