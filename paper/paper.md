@@ -38,7 +38,8 @@ materials - atoms and molecules in the gas phase, or solid or liquid aerosols - 
 Using a spectrograph the flux is recorded as a function of wavelength, allowing scientists to construct 
 absorption/transmission spectra, with the goal to identify the chemical composition of the atmosphere.
 
-A majority of the exoplanets studied via transmission spectroscopy are on close-in orbits around their 
+There are many different chemical components that transit spectroscopy can reveal in an exoplanet, but a majority of the 
+exoplanets studied via transmission spectroscopy are on close-in orbits around their 
 stars lasting only several days, most of them giant Jupiter- or Neptune-sized worlds. For these giant, 
 close-in exoplanets the most dominant source of 
 absorption will be from water vapour, which is expected to be well mixed throughout their atmosphere. H$_2$O has 
@@ -48,6 +49,27 @@ the way. To measure H$_2$O in the atmospheres of exoplanets, astronomers use the
 Camera 3 (HST WFC3) infrared capabilities to detect the absorption signatures of H$_2$O at 0.9 $\mu$m with the G102 
 grism, and at 1.4 $\mu$m with the G141 grism [e.g. @kreidberg2015; @sing2016; @wakeford2017; @wakeford2018; @spake2018].
 
+## Calibration of instrument systematics with marginalisation
+
+While all telescopes aim at recording the light of distant worlds as accurately as possible, every 
+instrument will have its own signature that it superimposes on the collected signal. These effects that contaminate our 
+data are called "instrument systematics" and need to be calibrated out before an observation can be interpreted 
+truthfully. All the different systematics that influence the result recorded by an instrument are combined into 
+a systematic instrument model to be used during the calibration. These models are not always obvious and different 
+authors often suggest differing systematic instrument models being applied to data from the same instrument, often 
+favouring models that work particularly well for any given data set. This makes it hard to compare data sets to each 
+other, yielding moderately different results for the parameters of a transiting planet when a different systematic 
+model was applied to the data.
+
+The solution that was applied to WFC3 data in @wakeford2016 performs a marginalisation across a grid of systematic 
+models that take different corrections across an exoplanet transit data set into account. Following the method proposed 
+by @gibson2014, one performs a Levenberg-Marquardt least-squares minimization across all systematic models which yields 
+as set of fitted transit parameters for each systematic model. We then use the resulting Akaike Information 
+Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. These weights are then 
+used to calculate the marginalised fit parameters, leading to results that will not depend as heavily on the individual 
+choice of systematic model anymore. Finally, performing this for each lightcurve constructed at each wavelength from 
+the measured spectrum results in the measured transmission spectrum of the exoplanet.
+
 # Package functionality
 
 ``ExoTiC-ISM`` (Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation) is a Python package that 
@@ -56,13 +78,10 @@ for instrument based systematics that may impact the measurement, following the 
 currently implemented instrument systematic grid is composed of a series of 49  polynomial functions that are 
 specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], however, 
 can be adapted to other instruments.
-The package performs a Levenberg-Marquardt least-squares minimization across all systematic models with the 
-``sherpa`` package [@sherpa.v4.11.0] for modeling and fitting data, and then uses the resulting Akaike Information 
-Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. The final transit 
-depth and other transit parameters selected to be fitted (e.g., inclination, a/R$_*$, center of transit time) are then 
-calculated using the weights by marginalising over the fit parameters using each systematic model. This can then be 
-performed for each lightcurve constructed at each wavelength from the measured spectrum, resulting in the measured 
-transmission spectrum of the exoplanet. This method is different from evaluating each systematic model independently 
+The package performs the Levenberg-Marquardt least-squares minimization across all models with the 
+``sherpa`` package [@sherpa.v4.11.0] for modeling and fitting data, and then calculates the AIC and normalised weight to 
+marginalise over the fit parameters (e.g. transit depth $rl$, inclination $i$, a/R$_*$, center of transit time) using 
+each systematic model. This method is different from evaluating each systematic model independently 
 and selecting the “best” one purely by minimising the scatter of its residuals as that would not include a 
 penalisation for increased model complexity nor information from similarly likely systematic corrections. As the 
 authors of the original method paper state [@wakeford2016]: “The use of marginalisation 
@@ -79,7 +98,7 @@ exoplanets [@wakeford2016] observed in the IR with the G141 grism on HST's WFC3.
 in this paper implements a marginalisation for that same grism and extends its functionality to the G102 grism, which 
 uses the same grid of systematic models [see results by @wakeford2017; @wakeford2018]. The development in Python and 
 hosting the repository on GitHub will facilitate the usage of the package by researchers, as well as further 
-functional development.
+functional development; an introductory tutorial is provided in the form of a Jupyter Notebook.
 
 While its current capabilities are limited to WFC3 data taken with the G141 and G102 grism, the package’s 
 functionality will be extended to the UVIS G280 grism and the G430L and G750L gratings of the Space Telescope 
