@@ -7,7 +7,7 @@
 # ExoTiC-ISM
 **Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation**
 
-This code performs Levenberg-Marquardt least-squares minimization across a grid of pseudo-stochastic instrument systematic models to produce marginalised transit parameters given a lightcurve for a specified wavelength range.
+This code performs Levenberg-Marquardt least-squares minimisation across a grid of pseudo-stochastic instrument systematic models to produce marginalised transit parameters given a lightcurve for a specified wavelength range.
 
 This was developed and tested for data from Wide Field Camera 3 (WFC3) on the Hubble Space Telescope (HST), specifically with the G141 spectroscopic grism, as published in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract). This method can also be applied to the WFC3 IR G102 grism, and UVIS G280 grism by selecting the correct parameters.
 Future work includes plans to extend this to Space Telescope Imaging Spectrograph (STIS) instrument data, and eventually data from the James Webb Space Telescope (JWST).
@@ -17,7 +17,7 @@ These 50 instrument systematic models contain a combination of corrective factor
 
 The evidence (marginal liklihood) is calculated from the AIC for each model when fit with the data and converted to a normalised weighting that is used to marginalise each of the global fit parameters. See equations 15 and 16 in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract) to marginalise over the parameters and their uncertainties.
 
-The program makes use of the analytic transit model in [Mandel & Agol (2002)](https://ui.adsabs.harvard.edu/abs/2002ApJ...580L.171M/abstract) and a Levenberg-Marquardt least squares minimization using [Sherpa](https://sherpa.readthedocs.io/en/latest/), a Python package for modeling and fitting data. The transit model uses a 4-parameter limb darkening law, as outlined in [Claret (2010)](https://ui.adsabs.harvard.edu/abs/2000A%26A...363.1081C/abstract) and [Sing (2010)](https://ui.adsabs.harvard.edu/abs/2010A%26A...510A..21S/abstract).
+The program makes use of the analytic transit model in [Mandel & Agol (2002)](https://ui.adsabs.harvard.edu/abs/2002ApJ...580L.171M/abstract) and a Levenberg-Marquardt least squares minimisation using [Sherpa](https://sherpa.readthedocs.io/en/latest/), a Python package for modeling and fitting data. The transit model uses a 4-parameter limb darkening law, as outlined in [Claret (2010)](https://ui.adsabs.harvard.edu/abs/2000A%26A...363.1081C/abstract) and [Sing (2010)](https://ui.adsabs.harvard.edu/abs/2010A%26A...510A..21S/abstract).
 
 This package was built from the original IDL code used for the analysis in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract), initially translated by Matthew Hill and then further adapted and transformed into a full astronomy Python package with the help of Iva Laginja.
 
@@ -62,7 +62,7 @@ $ conda env create --file environment.yml
 
 - Go into the code directory:  
 ```bash
-$ cd exotic-ism
+$ cd exoticism
 ```
 
 - Copy the file `config.ini` and name the copy `config_local.ini`.
@@ -87,9 +87,9 @@ output_path = /Users/<YourUser>/<path-to-data>
 $ conda activate exoticism
 ```
 
-- Run the marginalization on the demo data from the template:  
+- Run the marginalisation on the demo data from the template:  
 ```bash
-$ python marginalization.py
+$ python marginalisation.py
 ```
 
 The script takes a short while to run and will output messages to the terminal and save the final data to the path you 
@@ -186,7 +186,7 @@ name of the stellar system data and a custom suffix, which you set in the config
 ### Changing input data and/or input parameters
 
 We provide demo data for the exoplanet WASP-17b, which is one of the datasets analyzed in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract).
-Please refer to section "Supported instruments and gratings" for a list of currently supported instruments and gratings. If you want to perform the marginalization on a different 
+Please refer to section "Supported instruments and gratings" for a list of currently supported instruments and gratings. If you want to perform the marginalisation on a different 
 transit dataset, you have to point the configfile to your input data folder and also update the planetary parameters by adding a new section to the configfile.
 
 #### Input filenames
