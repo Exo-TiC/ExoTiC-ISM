@@ -70,12 +70,21 @@ used to calculate the marginalised fit parameters, leading to results that will 
 choice of systematic model anymore. Finally, performing this for each lightcurve constructed at each wavelength from 
 the measured spectrum results in the measured transmission spectrum of the exoplanet.
 
-# Package functionality
+# The ``ExoTiC-ISM`` package
+
+## Functionality
 
 ``ExoTiC-ISM`` (Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation) is an open-source Python 
 package that computes the transit depth from a timeseries lightcurve, while sampling a grid of pseudo-stochastic models 
 to account for instrument based systematics that may impact the measurement, following the method proposed by 
-@gibson2014. The currently implemented instrument systematic grid is composed of a series of 49  polynomial functions 
+@gibson2014. While there are a number of Python solutions to create and fit transiting planet light curves (e.g. 
+``EXOTIC`` [@exotic], ``pyTransit`` [@pytransit], ``ktransit`` [@ktransit], ``BATMAN`` [@kreidberg2015]) and others 
+that calculate forward models and retrieval of transmission spectra (e.g. ``ExoTransmit`` [@ExoTransmitPy], 
+``PLATON`` [@zhang2019]) of which ExoCTK [@exoctk2] stands out as a modular data analysis package encapsulating 
+ several tools for for atmospheric characterisation, ``ExoTiC-ISM`` focuses on the marginalisation across different 
+ systematic models as outlined in @wakeford2016.
+
+The currently implemented instrument systematic grid is composed of a series of 49  polynomial functions 
 that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], 
 however, can be adapted to other instruments.
 The package performs the Levenberg-Marquardt least-squares minimization across all models with the 
@@ -89,16 +98,24 @@ allows for transparent interpretation and understanding of the instrument and th
 evaluated statistically for each data set, expanding the ability to make true and comprehensive comparisons between 
 exoplanet atmospheres.”
 
-``ExoTiC-ISM`` is written in Python and makes use of the packages ``numpy`` [@numpy1; @numpy2], ``astropy`` 
-[@astropy2013; @astropy2018], ``pandas`` [@pandas], ``matplotlib`` [@matplotlib; @matplotlib-zenodo], 
-``sherpa`` [@sherpa.v4.11.0] as well as some custom functions, like an implementation of the 
-transit function by @mandel2002 and a 4-parameter limb darkening law as outlined in @claret2000 and @sing2010. The 
-original code was written in IDL, which was used to publish marginalised transit parameters for five different 
+The original code was written in IDL, which was used to publish marginalised transit parameters for five different 
 exoplanets [@wakeford2016] observed in the IR with the G141 grism on HST's WFC3. The ``ExoTiC-ISM`` package described 
 in this paper implements a marginalisation for that same grism and extends its functionality to the G102 grism, which 
-uses the same grid of systematic models [see results by @wakeford2017; @wakeford2018]. The development in Python and 
-hosting the repository on GitHub will facilitate the usage of the package by researchers, as well as further 
-functional development; an introductory tutorial is provided in the form of a Jupyter Notebook.
+uses the same grid of systematic models [see results by @wakeford2017; @wakeford2018].
+
+## Dependencies and usage
+
+``ExoTiC-ISM`` is written in Python with support for Pyton 3.6 and 3.7 on MacOS and Linux. It makes use of the packages 
+``numpy`` [@numpy1; @numpy2], ``astropy`` [@astropy2013; @astropy2018], ``pandas`` [@pandas], 
+``matplotlib`` [@matplotlib; @matplotlib-zenodo], ``sherpa`` [@sherpa.v4.11.0] as well as some custom functions, 
+like an implementation of the transit function by @mandel2002. It applies a 4-parameter limb darkening law as outlined 
+in @claret2000 and @sing2010, using either the 1D Kurucz stellar models or the 3D stellar 
+atmosphere models by @magic2015. The required inputs for the analysis are two text files that contain the lightcurve 
+of the observed object, and a wavelength array. The development in Python and hosting the repository on GitHub will 
+facilitate the usage of the package by researchers, as well as further functional development; an introductory 
+tutorial is provided in the form of a Jupyter Notebook.
+
+## Outlook
 
 While its current capabilities are limited to WFC3 data taken with the G141 and G102 grism, the package’s 
 functionality will be extended to the UVIS G280 grism and the G430L and G750L gratings of the Space Telescope 
