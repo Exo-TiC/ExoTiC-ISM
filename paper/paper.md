@@ -106,7 +106,7 @@ uses the same grid of systematic models [see results by @wakeford2017; @wakeford
 ## Dependencies and usage
 
 ``ExoTiC-ISM`` is written in Python with support for Pyton 3.6 and 3.7 on MacOS and Linux. It makes use of the packages 
-``numpy`` [@numpy1; @numpy2], ``astropy`` [@astropy2013; @astropy2018], ``pandas`` [@pandas], 
+``numpy`` [@numpy1; @numpy2], ``astropy`` [@astropy2013; @astropy2018], ``pandas`` [@pandas-paper; @pandas-zenodo], 
 ``matplotlib`` [@matplotlib; @matplotlib-zenodo], ``sherpa`` [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] as well as some custom functions, 
 like an implementation of the transit function by @mandel2002. It applies a 4-parameter limb darkening law as outlined 
 in @claret2000 and @sing2010, using either the 1D Kurucz stellar models or the 3D stellar atmosphere models by @magic2015.
