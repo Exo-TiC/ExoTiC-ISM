@@ -109,10 +109,12 @@ uses the same grid of systematic models [see results by @wakeford2017; @wakeford
 ``numpy`` [@numpy1; @numpy2], ``astropy`` [@astropy2013; @astropy2018], ``pandas`` [@pandas], 
 ``matplotlib`` [@matplotlib; @matplotlib-zenodo], ``sherpa`` [@sherpa.v4.11.0] as well as some custom functions, 
 like an implementation of the transit function by @mandel2002. It applies a 4-parameter limb darkening law as outlined 
-in @claret2000 and @sing2010, using either the 1D Kurucz stellar models or the 3D stellar 
-atmosphere models by @magic2015. The required inputs for the analysis are two text files that contain the lightcurve 
-of the observed object, and a wavelength array. The development in Python and hosting the repository on GitHub will 
-facilitate the usage of the package by researchers, as well as further functional development; an introductory 
+in @claret2000 and @sing2010, using either the 1D Kurucz stellar models or the 3D stellar atmosphere models by @magic2015.
+
+The required inputs for the analysis are two text files that contain the lightcurve of the observed object, and a 
+wavelength array. Input parameters are rendered from a ``config.ini`` file and we provide an ``environment.yml`` file 
+to build a ``conda`` environment to run the package in. The development in Python and hosting the repository on GitHub 
+will facilitate the usage of the package by researchers, as well as further functional development; an introductory 
 tutorial is provided in the form of a Jupyter Notebook.
 
 ## Outlook
