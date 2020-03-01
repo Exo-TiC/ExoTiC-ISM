@@ -88,7 +88,7 @@ The currently implemented instrument systematic grid is composed of a series of 
 that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], 
 however, can be adapted to other instruments.
 The package performs the Levenberg-Marquardt least-squares minimization across all models with the 
-``sherpa`` package [@sherpa.v4.11.0] for modeling and fitting data, and then calculates the AIC and normalised weight to 
+``sherpa`` package [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] for modeling and fitting data, and then calculates the AIC and normalised weight to 
 marginalise over the fit parameters (e.g. transit depth $rl$, inclination $i$, a/R$_*$, center of transit time) using 
 each systematic model. This method is different from evaluating each systematic model independently 
 and selecting the “best” one purely by minimising the scatter of its residuals as that would not include a 
@@ -107,7 +107,7 @@ uses the same grid of systematic models [see results by @wakeford2017; @wakeford
 
 ``ExoTiC-ISM`` is written in Python with support for Pyton 3.6 and 3.7 on MacOS and Linux. It makes use of the packages 
 ``numpy`` [@numpy1; @numpy2], ``astropy`` [@astropy2013; @astropy2018], ``pandas`` [@pandas], 
-``matplotlib`` [@matplotlib; @matplotlib-zenodo], ``sherpa`` [@sherpa.v4.11.0] as well as some custom functions, 
+``matplotlib`` [@matplotlib; @matplotlib-zenodo], ``sherpa`` [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] as well as some custom functions, 
 like an implementation of the transit function by @mandel2002. It applies a 4-parameter limb darkening law as outlined 
 in @claret2000 and @sing2010, using either the 1D Kurucz stellar models or the 3D stellar atmosphere models by @magic2015.
 
