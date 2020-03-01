@@ -81,7 +81,7 @@ to account for instrument based systematics that may impact the measurement, fol
 ``EXOTIC`` [@exotic], ``pyTransit`` [@pytransit], ``ktransit`` [@ktransit], ``BATMAN`` [@kreidberg2015]) and others 
 that calculate forward models and retrieval of transmission spectra (e.g. ``ExoTransmit`` [@ExoTransmitPy], 
 ``PLATON`` [@zhang2019]) of which ``ExoCTK`` [@exoctk] stands out as a modular data analysis package encapsulating 
- several tools for for atmospheric characterisation, ``ExoTiC-ISM`` focuses on the marginalisation across different 
+ several tools for atmospheric characterisation, ``ExoTiC-ISM`` focuses on the marginalisation across different 
  systematic models as outlined in @wakeford2016.
 
 The currently implemented instrument systematic grid is composed of a series of 49  polynomial functions 
