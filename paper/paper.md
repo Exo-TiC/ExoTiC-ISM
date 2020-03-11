@@ -63,11 +63,11 @@ model was applied to the data.
 
 The solution that was applied to WFC3 data in @wakeford2016 performs a marginalisation across a grid of systematic 
 models that take different corrections across an exoplanet transit data set into account. Following the method proposed 
-by @gibson2014, one performs a Levenberg-Marquardt least-squares minimization across all systematic models which yields 
+by @gibson2014, a Levenberg-Marquardt least-squares minimization is performed across all systematic models which yields 
 as set of fitted transit parameters for each systematic model. We then use the resulting Akaike Information 
 Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. These weights are then 
 used to calculate the marginalised fit parameters, leading to results that will not depend as heavily on the individual 
-choice of systematic model anymore. Finally, performing this for each lightcurve constructed at each wavelength from 
+choice of systematic model. Finally, performing this for each lightcurve constructed at each wavelength from 
 the measured spectrum results in the measured transmission spectrum of the exoplanet.
 
 # The ``ExoTiC-ISM`` package
@@ -77,7 +77,7 @@ the measured spectrum results in the measured transmission spectrum of the exopl
 ``ExoTiC-ISM`` (Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation) is an open-source Python 
 package that computes the transit depth from a timeseries lightcurve, while sampling a grid of pseudo-stochastic models 
 to account for instrument based systematics that may impact the measurement, following the method proposed by 
-@gibson2014. While there are a number of Python solutions to create and fit transiting planet light curves (e.g. 
+@gibson2014 and implemented by @wakeford2016. While there are a number of Python solutions to create and fit transiting planet light curves (e.g. 
 ``EXOTIC`` [@exotic], ``pyTransit`` [@pytransit], ``ktransit`` [@ktransit], ``BATMAN`` [@kreidberg2015]) and others 
 that calculate forward models and retrieval of transmission spectra (e.g. ``ExoTransmit`` [@ExoTransmitPy], 
 ``PLATON`` [@zhang2019]) of which ``ExoCTK`` [@exoctk] stands out as a modular data analysis package encapsulating 
@@ -111,7 +111,7 @@ uses the same grid of systematic models [see results by @wakeford2017; @wakeford
 like an implementation of the transit function by @mandel2002. It applies a 4-parameter limb darkening law as outlined 
 in @claret2000 and @sing2010, using either the 1D Kurucz stellar models or the 3D stellar atmosphere models by @magic2015.
 
-The required inputs for the analysis are two text files that contain the lightcurve of the observed object, and a 
+The required inputs for the analysis are two text files that contain the uncorrected lightcurve of the observed object, and a 
 wavelength array. Input parameters are rendered from a ``config.ini`` file and we provide an ``environment.yml`` file 
 to build a ``conda`` environment to run the package in. The development in Python and hosting the repository on GitHub 
 will facilitate the usage of the package by researchers, as well as further functional development; an introductory 
