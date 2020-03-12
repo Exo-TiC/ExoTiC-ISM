@@ -80,7 +80,7 @@ to account for instrument based systematics that may impact the measurement, fol
 @gibson2014 and implemented by @wakeford2016. While there are a number of Python solutions to create and fit transiting 
 planet light curves (e.g. ``pyTransit`` [@pytransit], ``ktransit`` [@ktransit], ``BATMAN`` [@kreidberg2015]) and others 
 that calculate forward models and retrieval of transmission spectra (e.g. ``ExoTransmit`` [@ExoTransmitPy], 
-``PLATON`` [@zhang2019]) and instrument models (e.g. ``PandExo`` [@pandexo_software; @pandexo_paper]) of which 
+``PLATON`` [@zhang2019]) and instrument models (e.g. ``PandExo`` [@pandexo_software; @pandexo_paper]), of which 
 ``ExoCTK`` [@exoctk] stands out as a modular data analysis package encapsulating 
  several tools for atmospheric characterisation. ``ExoTiC-ISM`` is a lightcurve fitting tool focusing on correcting 
  systematics using the marginalisation technique and models outlined in @wakeford2016.
