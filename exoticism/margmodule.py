@@ -1,5 +1,5 @@
 """
-Helper module for transit marginalization.
+Helper module for transit marginalisation.
 """
 
 import os
@@ -373,13 +373,13 @@ def wfc3_systematic_model_grid_selection(selection):
     return wfc3_grid
 
 
-def marginalization(array, error, weight):
+def marginalisation(array, error, weight):
     """
-    Marginalization of the parameter array.
+    Marginalisation of the parameter array.
     :param array:  parameter array
     :param error:  error array
     :param weight: weighting
-    :return: marginalization parameter, error on marginalization parameter
+    :return: marginalisation parameter, error on marginalisation parameter
     """
 
     mean_param = np.sum(weight * array)

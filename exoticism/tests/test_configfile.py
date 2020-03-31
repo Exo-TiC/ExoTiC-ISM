@@ -1,7 +1,7 @@
 from exoticism.config import CONFIG_INI
 
 
-STANDARD_SECTIONS = ['data_paths', 'setup', 'smooth_model', 'W17', 'constants']
+STANDARD_SECTIONS = ['data_paths', 'setup', 'smooth_model', 'W17', 'simple_transit', 'constants']
 
 
 def test_main_sections():
@@ -45,11 +45,24 @@ def test_constants():
 
 
 def test_planet_parameters():
-    """Check that all planetary system sections have all necessary keys."""
+    """Check that all planetary system sections have all necessary keys.
+
+    If using a local configfile like recommended in the documentation, his test
+    will only catch missing planet parameters on custom planet sections if it is
+    run locally.
+    """
 
     planet_params = ['lightcurve_file', 'wvln_file', 'rl', 'epoch', 'inclin', 'ecc',
                      'omega', 'Per', 'aor', 'metallicity', 'Teff', 'logg']
     all_sections = CONFIG_INI.sections()
+
+    # First test the planet sections that are included by default
+    # Leaving simple_transit out since that has no associated data files for keys lightcurve_file and wvln_file
+    for sec in ['W17']:
+        for key in planet_params:
+            assert CONFIG_INI.has_option(sec, key)
+
+    # Then test any additional planet sections
     for sec in all_sections:
         if sec in STANDARD_SECTIONS:
             pass
