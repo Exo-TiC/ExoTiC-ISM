@@ -60,6 +60,11 @@ $ cd ExoTiC-ISM
 $ conda env create --file environment.yml
 ```
 
+- Install the package into this environment, in editable mode:
+```bash
+$ python setup.py develop
+```
+
 ### Set up local configfile
 
 - Go into the code directory:  
@@ -122,6 +127,13 @@ $ conda env create --name <myEnvName> --file environment.yml
 ```
 
 to give the environment your own name.
+
+The last step is to install the `exoticism` package into your newly created environment. We do currently not support a
+plain install ($ python setup.py install), instead please install it in editable mode:
+```bash
+$ python setup.py develop
+```
+
 
 ### Configuration file
 
