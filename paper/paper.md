@@ -129,7 +129,8 @@ for JWST data.
 # Acknowledgements
 
 The authors would like to acknowledge Matthew Hill who translated the first part of the IDL version of this code to 
-Python. We also thank the Sherpa team for their fast and detailed responses to questions we had during the 
+Python. We also acknowledge contributions by Tom J. Wilson to the statistical testing of the code. 
+We also thank the Sherpa team for their fast and detailed responses to questions we had during the 
 implementation of their package. This work is based on observations made with the NASA/ESA Hubble Space Telescope, 
 HST-GO-14918, that were obtained at the Space Telescope Science Institute, which is operated by the Association of 
 Universities for Research in Astronomy, Inc.
