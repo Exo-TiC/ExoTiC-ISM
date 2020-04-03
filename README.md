@@ -49,6 +49,10 @@ $ cd /User/<YourUser>/repos/
 ```bash
 $ git clone https://github.com/hrwakeford/ExoTiC-ISM.git
 ```
+or use SSH if that is your preferred way of cloning repositories:
+```bash
+$ git clone git@github.com:hrwakeford/ExoTiC-ISM.git
+```
 
 - Navigate into the cloned repository:  
 ```bash
