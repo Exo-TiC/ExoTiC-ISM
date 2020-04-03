@@ -243,6 +243,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.tx
 
 ### Acknowledgments
 
+* Tom J. Wilson for statistical testing of the code
 * Matthew Hill for a functional translation from IDL to Python
 * Iva Laginja for finding `Sherpa`, making the clunky `mpfit` dispensable
 * The [`Sherpa` team](https://github.com/sherpa/sherpa), providing a fantastic package and answering fast to GitHub issues
