@@ -63,7 +63,7 @@ model was applied to the data.
 
 The solution that was applied to WFC3 data in @wakeford2016 performs a marginalisation across a grid of systematic 
 models that take different corrections across an exoplanet transit data set into account. Following the method proposed 
-by @gibson2014, a Levenberg-Marquardt least-squares minimization is performed across all systematic models which yields 
+by @gibson2014, a Levenberg-Marquardt least-squares minimisation is performed across all systematic models which yields 
 as set of fitted transit parameters for each systematic model. We then use the resulting Akaike Information 
 Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. These weights are then 
 used to calculate the marginalised fit parameters, leading to results that will not depend as heavily on the individual 
@@ -77,18 +77,18 @@ the measured spectrum results in the measured transmission spectrum of the exopl
 ``ExoTiC-ISM`` (Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation) is an open-source Python 
 package that computes the transit depth from a timeseries lightcurve, while sampling a grid of pseudo-stochastic models 
 to account for instrument based systematics that may impact the measurement, following the method proposed by 
-@gibson2014 and implemented by @wakeford2016. While there are a number of Python solutions to create and fit transiting 
-planet light curves (e.g. ``pyTransit`` [@pytransit], ``ktransit`` [@ktransit], ``BATMAN`` [@kreidberg2015]) and others 
+@gibson2014 and implemented by @wakeford2016. There are a number of Python solutions to create and fit transiting 
+planet light curves (e.g. ``pyTransit`` [@pytransit], ``ktransit`` [@ktransit], ``BATMAN`` [@kreidberg2015]), others 
 that calculate forward models and retrieval of transmission spectra (e.g. ``ExoTransmit`` [@ExoTransmitPy], 
-``PLATON`` [@zhang2019]) and instrument models (e.g. ``PandExo`` [@pandexo_software; @pandexo_paper]), of which 
+``PLATON`` [@zhang2019]) as well as instrument models (e.g. ``PandExo`` [@pandexo_software; @pandexo_paper]), of which 
 ``ExoCTK`` [@exoctk] stands out as a modular data analysis package encapsulating 
- several tools for atmospheric characterisation. ``ExoTiC-ISM`` is a lightcurve fitting tool focusing on correcting 
- systematics using the marginalisation technique and models outlined in @wakeford2016.
+ several tools for atmospheric characterisation. ``ExoTiC-ISM`` is a lightcurve fitting tool that focuses particularly 
+ on correcting systematics using the marginalisation technique and models outlined in @wakeford2016.
 
-The currently implemented instrument systematic grid is composed of a series of 49  polynomial functions 
+The currently implemented instrument systematic grid is composed of a series of 49 polynomial functions 
 that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], 
 however, can be adapted to other instruments.
-The package performs the Levenberg-Marquardt least-squares minimization across all models with the 
+The package performs the Levenberg-Marquardt least-squares minimisation across all models with the 
 ``sherpa`` package [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] for modeling and fitting data, and then calculates the AIC and normalised weight to 
 marginalise over the fit parameters (e.g. transit depth $rl$, inclination $i$, a/R$_*$, center of transit time) using 
 each systematic model. This method is different from evaluating each systematic model independently 
