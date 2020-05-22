@@ -84,7 +84,11 @@ impacting a measurement. While other methods, such as Gaussian processes (GP), c
 systematics impacting your measurement, these methods can typically not easily determine which systematics are the most 
 important, and which combination of systematics is specifically affecting your data set. ``ExoTiC-ISM`` allows you to 
 evaluate a grid of instrument systematic models to obtain the needed information on the dominant systematics enabling 
-you to design the next observation to be more efficient and precise.
+you to design the next observation to be more efficient and precise. As the 
+authors of the original method paper state [@wakeford2016]: “The use of marginalisation 
+allows for transparent interpretation and understanding of the instrument and the impact of each systematic [model] 
+evaluated statistically for each data set, expanding the ability to make true and comprehensive comparisons between 
+exoplanet atmospheres.”
 
 The currently implemented instrument systematic grid is composed of a series of 49 polynomial functions 
 that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], 
@@ -95,11 +99,7 @@ calculates the AIC and normalised weight to
 marginalise over the fit parameters (e.g. transit depth $rl$, inclination $i$, a/R$_*$, center of transit time) using 
 each systematic model. This method is different from evaluating each systematic model independently 
 and selecting the “best” one purely by minimising the scatter of its residuals as that would not include a 
-penalisation for increased model complexity nor information from similarly likely systematic corrections. As the 
-authors of the original method paper state [@wakeford2016]: “The use of marginalisation 
-allows for transparent interpretation and understanding of the instrument and the impact of each systematic [model] 
-evaluated statistically for each data set, expanding the ability to make true and comprehensive comparisons between 
-exoplanet atmospheres.”
+penalisation for increased model complexity nor information from similarly likely systematic corrections.
 
 The original code was written in IDL, which was used to publish marginalised transit parameters for five different 
 exoplanets [@wakeford2016] observed in the IR with the G141 grism on HST's WFC3. The ``ExoTiC-ISM`` package described 
@@ -123,7 +123,7 @@ tutorial is provided in the form of a Jupyter Notebook.
 ## Outlook
 
 While its current capabilities are limited to WFC3 data taken with the G141 and G102 grism, the package’s 
-functionality will be extended to the UVIS G280 grism and the G430L and G750L gratings of the Space Telescope 
+functionality will be extended to the UVIS G280 grism [@wakeford2020] and the G430L and G750L gratings of the Space Telescope 
 Imaging Spectrograph (STIS) on HST. This will lay the groundwork for the envisioned future extension to implement 
 systematic grids for select instruments on the James Webb Space Telescope (JWST) and obtain robust transit spectra 
 for JWST data.
