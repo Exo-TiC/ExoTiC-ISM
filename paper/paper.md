@@ -80,10 +80,11 @@ to account for instrument based systematics that may impact the measurement, fol
 @gibson2014 and implemented by @wakeford2016. There are a number of Python solutions to create and fit transiting 
 planet light curves, however ``ExoTiC-ISM`` is a lightcurve fitting tool that focuses particularly 
 on the statistical method of marginalisation. It allows for a transparent method of data analysis of systematics
-impacting a measurement. While this can be acomplished using other methods such as Gaussian processes (GP), these can
-typically not easily determine which systematics are the most important, and which combination of systematics is 
-specifically affecting your data set. ``ExoTiC-ISM`` allows you to evaluate a grid of instrument systematic models to 
-obtain the needed information to design the next observation to be more efficient and precise.
+impacting a measurement. While other methods, such as Gaussian processes (GP), can account for the likelyhood of 
+systematics impacting your measurement, these methods can typically not easily determine which systematics are the most 
+important, and which combination of systematics is specifically affecting your data set. ``ExoTiC-ISM`` allows you to 
+evaluate a grid of instrument systematic models to obtain the needed information on the dominant systematics enabling 
+you to design the next observation to be more efficient and precise.
 
 The currently implemented instrument systematic grid is composed of a series of 49 polynomial functions 
 that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], 
