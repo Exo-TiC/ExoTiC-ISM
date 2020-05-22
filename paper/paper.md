@@ -78,18 +78,19 @@ the measured spectrum results in the measured transmission spectrum of the exopl
 package that computes the transit depth from a timeseries lightcurve, while sampling a grid of pseudo-stochastic models 
 to account for instrument based systematics that may impact the measurement, following the method proposed by 
 @gibson2014 and implemented by @wakeford2016. There are a number of Python solutions to create and fit transiting 
-planet light curves (e.g. ``pyTransit`` [@pytransit], ``ktransit`` [@ktransit], ``BATMAN`` [@kreidberg2015]), others 
-that calculate forward models and retrieval of transmission spectra (e.g. ``ExoTransmit`` [@ExoTransmitPy], 
-``PLATON`` [@zhang2019]) as well as instrument models (e.g. ``PandExo`` [@pandexo_software; @pandexo_paper]), of which 
-``ExoCTK`` [@exoctk] stands out as a modular data analysis package encapsulating 
- several tools for atmospheric characterisation. ``ExoTiC-ISM`` is a lightcurve fitting tool that focuses particularly 
- on correcting systematics using the marginalisation technique and models outlined in @wakeford2016.
+planet light curves, however ``ExoTiC-ISM`` is a lightcurve fitting tool that focuses particularly 
+on the statistical method of marginalisation. It allows for a transparent method of data analysis of systematics
+impacting a measurement. While this can be acomplished using other methods such as Gaussian processes (GP), these can
+typically not easily determine which systematics are the most important, and which combination of systematics is 
+specifically affecting your data set. ``ExoTiC-ISM`` allows you to evaluate a grid of instrument systematic models to 
+obtain the needed information to design the next observation to be more efficient and precise.
 
 The currently implemented instrument systematic grid is composed of a series of 49 polynomial functions 
 that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], 
 however, can be adapted to other instruments.
 The package performs the Levenberg-Marquardt least-squares minimisation across all models with the 
-``sherpa`` package [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] for modeling and fitting data, and then calculates the AIC and normalised weight to 
+``sherpa`` package [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] for modeling and fitting data, and then 
+calculates the AIC and normalised weight to 
 marginalise over the fit parameters (e.g. transit depth $rl$, inclination $i$, a/R$_*$, center of transit time) using 
 each systematic model. This method is different from evaluating each systematic model independently 
 and selecting the “best” one purely by minimising the scatter of its residuals as that would not include a 
