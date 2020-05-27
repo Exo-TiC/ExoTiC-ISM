@@ -17,7 +17,7 @@ authors:
 affiliations:
  - name: Space Telescope Science Institute, Baltimore, USA
    index: 1
- - name: Office national d’études et de recherches aérospatiales, Paris, France
+ - name: DOTA, ONERA, Université Paris Saclay, F-92322 Châtillon, France
    index: 2
  - name: School of Physics, University of Bristol, HH Wills Physics Laboratory, Tyndall Avenue, Bristol BS8 1TL, UK
    index: 3
