@@ -10,18 +10,20 @@ tags:
 authors:
   - name: Iva Laginja
     orcid: 0000-0003-1783-5023
-    affiliation: "1, 2"
+    affiliation: "1, 2, 3"
   - name: Hannah R. Wakeford
     orcid: 0000-0003-4328-3867
-    affiliation: 3
+    affiliation: 4
 affiliations:
  - name: Space Telescope Science Institute, Baltimore, USA
    index: 1
  - name: DOTA, ONERA, Université Paris Saclay, F-92322 Châtillon, France
    index: 2
- - name: School of Physics, University of Bristol, HH Wills Physics Laboratory, Tyndall Avenue, Bristol BS8 1TL, UK
+ - name: Aix Marseille Université, CNRS, CNES, LAM, Marseille, France
    index: 3
-date: 13 February 2020
+ - name: School of Physics, University of Bristol, HH Wills Physics Laboratory, Tyndall Avenue, Bristol BS8 1TL, UK
+   index: 4
+date: 27 May 2020
 bibliography: paper.bib
 
 ---
