@@ -64,6 +64,11 @@ $ cd ExoTiC-ISM
 $ conda env create --file environment.yml
 ```
 
+- Activate the environment:
+```bash
+$ conda activate exoticism
+```
+
 - Install the package into this environment, in editable mode:
 ```bash
 $ python setup.py develop
