@@ -32,7 +32,7 @@ bibliography: paper.bib
 
 ## Transit spectroscopy of exoplanets
 
-There has been a slew of planet detections outside our own solar system over the past two decades and several 
+There have been a slew of planet detections outside our own solar system over the past two decades and several 
 characterisation methods can be used to determine their chemical compositions. One of them is transit spectroscopy. 
 With this technique, astronomers measure the star light passing through an exoplanet's atmosphere while it is 
 transiting in front of its host star. Imprinted on this light are the absorption signatures of different 
