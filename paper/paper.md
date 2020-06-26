@@ -66,7 +66,7 @@ model was applied to the data.
 The solution that was applied to WFC3 data in @wakeford2016 performs a marginalisation across a grid of systematic 
 models that take different corrections across an exoplanet transit data set into account. Following the method proposed 
 by @gibson2014, a Levenberg-Marquardt least-squares minimisation is performed across all systematic models which yields 
-as set of fitted transit parameters for each systematic model. We then use the resulting Akaike Information 
+a set of fitted transit parameters for each systematic model. We then use the resulting Akaike Information 
 Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. These weights are then 
 used to calculate the marginalised fit parameters, leading to results that will not depend as heavily on the individual 
 choice of systematic model. Finally, performing this for each lightcurve constructed at each wavelength from 
@@ -110,7 +110,7 @@ uses the same grid of systematic models [see results by @wakeford2017; @wakeford
 
 ## Dependencies and usage
 
-``ExoTiC-ISM`` is written in Python with support for Pyton 3.6 and 3.7 on MacOS and Linux. It makes use of the packages 
+``ExoTiC-ISM`` is written in Python with support for Python 3.6 and 3.7 on MacOS and Linux. It makes use of the packages 
 ``numpy`` [@numpy1; @numpy2], ``astropy`` [@astropy2013; @astropy2018], ``pandas`` [@pandas-paper; @pandas-zenodo], 
 ``matplotlib`` [@matplotlib; @matplotlib-zenodo], ``sherpa`` [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] as well as some custom functions, 
 like an implementation of the transit function by @mandel2002. It applies a 4-parameter limb darkening law as outlined 
