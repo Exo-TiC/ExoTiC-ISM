@@ -1,0 +1,2 @@
+This directory contains notebooks used for the development of the package, from all phases of the project.
+These notebooks are not actively maintained and will probably be out of date with the current version of the package.

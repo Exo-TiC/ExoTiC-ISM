@@ -1,0 +1,39 @@
+name: ExoTiC-ISM CI
+
+on:
+    pull_request:
+     branches:
+     - master
+     - develop
+
+jobs:
+    build-linux:
+      runs-on: ubuntu-latest
+      strategy:
+        max-parallel: 5
+        matrix:
+          python-version: [3.6, 3.7]
+
+      steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          # $CONDA is an environment variable pointing to the root of the miniconda directory
+          $CONDA/bin/conda env update --file environment.yml --name base
+      - name: Lint with flake8
+        run: |
+          $CONDA/bin/conda install flake8
+          # stop the build if there are Python syntax errors or undefined names
+          # $CONDA/bin/flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          # $CONDA/bin/flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          # I commented the two above out to keep things simple
+          $CONDA/bin/flake8 . --count --max-line-length=127 --statistics --select=E9
+      - name: Test with pytest
+        run: |
+          conda install pytest
+          $CONDA/bin/pytest

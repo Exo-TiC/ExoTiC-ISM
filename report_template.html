@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+    <header lang="en">
+        
+        <title> Report page ExoTiC-ISM </title>
+        
+    </header>
+    
+    
+    <body>
+        
+        <h1> Report page ExoTIC-ISM </h1>
+        
+        <h2> {{ data_file }} - {{ run_name }} </h2>
+        
+            <h3> Input parameters: </h3>
+            
+            <p>
+            Number of systematic models: {{ nsys }}
+            </p>
+            
+            <p>
+            <h5> Planet parameters: </h5>
+            Rp/R* = {{ rl_in }}<br>
+            Epoch (MJD) = {{ epoch_in }}<br>
+            Inclination (deg) = {{ incl_deg_in }}<br>
+            Eccentricity = {{ ecc_in }}<br>
+            Omega (deg) = {{ omega_in }}<br>
+            Period (days) = {{ period_in }}<br>
+            a/R* = {{ aor_in }}
+            
+            <h5> Stellar parameters:</h5>
+            FeH (dex) = {{ metallicity }}<br>
+            Teff (K) = {{ teff_in }}<br>
+            log(g) (cgs) = {{ logg_in }}<br>
+            </p>
+            
+            <h3> Limb-darkening coefficients: </h3>
+            
+            <p>
+            C1 = {{ c1 }}<br>
+            C2 = {{ c2 }}<br>
+            C3 = {{ c3 }}<br>
+            C4 = {{ c4 }}
+            </p>
+            
+            <h3> Top five systematic models by their weight </h3>
+            
+            <p>
+            Model numbers = {{ top_five_numbers }}<br>
+            Weights = {{ top_five_weights }}<br>
+            SDNR = {{ top_five_sdnr }}<br>
+            <br>
+            <h5> Top model: </h5>
+            White noise = {{ white_noise }}<br>
+            Red noise = {{ red_noise }}<br>
+            Beta = {{ beta }}
+            </p>
+            
+            <h3> Marginalised parameters: </h3>
+            
+            <p>
+            {{ num_rejected }} models do not satisfy the positive AIC condition and were removed
+            from the marginalisation. Their model numbers are (numbering starts at 0):<br>
+            {{ indices_rejected }}
+            </p>
+            
+            <p>
+            If None, parameter was not fit for.<br>
+            <br>
+            Rp/R* = {{ rl_marg }} +/- {{ rl_marg_err }}<br>
+            Epoch (MJD) = {{ epoch_marg }} +/- {{ epoch_marg_err }}<br>
+            Inclination (rad) = {{ inclin_rad_marg }} +/- {{ inclin_rad_marg_err }}<br>
+            Inclination (deg) = {{ inclin_deg_marg }} +/- {{ inclin_deg_marg_err }}<br>
+            System density (Ms+Mp/R^3) = {{ msmpr_marg }} +/- {{ msmpr_marg_err }}<br>
+            a/R* = {{ aor_marg }} +/- {{ aor_marg_err }}<br>
+            </p>
+            
+            <h3> Systematics </h3>
+            
+            <p>
+            <img src="{{ systematics_figure }}" alt="systematics" width="900" height="650"><br>
+            <br>
+            <i>Top:</i> Evidence-based weight associated with each systematic model when fit with the data.
+                <i>Middle:</i> Standard deviation of the residuals after correcting for each systematic model.
+                <i>Bottom:</i> Radius ratio measured from the transit depth when the light curve has been corrected
+                using each systematic model. <i>If present, grey crosses mark discarded systematic models (negative AIC).</i>
+            </p>
+            
+            <h3> Lightcurves </h3>
+            
+            <p>
+            <img src="{{ lightcurve_figure }}" alt="lightcurve" width="900" height="650"><br>
+            <br>
+                <i>Top:</i> Input lightcurve with no systematic model correction applied.
+                <i>Middle:</i> Lightcurve corrected by highest weight systematic model plotted with the smooth
+                planetary transit model centred on the mid-transit time.
+                <i>Bottom:</i> Residuals and uncertainties associated with the middle panel lightcurve. The upper and
+                lower standard deviation bounds are shown in dotted lines relative to zero.
+            </p>
+        
+    </body>
+</html>

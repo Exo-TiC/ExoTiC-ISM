@@ -1,6 +1,6 @@
 To reference [NEWNAME] in publications, please cite both of the following:
 
-- Wakeford et al.: "Marginalizing Instrument Systematics in HST WFC3 Transit Light Curves", 2016 ApJ 819 10
+- Wakeford et al.: "Marginalising Instrument Systematics in HST WFC3 Transit Light Curves", 2016 ApJ 819 10
 - NATIVE SOFTWARE DOI: [...]
 
 We provide the following LaTeX/BibTeX acknowledgment if there is no specific place to cite the above:
@@ -14,7 +14,7 @@ work of \cite{wakeford2016}."
 @ARTICLE{wakeford2016,
        author = {{Wakeford}, H.~R. and {Sing}, D.~K. and {Evans}, T. and {Deming}, D. and
          {Mandell}, A.},
-        title = "{Marginalizing Instrument Systematics in HST WFC3 Transit Light Curves}",
+        title = "{Marginalising Instrument Systematics in HST WFC3 Transit Light Curves}",
       journal = {\apj},
      keywords = {methods: data analysis, planets and satellites: atmospheres, techniques: spectroscopic, Astrophysics - Earth and Planetary Astrophysics},
          year = "2016",
