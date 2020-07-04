@@ -38,13 +38,13 @@ With this technique, astronomers measure the star light passing through an exopl
 transiting in front of its host star. Imprinted on this light are the absorption signatures of different 
 materials - atoms and molecules in the gas phase, or solid or liquid aerosols - in the transiting planet's atmosphere. 
 Using a spectrograph the flux is recorded as a function of wavelength, allowing scientists to construct 
-absorption/transmission spectra, with the goal to identify the chemical composition of the atmosphere.
+absorption/transmission spectra, with the goal of identifying the chemical composition of the atmosphere.
 
 There are many different chemical components that transit spectroscopy can reveal in an exoplanet, but a majority of the 
 exoplanets studied via transmission spectroscopy are on close-in orbits around their 
 stars lasting only several days, most of them giant Jupiter- or Neptune-sized worlds. For these giant, 
-close-in exoplanets the most dominant source of 
-absorption will be from water vapour, which is expected to be well mixed throughout their atmosphere. H$_2$O has 
+close-in exoplanets, the most dominant source of 
+absorption will be from water vapour, which is expected to be well-mixed throughout their atmosphere. H$_2$O has 
 strong absorption in the near-infrared (IR) with broad peaks at 0.9, 1.4, 1.9, and 2.7 $\mu$m. However, these 
 absorption features cannot be measured from the ground as the Earth's atmosphere, filled with water vapour, gets in 
 the way. To measure H$_2$O in the atmospheres of exoplanets, astronomers use the Hubble Space Telescope's Wide Field 
@@ -65,7 +65,7 @@ model was applied to the data.
 
 The solution that was applied to WFC3 data in @wakeford2016 performs a marginalisation across a grid of systematic 
 models that take different corrections across an exoplanet transit data set into account. Following the method proposed 
-by @gibson2014, a Levenberg-Marquardt least-squares minimisation is performed across all systematic models which yields 
+by @gibson2014, a Levenberg-Marquardt least-squares minimisation is performed across all systematic models, which yields 
 a set of fitted transit parameters for each systematic model. We then use the resulting Akaike Information 
 Criterion (AIC) to calculate each model’s evidence (marginal likelihood) and normalised weight. These weights are then 
 used to calculate the marginalised fit parameters, leading to results that will not depend as heavily on the individual 
@@ -79,8 +79,8 @@ the measured spectrum results in the measured transmission spectrum of the exopl
 ``ExoTiC-ISM`` (Exoplanet Timeseries Characterisation - Instrument Systematic Marginalisation) is an open-source Python 
 package that computes the transit depth from a timeseries lightcurve, while sampling a grid of pseudo-stochastic models 
 to account for instrument based systematics that may impact the measurement, following the method proposed by 
-@gibson2014 and implemented by @wakeford2016. There are a number of Python solutions to create and fit transiting 
-planet light curves, however ``ExoTiC-ISM`` is a lightcurve fitting tool that focuses particularly 
+@gibson2014 and implemented by @wakeford2016. While there are a number of Python solutions to create and fit transiting 
+planet light curves, ``ExoTiC-ISM`` is a lightcurve fitting tool that focuses particularly 
 on the statistical method of marginalisation. It allows for a transparent method of data analysis of systematics
 impacting a measurement. While other methods, such as Gaussian processes (GP), can account for the likelyhood of 
 systematics impacting your measurement, these methods can typically not easily determine which systematics are the most 
@@ -93,8 +93,8 @@ evaluated statistically for each data set, expanding the ability to make true an
 exoplanet atmospheres.”
 
 The currently implemented instrument systematic grid is composed of a series of 49 polynomial functions 
-that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016], 
-however, can be adapted to other instruments.
+that are specifically designed to account for systematics associated with the detectors on HST WFC3 [@wakeford2016]. 
+However, this can be adapted to other instruments.
 The package performs the Levenberg-Marquardt least-squares minimisation across all models with the 
 ``sherpa`` package [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] for modeling and fitting data, and then 
 calculates the AIC and normalised weight to 
@@ -112,13 +112,13 @@ uses the same grid of systematic models [see results by @wakeford2017; @wakeford
 
 ``ExoTiC-ISM`` is written in Python with support for Python 3.6 and 3.7 on MacOS and Linux. It makes use of the packages 
 ``numpy`` [@numpy1; @numpy2], ``astropy`` [@astropy2013; @astropy2018], ``pandas`` [@pandas-paper; @pandas-zenodo], 
-``matplotlib`` [@matplotlib; @matplotlib-zenodo], ``sherpa`` [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2] as well as some custom functions, 
+``matplotlib`` [@matplotlib; @matplotlib-zenodo], ``sherpa`` [@sherpa.v4.11.0; @sherpa_paper_1; @sherpa_paper_2], as well as some custom functions, 
 like an implementation of the transit function by @mandel2002. It applies a 4-parameter limb darkening law as outlined 
 in @claret2000 and @sing2010, using either the 1D Kurucz stellar models or the 3D stellar atmosphere models by @magic2015.
 
 The required inputs for the analysis are two text files that contain the uncorrected lightcurve of the observed object, and a 
 wavelength array. Input parameters are rendered from a ``config.ini`` file and we provide an ``environment.yml`` file 
-to build a ``conda`` environment to run the package in. The development in Python and hosting the repository on GitHub 
+to build a ``conda`` environment to run the package in. Development in Python and hosting the repository on GitHub 
 will facilitate the usage of the package by researchers, as well as further functional development; an introductory 
 tutorial is provided in the form of a Jupyter Notebook.
 
