@@ -1,24 +1,45 @@
-To reference [NEWNAME] in publications, please cite both of the following:
-
-- Wakeford et al.: "Marginalising Instrument Systematics in HST WFC3 Transit Light Curves", 2016 ApJ 819 10
-- NATIVE SOFTWARE DOI: [...]
+If you used ExoTiC-ISM in your work, please cite the software paper Laginja and Wakeford, 2020 [1] and the version you
+used in your work [2]. To cite the scientific method, please cite Wakeford et al., 2016 [3].
 
 We provide the following LaTeX/BibTeX acknowledgment if there is no specific place to cite the above:
-"This research made use of [NEWNAME] \citep{SOFTWARE-DOI}, a software package developed based on the 
-work of \cite{wakeford2016}."
+"This research made use of ExoTiC-ISM \citep{Laginja2020}, a software package for marginalised transit parameters, which
+was developed based on the work by \cite{Wakeford2016}."
 
-@SOFTWARE{
-      ..fill this in once we have a DOI...
+[1] Laginja and Wakeford 2020, software paper
+@article{Laginja2020,
+  doi = {10.21105/joss.02281},
+  url = {https://doi.org/10.21105/joss.02281},
+  year = {2020},
+  publisher = {The Open Journal},
+  volume = {5},
+  number = {51},
+  pages = {2281},
+  author = {Iva Laginja and Hannah R. Wakeford},
+  title = {{ExoTiC-ISM}: A {P}ython package for marginalised exoplanet transit parameters across a grid of systematic instrument models},
+  journal = {Journal of Open Source Software}
 }
 
-@ARTICLE{wakeford2016,
-       author = {{Wakeford}, H.~R. and {Sing}, D.~K. and {Evans}, T. and {Deming}, D. and
-         {Mandell}, A.},
-        title = "{Marginalising Instrument Systematics in HST WFC3 Transit Light Curves}",
+[2] Software version
+@software{iva_laginja_2020_3923986,
+  author       = {Iva Laginja and
+                  Hannah R. Wakeford},
+  title        = {ExoTiC-ISM v2.0.0},
+  month        = jun,
+  year         = 2020,
+  publisher    = {Zenodo},
+  version      = {v2.0.0},
+  doi          = {10.5281/zenodo.3923986},
+  url          = {https://doi.org/10.5281/zenodo.3923986}
+}
+
+[3] Wakeford et al. 2016, method paper
+@ARTICLE{Wakeford2016,
+       author = {{Wakeford}, H.~R. and {Sing}, D.~K. and {Evans}, T. and {Deming}, D. and {Mandell}, A.},
+        title = "{Marginalizing Instrument Systematics in HST WFC3 Transit Light Curves}",
       journal = {\apj},
      keywords = {methods: data analysis, planets and satellites: atmospheres, techniques: spectroscopic, Astrophysics - Earth and Planetary Astrophysics},
-         year = "2016",
-        month = "Mar",
+         year = 2016,
+        month = mar,
        volume = {819},
        number = {1},
           eid = {10},
