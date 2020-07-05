@@ -238,6 +238,8 @@ This table shows the functional form of the systematic models as presented in Wa
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines, and the process for submitting issues and pull requests to us.
 Please also see our [CODE OF CONDUCT](CODE_OF_CONDUCT.md).
 
+If you use this code in your work, please find citation snippets to give us credits with in [CITATION.txt](CITATION.txt).
+
 ### Authors
 
 * **Hannah R. Wakeford** - *Method author* - [@hrwakeford](https://github.com/hrwakeford)
