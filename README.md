@@ -1,6 +1,7 @@
 <!-- PROJECT SHIELDS -->
-[![MIT License][license-shield]][license-url]
+[![DOI](https://joss.theoj.org/papers/10.21105/joss.02281/status.svg)](https://doi.org/10.21105/joss.02281)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3923986.svg)](https://doi.org/10.5281/zenodo.3923986)
+[![MIT License][license-shield]][license-url]
 ![Python version][python-version-url]
 
 <img src="logo.png" align="left" />
@@ -236,6 +237,8 @@ This table shows the functional form of the systematic models as presented in Wa
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines, and the process for submitting issues and pull requests to us.
 Please also see our [CODE OF CONDUCT](CODE_OF_CONDUCT.md).
+
+If you use this code in your work, please find citation snippets to give us credits with in [CITATION.txt](CITATION.txt).
 
 ### Authors
 
