@@ -257,7 +257,7 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
         wdel = 1
 
     if grating == 'G102':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
-        sav = readsav(os.path.join(dirsen, 'G141.WFC3.sensitivity.sav'))  # wssens, sensitivity
+        sav = readsav(os.path.join(dirsen, 'G102.WFC3.sensitivity.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 1
