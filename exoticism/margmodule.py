@@ -39,7 +39,7 @@ def _transit_model(pars, x, sh, x_in_phase=False):
            constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
     ecc: eccentricity of the system
     omega: that other weird angle in a planetary system
-    per: period of planet transit in days
+    period: period of planet transit in days
     tzero: first x-array data entry in days (MJD)
     c1, c2, c3, c4: limb darkening parameters (quadratic)
     m_fac: global slope factor in the systematic model
@@ -53,34 +53,50 @@ def _transit_model(pars, x, sh, x_in_phase=False):
     HSTper = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
 
     # Define each of the parameters that are read into the fitting routine
-    (rl, flux0, epoch, inclin, MsMpR, ecc, omega, per, tzero, c1, c2, c3, c4,
+    (rl, flux0, epoch, inclin, MsMpR, ecc, omega, period, tzero, c1, c2, c3, c4,
      m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4) = pars
 
     # Attaching some units
     x *= u.d
     epoch *= u.d
     inclin *= u.rad
-    per *= u.d
+    period *= u.d
     tzero *= u.d
 
+    # If sh is None, we will just pass an array of zeros (meaning no shift on the data) so that the consecutive code
+    # goes through all right. This will guarantee that we can also evaluate the model on a smooth grid, as the sh array
+    # containing all zeros created here will always have the same length as x.
     if sh is None:
         temp = x.shape[0]
         sh = np.zeros(temp)
 
+    # Including a grid of shifts for the data, sh, only makes sense on actual data, but not on an interpolated grid
+    # of x-values. The code will catch this by comparing the array size of the x data with the array size of the sh data.
+    # If the x array is longer than sh, you are likely using an sh array for data with an interpolated x array, which
+    # will not work, so we will stop you here. If x is shorter than sh, then something else is wrong.
+    # If you want to evaluate this transit model, that also includes a systematic model, on such a smooth
+    # x-value array, you need to set sh=None.
+    elif x.shape[0] > sh.shape[0]:
+        raise ValueError('Your x array is longer than your sh array: You are likely trying to calculate a smooth model'
+                         'while also passing an a grid of shifts - this is not possible. Please set sh=None if you'
+                         'want to calculate a smooth model. Alternatively, you might simply be passing in wrong data.')
+    elif x.shape[0] < sh.shape[0]:
+        raise ValueError('Your sh array is longer than you x array - please make sure those have the same length.')
+
     if not x_in_phase:
-        phase = phase_calc(x, epoch, per)  # Per in days here
+        phase = phase_calc(x, epoch, period)  # Period in days here
         HSTphase = phase_calc(x, tzero, HSTper)
     else:
         phase = x.value
         HSTphase = x.value
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = impact_param(per.to(u.second), MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
+    b0 = impact_param(period.to(u.second), MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
     # b0 is the impact parameter function and I am not sure how this is handled in BATMAN - need to look into this.
-    mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
+    mulimb0, _mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
     systematic_model = sys_model(phase, HSTphase, sh, m_fac, hstp1, hstp2, hstp3, hstp4,
                                  xshift1, xshift2, xshift3, xshift4)
 
@@ -94,7 +110,7 @@ class Transit(model.RegriddableModel1D):
     """Transit model
 
     Params below as inputs, all other params read from configfile:
-    rl, epoch, inclin, ecc, omega, per, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4.
+    rl, epoch, inclin, ecc, omega, period, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4.
     The x-data array is read from disk as specified in the configfile.
     --------
     Params:
@@ -388,17 +404,17 @@ def marginalisation(array, error, weight):
     return mean_param, variance_param
 
 
-@u.quantity_input(per=u.s, incl=u.rad)
-def impact_param(per, msmpr, phase, incl):
+@u.quantity_input(period=u.s, incl=u.rad)
+def impact_param(period, msmpr, phase, incl):
     """
     Calculate impact parameter.
-    :param per: float, period in seconds
+    :param period: float, period in seconds
     :param msmpr: float, MsMpR
     :param phase: array, phase
     :param incl: float, inclination in radians
     """
 
-    b0 = (G * per * per / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
+    b0 = (G * period * period / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
          (np.sin(phase * 2 * np.pi * u.rad)) ** 2 + (np.cos(incl) * np.cos(phase * 2 * np.pi * u.rad)) ** 2)
 
     return b0
