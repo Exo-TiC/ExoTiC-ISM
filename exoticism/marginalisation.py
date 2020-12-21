@@ -11,8 +11,8 @@ fitting package Sherpa.
 limb_darkening.py contains a python translation of the 3D limb darkening code in the original IDL. It uses Astropy
 for fitting the models.
 
-Initial translation of Python to IDL was done by Matthew Hill (mhill92@gmail).
-Continued translation and implementation of Sherpa by Iva Laginja (laginja.iva@gmail.com).
+Initial translation of Python to IDL was done by Matthew Hill (@mattjhill).
+Continued translation and implementation of Sherpa by Iva Laginja (@ivalaginja).
 """
 
 import os
