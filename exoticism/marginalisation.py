@@ -48,10 +48,10 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     :param x: time array
     :param y: array of normalised flux values equal to the length of the x array
     :param err: array of error values corresponding to the flux values in y
-    :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err)
+    :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err); can be None
     :param wavelength: array of wavelengths covered to compute y
     :param output_dir: string of folder path to save the data to, e.g. '/Users/MyUser/data/'
-    :param run_name: string of the individual run name, e.g. 'whitelight', or 'bin1', or '115-120micron'
+    :param run_name: arbitrary string of the individual run name, e.g. 'whitelight', or 'bin1', or '115-120micron'
     :param plotting: bool, default=True; whether or not interactive plots should be shown
     :return:
     """
