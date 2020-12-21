@@ -44,6 +44,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     - MANDEL & AGOL (2002) transit model (occultnl.py)
     - GRID OF SYSTEMATIC MODELS for WFC3 to test against the data (marg.wfc3_systematic_model_grid_selection() )
 
+    :param exoplanet: string, exoplanet name to be worked on, as defined in CONFIG_INI.get('setup', 'data_set')
     :param x: time array
     :param y: array of normalised flux values equal to the length of the x array
     :param err: array of error values corresponding to the flux values in y
