@@ -63,9 +63,25 @@ def _transit_model(pars, x, sh, x_in_phase=False):
     period *= u.d
     tzero *= u.d
 
+    # If sh is None, we will just pass an array of zeros (meaning no shift on the data) so that the consecutive code
+    # goes through all right. This will guarantee that we can also evaluate the model on a smooth grid, as the sh array
+    # containing all zeros created here will always have the same length as x.
     if sh is None:
         temp = x.shape[0]
         sh = np.zeros(temp)
+
+    # Including a grid of shifts for the data, sh, only makes sense on actual data, but not on an interpolated grid
+    # of x-values. The code will catch this by comparing the array size of the x data with the array size of the sh data.
+    # If the x array is longer than sh, you are likely using an sh array for data with an interpolated x array, which
+    # will not work, so we will stop you here. If x is shorter than sh, then something else is wrong.
+    # If you want to evaluate this transit model, that also includes a systematic model, on such a smooth
+    # x-value array, you need to set sh=None.
+    elif x.shape[0] > sh.shape[0]:
+        raise ValueError('Your x array is longer than your sh array: You are likely trying to calculate a smooth model'
+                         'while also passing an a grid of shifts - this is not possible. Please set sh=None if you'
+                         'want to calculate a smooth model. Alternatively, you might simply be passing in wrong data.')
+    elif x.shape[0] < sh.shape[0]:
+        raise ValueError('Your sh array is longer than you x array - please make sure those have the same length.')
 
     if not x_in_phase:
         phase = phase_calc(x, epoch, period)  # Period in days here
