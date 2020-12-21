@@ -80,7 +80,7 @@ def _transit_model(pars, x, sh, x_in_phase=False):
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
     # b0 is the impact parameter function and I am not sure how this is handled in BATMAN - need to look into this.
-    mulimb0, mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
+    mulimb0, _mulimbf = occultnl(rl, c1, c2, c3, c4, b0)
     systematic_model = sys_model(phase, HSTphase, sh, m_fac, hstp1, hstp2, hstp3, hstp4,
                                  xshift1, xshift2, xshift3, xshift4)
 
