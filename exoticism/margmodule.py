@@ -39,7 +39,7 @@ def _transit_model(pars, x, sh, x_in_phase=False):
            constant1 = (G*Per*Per/(4*!pi*!pi))^(1/3) -> MsMpR = (a_Rs/constant1)^3
     ecc: eccentricity of the system
     omega: that other weird angle in a planetary system
-    per: period of planet transit in days
+    period: period of planet transit in days
     tzero: first x-array data entry in days (MJD)
     c1, c2, c3, c4: limb darkening parameters (quadratic)
     m_fac: global slope factor in the systematic model
@@ -53,14 +53,14 @@ def _transit_model(pars, x, sh, x_in_phase=False):
     HSTper = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
 
     # Define each of the parameters that are read into the fitting routine
-    (rl, flux0, epoch, inclin, MsMpR, ecc, omega, per, tzero, c1, c2, c3, c4,
+    (rl, flux0, epoch, inclin, MsMpR, ecc, omega, period, tzero, c1, c2, c3, c4,
      m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4) = pars
 
     # Attaching some units
     x *= u.d
     epoch *= u.d
     inclin *= u.rad
-    per *= u.d
+    period *= u.d
     tzero *= u.d
 
     if sh is None:
@@ -68,14 +68,14 @@ def _transit_model(pars, x, sh, x_in_phase=False):
         sh = np.zeros(temp)
 
     if not x_in_phase:
-        phase = phase_calc(x, epoch, per)  # Per in days here
+        phase = phase_calc(x, epoch, period)  # Period in days here
         HSTphase = phase_calc(x, tzero, HSTper)
     else:
         phase = x.value
         HSTphase = x.value
 
     # Calculate the impact parameter as a function of the planetary phase across the star.
-    b0 = impact_param(per.to(u.second), MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
+    b0 = impact_param(period.to(u.second), MsMpR, phase, inclin)  # period in sec here, incl in radians, b0 in stellar radii
 
     # Occultnl would be replaced with BATMAN if possible. The main result we need is the rl - radius ratio
     # The c1-c4 are the non-linear limb-darkening parameters
@@ -94,7 +94,7 @@ class Transit(model.RegriddableModel1D):
     """Transit model
 
     Params below as inputs, all other params read from configfile:
-    rl, epoch, inclin, ecc, omega, per, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4.
+    rl, epoch, inclin, ecc, omega, period, m_fac, hstp1, hstp2, hstp3, hstp4, xshift1, xshift2, xshift3, xshift4.
     The x-data array is read from disk as specified in the configfile.
     --------
     Params:
@@ -388,17 +388,17 @@ def marginalisation(array, error, weight):
     return mean_param, variance_param
 
 
-@u.quantity_input(per=u.s, incl=u.rad)
-def impact_param(per, msmpr, phase, incl):
+@u.quantity_input(period=u.s, incl=u.rad)
+def impact_param(period, msmpr, phase, incl):
     """
     Calculate impact parameter.
-    :param per: float, period in seconds
+    :param period: float, period in seconds
     :param msmpr: float, MsMpR
     :param phase: array, phase
     :param incl: float, inclination in radians
     """
 
-    b0 = (G * per * per / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
+    b0 = (G * period * period / (4 * np.pi * np.pi)) ** (1 / 3.) * (msmpr ** (1 / 3.)) * np.sqrt(
          (np.sin(phase * 2 * np.pi * u.rad)) ** 2 + (np.cos(incl) * np.cos(phase * 2 * np.pi * u.rad)) ** 2)
 
     return b0
