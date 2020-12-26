@@ -40,14 +40,18 @@ def test_marginalisation_w17_fit_time():
     reader = csv.reader(open(os.path.join(run_dir, 'report.csv'), 'r'))
     output_dict = dict(reader)
 
-    # Test against old values obtained with commit ???
+    ### Test against old values obtained with commit ???
+
+    # Marginalized parameters
     assert np.isclose(float(output_dict['rl_marg']), 3, rtol=0.00001), 'rl_marg value is off'
     assert np.isclose(float(output_dict['rl_marg_err']), 3, rtol=0.00001), 'rl_marg_err value is off'
     assert np.isclose(float(output_dict['epoch_marg']), 3, rtol=0.00001), 'epoch_marg value is off'
     assert np.isclose(float(output_dict['epoch_marg_err']), 3, rtol=0.00001), 'epoch_marg_err value is off'
 
+    # Number of rejected systematic models
     assert int(output_dict['num_rejected']) == 0, 'No systematic model should have been rejected'
 
+    # Top five model stats - the lists get saved out weirdly to the csv, so reading them back in is a little cumbersome
     this = output_dict['top_five_numbers'][1:-2]
     that = this.split(' ')
     top_five_numbers = [int(i) for i in that]
@@ -63,6 +67,7 @@ def test_marginalisation_w17_fit_time():
     top_five_sdnr = [int(i) for i in that]
     assert top_five_sdnr == [0, 1, 2], 'top_five_sdnr are incorrect'
 
+    # Noise stats
     assert np.isclose(float(output_dict['white_noise']), 3, rtol=0.00001), 'white_noise value is off'
     assert np.isclose(float(output_dict['red_noise']), 3, rtol=0.00001), 'red_noise value is off'
     assert np.isclose(float(output_dict['beta']), 3, rtol=0.00001), 'beta value is off'
