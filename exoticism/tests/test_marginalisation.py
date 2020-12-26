@@ -43,7 +43,7 @@ def test_marginalisation_w17_fit_time():
 
     ### Test against old values obtained with ExoTiC-ISM v2.0.0 (tagged)
 
-    # Marginalized parameters
+    # Marginalised parameters
     assert np.isclose(float(output_dict['rl_marg']), 0.12401905841361494, rtol=1e-9), 'rl_marg value is off'
     assert np.isclose(float(output_dict['rl_marg_err']), 0.00019560291752800156, rtol=1e-9), 'rl_marg_err value is off'
     assert np.isclose(float(output_dict['epoch_marg']), 57957.97007898447, rtol=1e-6), 'epoch_marg value is off'
