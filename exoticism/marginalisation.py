@@ -15,6 +15,7 @@ Initial translation of Python to IDL was done by Matthew Hill (@mattjhill).
 Continued translation and implementation of Sherpa by Iva Laginja (@ivalaginja).
 """
 
+import csv
 import os
 import time
 from shutil import copy
@@ -652,7 +653,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
         for i in range(len(best_five_index)):
             sdnr_top_five[i] = marg.calc_sdnr(masked_residuals[best_five_index[i]])
 
-        # Prepare variables that go into PDF report
+        # Prepare variables that go into PDF report as dictionary
         template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
                          'run_name': run_name,
                          'nsys': nsys,
@@ -694,7 +695,13 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
                          'lightcurve_figure': fig2_fname}
 
         # Create PDf report
-        marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+exoplanet+'_'+grating+'_'+run_name+'.pdf'))
+        report_fname = f'report_{exoplanet}_{grating}_{run_name}'
+        marg.create_pdf_report(template_vars, os.path.join(outDir, f'{report_fname}.pdf'))
+
+        # Save the same data in a machine readable output format, csv
+        csv_report = csv.writer(open(os.path.join(outDir, 'report.csv'), 'w'))
+        for key, val in template_vars.items():
+            csv_report.writerow([key, val])
 
 
 if __name__ == '__main__':
