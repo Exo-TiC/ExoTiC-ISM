@@ -15,6 +15,7 @@ def test_marginalisation_w17_fit_time():
     exoplanet = 'W17'
 
     # Set up data paths that work with CI
+    # Outputs will be dumped in the same directory like this test lives in and can/should be deleted when done.
     output_dir = ''
     data_dir = find_data_parent('data')
 
