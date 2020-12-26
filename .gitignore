@@ -1,5 +1,6 @@
 *.pyc
 *.iml
+.DS_Store
 config_local.ini
 outputs/
 .ipynb_checkpoints/
