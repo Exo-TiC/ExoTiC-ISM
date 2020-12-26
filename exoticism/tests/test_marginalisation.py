@@ -41,13 +41,13 @@ def test_marginalisation_w17_fit_time():
     reader = csv.reader(open(os.path.join(run_dir, 'report.csv'), 'r'))
     output_dict = dict(reader)
 
-    ### Test against old values obtained with commit ???
+    ### Test against old values obtained with ExoTiC-ISM v2.0.0 (tagged)
 
     # Marginalized parameters
-    assert np.isclose(float(output_dict['rl_marg']), 3, rtol=0.00001), 'rl_marg value is off'
-    assert np.isclose(float(output_dict['rl_marg_err']), 3, rtol=0.00001), 'rl_marg_err value is off'
-    assert np.isclose(float(output_dict['epoch_marg']), 3, rtol=0.00001), 'epoch_marg value is off'
-    assert np.isclose(float(output_dict['epoch_marg_err']), 3, rtol=0.00001), 'epoch_marg_err value is off'
+    assert np.isclose(float(output_dict['rl_marg']), 0.12401905841361494, rtol=1e-9), 'rl_marg value is off'
+    assert np.isclose(float(output_dict['rl_marg_err']), 0.00019560291752800156, rtol=1e-9), 'rl_marg_err value is off'
+    assert np.isclose(float(output_dict['epoch_marg']), 57957.97007898447, rtol=1e-6), 'epoch_marg value is off'
+    assert np.isclose(float(output_dict['epoch_marg_err']), 0.0001836464061859145, rtol=1e-9), 'epoch_marg_err value is off'
 
     # Number of rejected systematic models
     assert int(output_dict['num_rejected']) == 0, 'No systematic model should have been rejected'
@@ -57,21 +57,24 @@ def test_marginalisation_w17_fit_time():
     that = this.split(' ')
     top_five_numbers = [int(i) for i in that]
     assert top_five_numbers == [0, 1, 2], 'top_five_numbers are incorrect'
+    assert top_five_numbers == [40, 30, 41, 45, 33], 'top_five_numbers are incorrect'
 
     this = output_dict['top_five_weights'][1:-2]
     that = this.split(' ')
     top_five_weights = [int(i) for i in that]
     assert top_five_weights == [0, 1, 2], 'top_five_weights are incorrect'
+    assert np.allclose(top_five_weights, [0.10877472617236775, 0.08219481507255598, 0.08213473840712483, 0.08096430014677133, 0.06651390301754695], rtol=1e-9), 'top_five_weights are incorrect'
 
     this = output_dict['top_five_sdnr'][1:-2]
     that = this.split(' ')
     top_five_sdnr = [int(i) for i in that]
     assert top_five_sdnr == [0, 1, 2], 'top_five_sdnr are incorrect'
+    assert np.allclose(top_five_sdnr, [122.82905364, 125.7510669, 122.29547469, 122.34196309, 122.81473885], rtol=1e-6), 'top_five_sdnr are incorrect'
 
     # Noise stats
-    assert np.isclose(float(output_dict['white_noise']), 3, rtol=0.00001), 'white_noise value is off'
-    assert np.isclose(float(output_dict['red_noise']), 3, rtol=0.00001), 'red_noise value is off'
-    assert np.isclose(float(output_dict['beta']), 3, rtol=0.00001), 'beta value is off'
+    assert np.isclose(float(output_dict['white_noise']), 0.00017134399252019425, rtol=1e-9), 'white_noise value is off'
+    assert np.isclose(float(output_dict['red_noise']), 2.9945171057075465e-5, rtol=1e-9), 'red_noise value is off'
+    assert np.isclose(float(output_dict['beta']), 1.1389386251150133, rtol=1e-9), 'beta value is off'
 
 
 if __name__ == '__main__':
