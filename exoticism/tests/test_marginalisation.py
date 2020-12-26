@@ -9,7 +9,7 @@ from exoticism.marginalisation import total_marg
 
 
 def test_marginalisation_w17_fit_time():
-    """Test the correct marginalise parameters for W17 with the grid selection 'fit time'."""
+    """Test the correct marginalised parameters for W17 with the grid selection 'fit time'."""
 
     # Set the star/exoplanet system to W17
     exoplanet = 'W17'
