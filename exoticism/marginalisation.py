@@ -74,10 +74,11 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
 
     # Copy the config.ini to the experiment folder.
     print('Saving the configfile to outputs folder.')
+    config_parent = marg.find_data_parent('exoticism')
     try:
-        copy('config_local.ini', outDir)
+        copy(os.path.join(config_parent, 'exoticism', 'config_local.ini'), outDir)
     except IOError:
-        copy('config.ini', outDir)
+        copy(os.path.join(config_parent, 'exoticism', 'config.ini'), outDir)
 
     # READ THE CONSTANTS
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
