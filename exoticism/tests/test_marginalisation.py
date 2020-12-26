@@ -75,7 +75,3 @@ def test_marginalisation_w17_fit_time():
     assert np.isclose(float(output_dict['white_noise']), 0.00017134399252019425, rtol=1e-9), 'white_noise value is off'
     assert np.isclose(float(output_dict['red_noise']), 2.9945171057075465e-5, rtol=1e-9), 'red_noise value is off'
     assert np.isclose(float(output_dict['beta']), 1.1389386251150133, rtol=1e-9), 'beta value is off'
-
-
-if __name__ == '__main__':
-    test_marginalisation_w17_fit_time()
