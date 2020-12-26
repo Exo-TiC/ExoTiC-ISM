@@ -52,23 +52,23 @@ def test_marginalisation_w17_fit_time():
     # Number of rejected systematic models
     assert int(output_dict['num_rejected']) == 0, 'No systematic model should have been rejected'
 
-    # Top five model stats - the lists get saved out weirdly to the csv, so reading them back in is a little cumbersome
-    this = output_dict['top_five_numbers'][1:-2]
-    that = this.split(' ')
-    top_five_numbers = [int(i) for i in that]
-    assert top_five_numbers == [0, 1, 2], 'top_five_numbers are incorrect'
+    # Top five model stats - the lists get saved out without commas to the csv, so reading them back in is a little cumbersome
+    this = output_dict['top_five_numbers'][1:-1]        # read stringified list without commas and reject brackets
+    that = this.split(' ')                              # split by white space
+    that_clean = list(filter(None, that))               # reject entries that are empty (in case there where double white spaces)
+    top_five_numbers = [int(i) for i in that_clean]     # cast into list of ints
     assert top_five_numbers == [40, 30, 41, 45, 33], 'top_five_numbers are incorrect'
 
-    this = output_dict['top_five_weights'][1:-2]
+    this = output_dict['top_five_weights'][1:-1]
     that = this.split(' ')
-    top_five_weights = [int(i) for i in that]
-    assert top_five_weights == [0, 1, 2], 'top_five_weights are incorrect'
+    that_clean = list(filter(None, that))
+    top_five_weights = [float(i) for i in that_clean]
     assert np.allclose(top_five_weights, [0.10877472617236775, 0.08219481507255598, 0.08213473840712483, 0.08096430014677133, 0.06651390301754695], rtol=1e-9), 'top_five_weights are incorrect'
 
-    this = output_dict['top_five_sdnr'][1:-2]
+    this = output_dict['top_five_sdnr'][1:-1]
     that = this.split(' ')
-    top_five_sdnr = [int(i) for i in that]
-    assert top_five_sdnr == [0, 1, 2], 'top_five_sdnr are incorrect'
+    that_clean = list(filter(None, that))
+    top_five_sdnr = [float(i) for i in that_clean]
     assert np.allclose(top_five_sdnr, [122.82905364, 125.7510669, 122.29547469, 122.34196309, 122.81473885], rtol=1e-6), 'top_five_sdnr are incorrect'
 
     # Noise stats
