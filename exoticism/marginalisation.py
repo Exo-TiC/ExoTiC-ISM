@@ -465,8 +465,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     masked_model_x = np.ma.masked_array(sys_model_phase, mask=bigmasksmooth)
 
     # Calculate the model weights
-    beta = np.min(masked_aic)
-    w_q = (np.exp(masked_aic - beta)) / np.sum(np.exp(masked_aic - beta))  # weights
+    beta_wq = np.max(masked_aic)
+    w_q = (np.exp(masked_aic - beta_wq)) / np.sum(np.exp(masked_aic - beta_wq))  # weights
 
     #  This is just for runtime outputs
     n01 = np.where(w_q >= 0.05)
