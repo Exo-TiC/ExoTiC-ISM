@@ -44,10 +44,15 @@ def test_marginalisation_w17_fit_time():
     ### Test against old values obtained with ExoTiC-ISM v2.0.0 (tagged)
 
     # Marginalised parameters
-    assert np.isclose(float(output_dict['rl_marg']), 0.12401905841361494, rtol=1e-9), 'rl_marg value is off'
-    assert np.isclose(float(output_dict['rl_marg_err']), 0.00019560291752800156, rtol=1e-9), 'rl_marg_err value is off'
-    assert np.isclose(float(output_dict['epoch_marg']), 57957.97007898447, rtol=1e-6), 'epoch_marg value is off'
-    assert np.isclose(float(output_dict['epoch_marg_err']), 0.0001836464061859145, rtol=1e-9), 'epoch_marg_err value is off'
+    set_rl_marg = 0.12401905841361494
+    set_rl_marg_err = 0.00019560291752800156
+    set_epoch_marg = 57957.97007898447
+    set_epoch_marg_err = 0.0001836464061859145
+
+    assert np.isclose(float(output_dict['rl_marg']), set_rl_marg, rtol=set_rl_marg_err), 'rl_marg value is off'
+    assert np.isclose(float(output_dict['rl_marg_err']), set_rl_marg_err, rtol=1e-9), 'rl_marg_err value is off'
+    assert np.isclose(float(output_dict['epoch_marg']), set_epoch_marg, rtol=set_epoch_marg_err), 'epoch_marg value is off'
+    assert np.isclose(float(output_dict['epoch_marg_err']), set_epoch_marg_err, rtol=1e-9), 'epoch_marg_err value is off'
 
     # Number of rejected systematic models
     assert int(output_dict['num_rejected']) == 0, 'No systematic model should have been rejected'
