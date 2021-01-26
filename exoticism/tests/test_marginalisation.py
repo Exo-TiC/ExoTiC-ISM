@@ -68,7 +68,7 @@ def test_marginalisation_w17_fit_time():
     that = this.split(' ')
     that_clean = list(filter(None, that))
     top_five_weights = [float(i) for i in that_clean]
-    assert np.allclose(top_five_weights, [0.10877472617236775, 0.08219481507255598, 0.08213473840712483, 0.08096430014677133, 0.06651390301754695], rtol=1e-4), 'top_five_weights are incorrect'
+    assert np.allclose(top_five_weights, [0.10877472617236775, 0.08219481507255598, 0.08213473840712483, 0.08096430014677133, 0.06651390301754695], rtol=1e-3), 'top_five_weights are incorrect'
 
     this = output_dict['top_five_sdnr'][1:-1]
     that = this.split(' ')
