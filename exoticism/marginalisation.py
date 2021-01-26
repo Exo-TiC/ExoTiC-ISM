@@ -415,7 +415,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
     # Print all the AIC values
     print('AIC for all systems: {}'.format(sys_evidenceAIC))
 
-    # REFORMAT all arrays, masking all negative AIC values
+    # REFORMAT all arrays, masking all poor AIC evidence values
     sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, -1e10)
     np.ma.set_fill_value(sys_evidenceAIC_masked, np.nan)
 
@@ -432,7 +432,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
                                                       np.where(sys_evidenceAIC_masked.mask == False)))
     print('Valid model AIC values = {}'.format(sys_evidenceAIC_masked))
 
-    # Mask models numbers that have negative AIC
+    # Mask models numbers that have poor AIC evidence values
     masked_chi = np.ma.masked_array(sys_stats[:, 3], mask=sys_evidenceAIC_masked.mask)
     masked_dof = np.ma.masked_array(sys_stats[:, 2], mask=sys_evidenceAIC_masked.mask)
     masked_aic = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
