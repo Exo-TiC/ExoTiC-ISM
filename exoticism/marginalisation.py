@@ -433,6 +433,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
     print('Valid model AIC values = {}'.format(sys_evidenceAIC_masked))
 
     # Mask models numbers that have negative AIC
+    masked_chi = np.ma.masked_array(sys_stats[:, 3], mask=sys_evidenceAIC_masked.mask)
+    masked_dof = np.ma.masked_array(sys_stats[:, 2], mask=sys_evidenceAIC_masked.mask)
     masked_aic = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
     masked_rl = np.ma.masked_array(sys_params[:, 0], mask=sys_evidenceAIC_masked.mask)             # transit depth
     masked_rl_err = np.ma.masked_array(sys_params_err[:, 0], mask=sys_evidenceAIC_masked.mask)     # transit depth error
@@ -673,6 +675,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
                          'c3': c3,
                          'c4': c4,
                          'top_five_numbers': best_five_index,
+                         'top_five_numbers': best_five_index,
+                         'top_five_dof': masked_dof[best_five_index],
+                         'top_five_chisq': masked_chi[best_five_index],
                          'top_five_weights': w_q[best_five_index],
                          'top_five_sdnr': sdnr_top_five,
                          'white_noise': sys_stats[best_sys_weight, 5],
