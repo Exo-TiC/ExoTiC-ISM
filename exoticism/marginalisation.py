@@ -51,7 +51,7 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
     :param err: array of error values corresponding to the flux values in y
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err); can be None
     :param wavelength: array of wavelengths covered to compute y
-    :param ld_model: string, '3D' or '2D', defines which limb darkening models to use
+    :param ld_model: string, '3D' or '1D', defines which limb darkening models to use
     :param grating: string, which instrument grating to use, e.g. 'G141'
     :param grid_selection: string, which systematic grid to use: grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
     :param output_dir: string of folder path to save the data to, e.g. '/Users/MyUser/data/'
