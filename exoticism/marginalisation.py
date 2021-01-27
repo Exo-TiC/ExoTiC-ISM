@@ -15,6 +15,7 @@ Initial translation of Python to IDL was done by Matthew Hill (@mattjhill).
 Continued translation and implementation of Sherpa by Iva Laginja (@ivalaginja).
 """
 
+import csv
 import os
 import time
 from shutil import copy
@@ -34,7 +35,7 @@ from exoticism.limb_darkening import limb_dark_fit
 import exoticism.margmodule as marg
 
 
-def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plotting=True):
+def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_selection, output_dir, run_name, plotting=True, report=True):
     """
     Produce marginalised transit parameters from HST lightcurves over a specified wavelength range.
 
@@ -50,9 +51,13 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     :param err: array of error values corresponding to the flux values in y
     :param sh: array corresponding to the shift in wavelength position on the detector throughout the visit. (same length as x, y and err); can be None
     :param wavelength: array of wavelengths covered to compute y
+    :param ld_model: string, '3D' or '1D', defines which limb darkening models to use
+    :param grating: string, which instrument grating to use, e.g. 'G141'
+    :param grid_selection: string, which systematic grid to use: grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
     :param output_dir: string of folder path to save the data to, e.g. '/Users/MyUser/data/'
     :param run_name: arbitrary string of the individual run name, e.g. 'whitelight', or 'bin1', or '115-120micron'
     :param plotting: bool, default=True; whether or not interactive plots should be shown
+    :param report: bool, default=True, whether or not to create a PDF report
     :return:
     """
 
@@ -69,10 +74,11 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
 
     # Copy the config.ini to the experiment folder.
     print('Saving the configfile to outputs folder.')
+    config_parent = marg.find_data_parent('exoticism')
     try:
-        copy('config_local.ini', outDir)
+        copy(os.path.join(config_parent, 'exoticism', 'config_local.ini'), outDir)
     except IOError:
-        copy('config.ini', outDir)
+        copy(os.path.join(config_parent, 'exoticism', 'config.ini'), outDir)
 
     # READ THE CONSTANTS
     HST_period = CONFIG_INI.getfloat('constants', 'HST_period') * u.d
@@ -97,16 +103,14 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
     logg = CONFIG_INI.getfloat(exoplanet, 'logg')   # log(g), stellar gravity - depends on whether 1D or 3D limb darkening models are used
 
     # Define limb darkening directory, which is inside this package
-    limbDir = os.path.join(CONFIG_INI.get('data_paths', 'local_path'), 'Limb-darkening')
-    ld_model = CONFIG_INI.get('setup', 'ld_model')
-    grat = CONFIG_INI.get('setup', 'grating')
-    _uLD, c1, c2, c3, c4, _cp1, _cp2, _cp3, _cp4, _aLD, _bLD = limb_dark_fit(grat, wavelength, M_H, Teff, logg, limbDir,
-                                                                      ld_model)
+    limb_dir_parent = marg.find_data_parent('Limb-darkening')
+    limbDir = os.path.join(limb_dir_parent, 'Limb-darkening')
+    _uLD, c1, c2, c3, c4, _cp1, _cp2, _cp3, _cp4, _aLD, _bLD = limb_dark_fit(grating, wavelength, M_H, Teff, logg, limbDir,
+                                                                             ld_model)
 
     # SELECT THE SYSTEMATIC GRID OF MODELS TO USE
     # 1 in the grid means the parameter is fixed, 0 means it is free
     # grid_selection: either one from 'fix_time', 'fit_time', 'fit_inclin', 'fit_msmpr' or 'fit_ecc'
-    grid_selection = CONFIG_INI.get('setup', 'grid_selection')
     grid = marg.wfc3_systematic_model_grid_selection(grid_selection)
     nsys, nparams = grid.shape   # nsys = number of systematic models, nparams = number of parameters
 
@@ -640,7 +644,6 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
              allow_pickle=True)
 
     ### Save as PDF report
-    report = CONFIG_INI.get('setup', 'report')
     if report:
 
         # Figure out best five models through the highest weights, and their SDNR
@@ -651,9 +654,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
         for i in range(len(best_five_index)):
             sdnr_top_five[i] = marg.calc_sdnr(masked_residuals[best_five_index[i]])
 
-        # Prepare variables that go into PDF report
+        # Prepare variables that go into PDF report as dictionary
         template_vars = {'data_file': CONFIG_INI.get(exoplanet, 'lightcurve_file'),
-                         'run_name': CONFIG_INI.get('data_paths', 'run_name'),
+                         'run_name': run_name,
                          'nsys': nsys,
                          'rl_in': CONFIG_INI.getfloat(exoplanet, 'rl'),
                          'epoch_in': CONFIG_INI.getfloat(exoplanet, 'epoch'),
@@ -693,7 +696,13 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plott
                          'lightcurve_figure': fig2_fname}
 
         # Create PDf report
-        marg.create_pdf_report(template_vars, os.path.join(outDir, 'report_'+exoplanet+'_'+grat+'_'+run_name+'.pdf'))
+        report_fname = f'report_{exoplanet}_{grating}_{run_name}'
+        marg.create_pdf_report(template_vars, os.path.join(outDir, f'{report_fname}.pdf'))
+
+        # Save the same data in a machine readable output format, csv
+        csv_report = csv.writer(open(os.path.join(outDir, 'report.csv'), 'w'))
+        for key, val in template_vars.items():
+            csv_report.writerow([key, val])
 
 
 if __name__ == '__main__':
@@ -716,12 +725,16 @@ if __name__ == '__main__':
     x, y, err, sh = np.loadtxt(os.path.join(dataDir, get_timeseries), skiprows=7, unpack=True)
     wavelength = np.loadtxt(os.path.join(dataDir, get_wvln), skiprows=3)
 
-    # What to call the run and whether to turn plotting on
+    # What to call the run and whether to turn plotting on, and some setup parameters
     run_name = CONFIG_INI.get('data_paths', 'run_name')
     plotting = CONFIG_INI.getboolean('setup', 'plotting')
+    report = CONFIG_INI.get('setup', 'report')
+    ld_model = CONFIG_INI.get('setup', 'ld_model')
+    grating = CONFIG_INI.get('setup', 'grating')
+    grid_selection = CONFIG_INI.get('setup', 'grid_selection')
 
     # Run the main function
-    total_marg(exoplanet, x, y, err, sh, wavelength, output_dir, run_name, plotting)
+    total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_selection, output_dir, run_name, plotting, report)
 
     end_time = time.time()
     print('\nTime it took to run the code:', (end_time-start_time)/60, 'min')

@@ -469,7 +469,8 @@ def create_pdf_report(template_vars, outfile):
 
     # Create Jinja environment and get template
     from jinja2 import Environment, FileSystemLoader
-    env = Environment(loader=FileSystemLoader(CONFIG_INI.get('data_paths', 'local_path')))
+    template_dir = find_data_parent('exoticism')
+    env = Environment(loader=FileSystemLoader(template_dir))
     template = env.get_template('report_template.html')
 
     # Render HTML with input variables
