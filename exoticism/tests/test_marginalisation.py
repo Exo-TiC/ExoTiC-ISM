@@ -74,7 +74,7 @@ def test_marginalisation_w17_fit_time():
     that = this.split(' ')
     that_clean = list(filter(None, that))
     top_five_sdnr = [float(i) for i in that_clean]
-    assert np.allclose(top_five_sdnr, [122.82905364, 125.7510669, 122.29547469, 122.34196309, 122.81473885], rtol=1e-6), 'top_five_sdnr are incorrect'
+    assert np.allclose(top_five_sdnr, [122.82905364, 125.7510669, 122.29547469, 122.34196309, 122.81473885], rtol=1e-3), 'top_five_sdnr are incorrect'
 
     # Noise stats
     assert np.isclose(float(output_dict['white_noise']), 0.00017134399252019425, rtol=1e-9), 'white_noise value is off'
