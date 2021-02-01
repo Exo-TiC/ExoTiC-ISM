@@ -22,7 +22,7 @@ $ pytest
 ```
 This will run all tests and give you a test report with passing and failing tests. The package `pytest` is automatically
 installed in the `exoticism` conda environment when creating it from our `environment.yml` file as described in the
-[Quickstart section of our README](README.md/Quickstart).
+[Quickstart section of our README](README.md/#quickstart).
 
 ## Code of conduct
 This package follows the Contributor Covenant [Code of Conduct](CODE_OF_CONDUCT.md) to provide a welcoming community to everybody.
