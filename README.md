@@ -23,7 +23,7 @@ The program makes use of the analytic transit model in [Mandel & Agol (2002)](ht
 
 This package was built from the original IDL code used for the analysis in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract), initially translated by Matthew Hill and then further adapted and transformed into a full astronomy Python package with the help of Iva Laginja.
 
-Note how this is not an installable package, but you will  always need to clone it if you want to work with it.
+Note how this package is not distributed through pip or conda, so you will  always need to clone it if you want to work with it.
 
 
 ## Table of contents
