@@ -23,7 +23,30 @@ The program makes use of the analytic transit model in [Mandel & Agol (2002)](ht
 
 This package was built from the original IDL code used for the analysis in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract), initially translated by Matthew Hill and then further adapted and transformed into a full astronomy Python package with the help of Iva Laginja.
 
-Note how this is not an installable package, but you will  always need to clone it if you want to work with it.
+Note how this package is not distributed through pip or conda, so you will  always need to clone it if you want to work with it.
+
+
+## Table of contents
+
+* [Supported instruments and gratings](#supported-instruments-and-gratings)
+* [Quickstart](#quickstart)
+  * [Clone the repo and create conda environment](#clone-the-repo-and-create-conda-environment)
+  * [Set up local configfile](#set-up-local-configfile)
+  * [Run the main script](#run-the-main-script)
+* [Full setup](#full-setup)
+  * [Prerequisites](#prerequisites)
+  * [Configuration file](#configuration-file)
+  * [Output data](#output-data)
+  * [Changing input data and/or input parameters](#changing-input-data-andor-input-parameters)
+  * [Input filenames](#input-filenames)
+  * [The Systematic Model Grid](#the-systematic-model-grid)
+  * [Running the testing suite](#running-the-testing-suite)
+* [About this repository](#about-this-repository)
+  * [Contributing and code of conduct](#contributing-and-code-of-conduct)
+  * [Authors](#authors)
+  * [Licence](#license)
+  * [Acknowledgments](#acknowledgments)
+  
 
 ## Supported instruments and gratings
 Current supported instruments and gratings are:  
@@ -229,6 +252,9 @@ the respective stellar and planetary parameters section, with a placeholder for 
 <img src="Systematic_model_tabel.png" align="left" />
 This table shows the functional form of the systematic models as presented in Wakeford et al. (2016). Each check mark shows which of the parameters are thawed in the model and fit to the data in combination. The grid contains corrections for a linear trend in time across the whole observation, corrections for thermal variations on the time scale of a HST orbit around the Earth, and positional shifts of the observed spectrum on the detector.
 
+
+### Running the testing suite
+Please see [here](CONTRIBUTING.md/#running-the-test-suite) how to run our units tests locally.
 
 
 ## About this repository
