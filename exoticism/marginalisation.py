@@ -415,8 +415,8 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
     # Print all the AIC values
     print('AIC for all systems: {}'.format(sys_evidenceAIC))
 
-    # REFORMAT all arrays, masking all negative AIC values
-    sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, 0.)
+    # REFORMAT all arrays, masking all poor AIC evidence values
+    sys_evidenceAIC_masked = np.ma.masked_less(sys_evidenceAIC, -1e10)
     np.ma.set_fill_value(sys_evidenceAIC_masked, np.nan)
 
     # Print some info about good and bad models
@@ -432,7 +432,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
                                                       np.where(sys_evidenceAIC_masked.mask == False)))
     print('Valid model AIC values = {}'.format(sys_evidenceAIC_masked))
 
-    # Mask models numbers that have negative AIC
+    # Mask models numbers that have poor AIC evidence values
+    masked_chi = np.ma.masked_array(sys_stats[:, 3], mask=sys_evidenceAIC_masked.mask)
+    masked_dof = np.ma.masked_array(sys_stats[:, 2], mask=sys_evidenceAIC_masked.mask)
     masked_aic = np.ma.masked_array(sys_evidenceAIC, mask=sys_evidenceAIC_masked.mask)
     masked_rl = np.ma.masked_array(sys_params[:, 0], mask=sys_evidenceAIC_masked.mask)             # transit depth
     masked_rl_err = np.ma.masked_array(sys_params_err[:, 0], mask=sys_evidenceAIC_masked.mask)     # transit depth error
@@ -673,6 +675,9 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
                          'c3': c3,
                          'c4': c4,
                          'top_five_numbers': best_five_index,
+                         'top_five_aicevidence': masked_aic[best_five_index],
+                         'top_five_dof': masked_dof[best_five_index],
+                         'top_five_chisq': masked_chi[best_five_index],
                          'top_five_weights': w_q[best_five_index],
                          'top_five_sdnr': sdnr_top_five,
                          'white_noise': sys_stats[best_sys_weight, 5],
