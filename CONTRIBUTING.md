@@ -8,7 +8,7 @@ We recommend that you **fork** the repository and submit your requests according
 1) Search previous issues and pull requests as your question or suggestion might be a duplicate.
 2) Open a separate issue or pull request for each suggestion or bug report.
 3) Pull requests, issues and commits should have a useful title.
-4) Give every PR a description.
+4) Give every PR a description and open it against **develop**, the default branch of the repository.
 5) Every PR that adds or changes a feature should also add or change the/an according **test**, if applicable, as well
 as **documentation**.
 
