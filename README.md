@@ -25,6 +25,29 @@ This package was built from the original IDL code used for the analysis in [Wake
 
 Note how this is not an installable package, but you will  always need to clone it if you want to work with it.
 
+
+## Table of contents
+
+* [Supported instruments and gratings](#supported-instruments-and-gratings)
+* [Quickstart](#quickstart)
+  * [Clone the repo and create conda environment](#clone-the-repo-and-create-conda-environment)
+  * [Set up local configfile](#set-up-local-configfile)
+  * [Run the main script](#run-the-main-script)
+* [Full setup](#full-setup)
+  * [Prerequisites](#prerequisites)
+  * [Configuration file](#configuration-file)
+  * [Output data](#output-data)
+  * [Changing input data and/or input parameters](#changing-input-data-andor-input-parameters)
+  * [Input filenames](#input-filenames)
+  * [The Systematic Model Grid](#the-systematic-model-grid)
+  * [Running the testing suite](#running-the-testing-suite)
+* [About this repository](#about-this-repository)
+  * [Contributing and code of conduct](#contributing-and-code-of-conduct)
+  * [Authors](#authors)
+  * [Licence](#license)
+  * [Acknowledgments](#acknowledgments)
+  
+
 ## Supported instruments and gratings
 Current supported instruments and gratings are:  
 **HST** *WFC3* IR/G102, IR/G141 grisms
