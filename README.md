@@ -230,6 +230,9 @@ the respective stellar and planetary parameters section, with a placeholder for 
 This table shows the functional form of the systematic models as presented in Wakeford et al. (2016). Each check mark shows which of the parameters are thawed in the model and fit to the data in combination. The grid contains corrections for a linear trend in time across the whole observation, corrections for thermal variations on the time scale of a HST orbit around the Earth, and positional shifts of the observed spectrum on the detector.
 
 
+### Running the testing suite
+Please see [here](CONTRIBUTING.md/#running-the-test-suite) how to run our units tests locally.
+
 
 ## About this repository
 
