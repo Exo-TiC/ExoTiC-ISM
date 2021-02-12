@@ -632,21 +632,23 @@ def total_marg(exoplanet, x, y, err, sh, wavelength, ld_model, grating, grid_sel
     #TODO: add marginalisation for eccentricity, see GitHub issue #56
 
     ### Save to file
-    # For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
-    # masked saves
-    np.savez(os.path.join(outDir, 'masked_marginalization_results'), w_q=np.ma.filled(w_q), best_sys=np.ma.filled(best_sys_weight),
-             marg_rl=np.ma.filled(marg_rl), marg_rl_err=np.ma.filled(marg_rl_err), marg_epoch=np.ma.filled(marg_epoch), marg_epoch_err=np.ma.filled(marg_epoch_err),
-             marg_inclin_rad=np.ma.filled(marg_inclin_rad), marg_inclin_rad_err=np.ma.filled(marg_inclin_rad_err), marg_inclin_deg=np.ma.filled(marg_inclin_deg),
-             marg_inclin_deg_err=np.ma.filled(marg_inclin_deg_err), marg_msmpr=np.ma.filled(marg_msmpr), marg_msmpr_err=np.ma.filled(marg_msmpr_err),
-             marg_aors=np.ma.filled(marg_aors), marg_aors_err=np.ma.filled(marg_aors_err), rl_sdnr=np.ma.filled(rl_sdnr), mask=sys_evidenceAIC_masked.mask, wave_mid=wave_mid, wave_half_width=wave_half_width,
-             allow_pickle=True)
+    ### For details on how to deal with this kind of file, see the notebook "NumpyData.ipynb"
+    # masked saves - removed from outputs and folded into the full results
+    # np.savez(os.path.join(outDir, 'masked_marginalization_results'), w_q=np.ma.filled(w_q), best_sys=np.ma.filled(best_sys_weight),
+    #          marg_rl=np.ma.filled(marg_rl), marg_rl_err=np.ma.filled(marg_rl_err), marg_epoch=np.ma.filled(marg_epoch), marg_epoch_err=np.ma.filled(marg_epoch_err),
+    #          marg_inclin_rad=np.ma.filled(marg_inclin_rad), marg_inclin_rad_err=np.ma.filled(marg_inclin_rad_err), marg_inclin_deg=np.ma.filled(marg_inclin_deg),
+    #          marg_inclin_deg_err=np.ma.filled(marg_inclin_deg_err), marg_msmpr=np.ma.filled(marg_msmpr), marg_msmpr_err=np.ma.filled(marg_msmpr_err),
+    #          marg_aors=np.ma.filled(marg_aors), marg_aors_err=np.ma.filled(marg_aors_err), rl_sdnr=np.ma.filled(rl_sdnr), mask=sys_evidenceAIC_masked.mask, wave_mid=wave_mid, wave_half_width=wave_half_width,
+    #          allow_pickle=True)
 
-    #unmasked saves
-    np.savez(os.path.join(outDir, 'unmasked_marginalization_results'), w_q=w_q, best_sys=best_sys_weight,
+    # unmasked saves - Modified Feb 2021 from 'unmasked_marginalisation_results'
+    # Modified naming as the program should now not mask any part of the array, if any masked then output
+    # array ind_rejected contains the points not used and these will show up as grey crosses on the plots
+    np.savez(os.path.join(outDir, 'marginalization_results'), w_q=w_q, best_sys=best_sys_weight,
              marg_rl=marg_rl, marg_rl_err=marg_rl_err, marg_epoch=marg_epoch, marg_epoch_err=marg_epoch_err,
              marg_inclin_rad=marg_inclin_rad, marg_inclin_rad_err=marg_inclin_rad_err, marg_inclin_deg=marg_inclin_deg,
              marg_inclin_deg_err=marg_inclin_deg_err, marg_msmpr=marg_msmpr, marg_msmpr_err=marg_msmpr_err,
-             marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, mask=sys_evidenceAIC_masked.mask, wave_mid=wave_mid, wave_half_width=wave_half_width,
+             marg_aors=marg_aors, marg_aors_err=marg_aors_err, rl_sdnr=rl_sdnr, mask=sys_evidenceAIC_masked.mask, wave_mid=wave_mid, wave_half_width=wave_half_width, ind_rejected=ind_rejected,
              allow_pickle=True)
 
     ### Save as PDF report
