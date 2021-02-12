@@ -14,9 +14,10 @@
         <h2> {{ data_file }} - {{ run_name }} </h2>
         
             <h3> Input parameters: </h3>
-            
             <p>
-            Number of systematic models: {{ nsys }}
+            Number of systematic models: {{ nsys }}<br>
+            Wavelength mid point = {{ wavelength_mid_point }}<br>
+            Wavelength half width = {{ wavelength_half_width }}
             </p>
             
             <p>
@@ -35,8 +36,8 @@
             log(g) (cgs) = {{ logg_in }}<br>
             </p>
             
-            <h3> Limb-darkening coefficients: </h3>
-            
+            <h3> Output parameters: </h3>
+            <h5> Limb-darkening coefficients: </h5>
             <p>
             C1 = {{ c1 }}<br>
             C2 = {{ c2 }}<br>
@@ -44,8 +45,7 @@
             C4 = {{ c4 }}
             </p>
             
-            <h3> Top five systematic models by their weight </h3>
-            
+            <h5> Top five systematic models by their weight </h5>
             <p>
             Check the chi-squared values and the AIC evidence for reasonable fits. <br> 
             If the chi-squared values far exceed the DOF then it is likely that the input data contains additional noise, double check the spectral extraction. <br>
@@ -56,7 +56,7 @@
             Weights = {{ top_five_weights }}<br>
             SDNR = {{ top_five_sdnr }}<br>
             <br>
-            <h5> Top model: </h5>
+            <h5> Top model Noise Statistics: </h5>
             White noise = {{ white_noise }}<br>
             Red noise = {{ red_noise }}<br>
             Beta = {{ beta }} <br>
@@ -64,7 +64,6 @@
             </p>
             
             <h3> Marginalised parameters: </h3>
-            
             <p>
             {{ num_rejected }} models do not satisfy the AIC evidence condition and were removed
             from the marginalisation. Their model numbers are (numbering starts at 0):<br>
