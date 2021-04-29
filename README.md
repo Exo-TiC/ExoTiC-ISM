@@ -247,6 +247,7 @@ The star and grating can then be set once in the config section '[setup]', while
 the respective stellar and planetary parameters section, with a placeholder for the grating name.  
 *E.g.: "W17_${setup:grating}_lightcurve_test_data.txt"*
 
+All header lines should start with '#'.
 
 ### The Systematic Model Grid
 <img src="Systematic_model_tabel.png" align="left" />
