@@ -735,8 +735,8 @@ if __name__ == '__main__':
     # Read in the txt file for the lightcurve data
     get_timeseries = CONFIG_INI.get(exoplanet, 'lightcurve_file')
     get_wvln = CONFIG_INI.get(exoplanet, 'wvln_file')
-    x, y, err, sh = np.loadtxt(os.path.join(dataDir, get_timeseries), skiprows=7, unpack=True)
-    wavelength = np.loadtxt(os.path.join(dataDir, get_wvln), skiprows=3)
+    x, y, err, sh = np.loadtxt(os.path.join(dataDir, get_timeseries), comments="#", unpack=True)
+    wavelength = np.loadtxt(os.path.join(dataDir, get_wvln), comments="#")
 
     # What to call the run and whether to turn plotting on, and some setup parameters
     run_name = CONFIG_INI.get('data_paths', 'run_name')
