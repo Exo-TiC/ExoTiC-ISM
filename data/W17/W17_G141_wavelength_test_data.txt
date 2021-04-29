@@ -1,6 +1,6 @@
-WASP-17b White lightcurve HST WFC3 G141 (GO-14918)
-Wavelength array (angstroms)
------------------------------------------
+#WASP-17b White lightcurve HST WFC3 G141 (GO-14918)
+#Wavelength array (angstroms)
+#-----------------------------------------
      11190.0051352   
      11236.4050375   
      11282.8051840   
