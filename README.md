@@ -19,7 +19,10 @@ These 50 instrument systematic models contain a combination of corrective factor
 
 The evidence (marginal liklihood) is calculated from the AIC for each model when fit with the data and converted to a normalised weighting that is used to marginalise each of the global fit parameters. See equations 15 and 16 in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract) to marginalise over the parameters and their uncertainties.
 
-The program makes use of the analytic transit model in [Mandel & Agol (2002)](https://ui.adsabs.harvard.edu/abs/2002ApJ...580L.171M/abstract) and a Levenberg-Marquardt least squares minimisation using [Sherpa](https://sherpa.readthedocs.io/en/latest/), a Python package for modeling and fitting data. The transit model uses a 4-parameter limb darkening law, as outlined in [Claret (2010)](https://ui.adsabs.harvard.edu/abs/2000A%26A...363.1081C/abstract) and [Sing (2010)](https://ui.adsabs.harvard.edu/abs/2010A%26A...510A..21S/abstract).
+Additional functions in this package that can be utilized independently include the following:
+- The program makes use of the analytic transit model in [Mandel & Agol (2002)](https://ui.adsabs.harvard.edu/abs/2002ApJ...580L.171M/abstract) that has been translated into python and can be used independently to fit any transit lightcurve once exotic-ism has been installed. 
+- It utilizes Levenberg-Marquardt least squares minimisation using [Sherpa](https://sherpa.readthedocs.io/en/latest/), a Python package for modeling and fitting data. 
+- The transit model uses a 4-parameter limb darkening law, as outlined in [Claret (2010)](https://ui.adsabs.harvard.edu/abs/2000A%26A...363.1081C/abstract) and [Sing (2010)](https://ui.adsabs.harvard.edu/abs/2010A%26A...510A..21S/abstract) using 1D Kurucz stellar models (provided on install of this package) or 3D stellar models for a smaller subset of parameters from [Magic et al. (2015)](https://ui.adsabs.harvard.edu/abs/2015A&A...573A..90M/abstract).
 
 This package was built from the original IDL code used for the analysis in [Wakeford et al. (2016)](https://ui.adsabs.harvard.edu/abs/2016ApJ...819...10W/abstract), initially translated by Matthew Hill and then further adapted and transformed into a full astronomy Python package with the help of Iva Laginja.
 
