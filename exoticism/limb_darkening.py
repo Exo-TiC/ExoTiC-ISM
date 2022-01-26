@@ -268,6 +268,19 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
         sensitivity = sav['sensitivity']
         wdel = 1
 
+    # FOR JWST NIRSpec
+    if grating == 'NIRSpec_Prism':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
+        sav = readsav(os.path.join(dirsen, 'NIRSpec.prism.sensitivity.pandeia.sav'))  # wssens, sensitivity
+        wssens = sav['wssens']
+        sensitivity = sav['sensitivity']
+        wdel = 1
+
+    if grating == 'NIRSpec_G395H':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
+        sav = readsav(os.path.join(dirsen, 'NIRSpec.G395H.sensitivity.pandeia.sav'))  # wssens, sensitivity
+        wssens = sav['wssens']
+        sensitivity = sav['sensitivity']
+        wdel = 1        
+
     widek = np.arange(len(wsdata))
     wsHST = wssens
     wsHST = np.concatenate((np.array([wsHST[0] - wdel - wdel, wsHST[0] - wdel]),
