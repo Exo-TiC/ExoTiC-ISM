@@ -19,12 +19,13 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
     Currently supports:
     HST STIS G750L, G750M, G430L gratings
     HST WFC3 UVIS/G280, IR/G102, IR/G141 grisms
+    JWST NIRSpec Prism, G395H
 
     What is used for 1D models - Kurucz (?)
     Procedure from Sing et al. (2010, A&A, 510, A21).
     Uses 3D limb darkening from Magic et al. (2015, A&A, 573, 90).
     Uses photon FLUX Sum over (lambda*dlamba).
-    :param grating: string; grating to use ('G430L','G750L','G750M', 'G280', 'G102', 'G141')
+    :param grating: string; grating to use ('G430L','G750L','G750M', 'G280', 'G102', 'G141', 'NIRSpec_Prism', 'NIRSpec_G395H')
     :param wsdata: array; data wavelength solution
     :param M_H: float; stellar metallicity
     :param Teff: float; stellar effective temperature (K)
@@ -269,13 +270,13 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
         wdel = 1
 
     # FOR JWST NIRSpec
-    if grating == 'NIRSpec_Prism':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
+    if grating == 'NIRSpec_Prism':  # Provided by D.K. Sing (JHU)
         sav = readsav(os.path.join(dirsen, 'NIRSpec.prism.sensitivity.pandeia.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
         wdel = 1
 
-    if grating == 'NIRSpec_G395H':  # http://www.stsci.edu/hst/acs/analysis/reference_files/synphot_tables.html
+    if grating == 'NIRSpec_G395H':  # Provided by D.K. Sing (JHU)
         sav = readsav(os.path.join(dirsen, 'NIRSpec.G395H.sensitivity.pandeia.sav'))  # wssens, sensitivity
         wssens = sav['wssens']
         sensitivity = sav['sensitivity']
