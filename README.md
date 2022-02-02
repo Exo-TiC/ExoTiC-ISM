@@ -53,7 +53,7 @@ Note how this package is not distributed through pip or conda, so you will  alwa
 
 ## Supported instruments and gratings
 Current supported instruments and gratings are:  
-**HST** *WFC3* IR/G102, IR/G141 grisms
+**HST** *WFC3* IR/G102, IR/G141, UVIS/G280 grisms
 
 
 ##  Quickstart
@@ -75,11 +75,11 @@ $ cd /User/<YourUser>/repos/
 
 - Clone the repository:  
 ```bash
-$ git clone https://github.com/hrwakeford/ExoTiC-ISM.git
+$ git clone https://github.com/exo-tic/ExoTiC-ISM.git
 ```
 or use SSH if that is your preferred way of cloning repositories:
 ```bash
-$ git clone git@github.com:hrwakeford/ExoTiC-ISM.git
+$ git clone git@github.com:exo-tic/ExoTiC-ISM.git
 ```
 
 - Navigate into the cloned repository:  
