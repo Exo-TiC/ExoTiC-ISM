@@ -19,12 +19,13 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
     Currently supports:
     HST STIS G750L, G750M, G430L gratings
     HST WFC3 UVIS/G280, IR/G102, IR/G141 grisms
+    JWST NIRSpec Prism, G395H
 
     What is used for 1D models - Kurucz (?)
     Procedure from Sing et al. (2010, A&A, 510, A21).
     Uses 3D limb darkening from Magic et al. (2015, A&A, 573, 90).
     Uses photon FLUX Sum over (lambda*dlamba).
-    :param grating: string; grating to use ('G430L','G750L','G750M', 'G280', 'G102', 'G141')
+    :param grating: string; grating to use ('G430L','G750L','G750M', 'G280', 'G102', 'G141', 'NIRSpec_Prism', 'NIRSpec_G395H')
     :param wsdata: array; data wavelength solution
     :param M_H: float; stellar metallicity
     :param Teff: float; stellar effective temperature (K)
@@ -268,17 +269,30 @@ def limb_dark_fit(grating, wsdata, M_H, Teff, logg, dirsen, ld_model='1D'):
         sensitivity = sav['sensitivity']
         wdel = 1
 
+    # FOR JWST NIRSpec
+    if grating == 'NIRSpec_Prism':  # Provided by D.K. Sing (JHU)
+        sav = readsav(os.path.join(dirsen, 'NIRSpec.prism.sensitivity.pandeia.sav'))  # wssens, sensitivity
+        wssens = sav['wssens']
+        sensitivity = sav['sensitivity']
+        wdel = 1
+
+    if grating == 'NIRSpec_G395H':  # Provided by D.K. Sing (JHU)
+        sav = readsav(os.path.join(dirsen, 'NIRSpec.G395H.sensitivity.pandeia.sav'))  # wssens, sensitivity
+        wssens = sav['wssens']
+        sensitivity = sav['sensitivity']
+        wdel = 1        
+
     widek = np.arange(len(wsdata))
-    wsHST = wssens
-    wsHST = np.concatenate((np.array([wsHST[0] - wdel - wdel, wsHST[0] - wdel]),
-                            wsHST,
-                            np.array([wsHST[len(wsHST) - 1] + wdel,
-                                      wsHST[len(wsHST) - 1] + wdel + wdel])))
+    wsmode = wssens
+    wsmode = np.concatenate((np.array([wsmode[0] - wdel - wdel, wsmode[0] - wdel]),
+                            wsmode,
+                            np.array([wsmode[len(wsmode) - 1] + wdel,
+                                      wsmode[len(wsmode) - 1] + wdel + wdel])))
 
-    respoutHST = sensitivity / np.max(sensitivity)
-    respoutHST = np.concatenate((np.zeros(2), respoutHST, np.zeros(2)))
+    respoutmode = sensitivity / np.max(sensitivity)
+    respoutmode = np.concatenate((np.zeros(2), respoutmode, np.zeros(2)))
 
-    inter_resp = interp1d(wsHST, respoutHST, bounds_error=False, fill_value=0)
+    inter_resp = interp1d(wsmode, respoutmode, bounds_error=False, fill_value=0)
     respout = inter_resp(ws)  # interpolate sensitivity curve onto model wavelength grid
 
     wsdata = np.concatenate((np.array([wsdata[0] - wdel - wdel, wsdata[0] - wdel]), wsdata,
